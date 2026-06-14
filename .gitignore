@@ -1,0 +1,6 @@
+/bin/
+/jars/*.jar
+*.log
+.DS_Store
+.claude/
+/slay-the-sector

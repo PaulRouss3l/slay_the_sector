@@ -1,0 +1,3 @@
+id,trigger,conditions,script,text,options,notes
+sts_jangala_descend,PopulateOptions,$market.id == jangala,,,99:sts_enter:Descend into the Sector,Inject Descend just above Leave (market Leave is order 100)
+sts_hub_enter,DialogOptionSelected,$option == sts_enter,STS_EnterRun,,,Hijack dialog into the run

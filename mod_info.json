@@ -1,0 +1,13 @@
+{
+  "id": "slay_the_sector",
+  "name": "Slay the Sector",
+  "author": "Ubik",
+  "utility": false,
+  "version": { "major": "0", "minor": "1", "patch": "0" },
+  "description": "Slay the Sector mod for Starsector.",
+  "gameVersion": "0.98a-RC5",
+  "jars": [ "jars/SlayTheSector.jar" ],
+  "modPlugin": "com.slaythesector.SlayTheSectorModPlugin",
+  "dependencies": [
+  ]
+}
