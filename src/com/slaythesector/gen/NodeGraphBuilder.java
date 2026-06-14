@@ -11,10 +11,10 @@ import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 
 /**
- * Pure logic (no game API) that lays out a run's node graph: a layered, branching
- * DAG from a single START down to a single BOSS. Every non-boss node has at least
- * one successor and every node below depth 0 has at least one parent, so the graph
- * is always traversable to the boss.
+ * Pure logic (no game API) that lays out a run's node graph: layered, with a single
+ * START, fixed-width middle rows, and a single BOSS. Every node connects to the whole
+ * next row, so the player is always offered the same number of choices each depth
+ * (the full next row) until the final boss.
  *
  * <p>The first node returned is always START; the last is always BOSS.
  */
@@ -24,6 +24,9 @@ public final class NodeGraphBuilder {
 
     /** Number of depth layers below START (boss sits at this depth). */
     private static final int DEPTHS = 7;
+
+    /** Fixed nodes per middle row — also the number of choices shown each depth. */
+    private static final int ROW_WIDTH = 3;
 
     private static final float TOP_Y = 7200f;
     private static final float DEPTH_GAP = 900f;
@@ -47,15 +50,14 @@ public final class NodeGraphBuilder {
         rows.add(startRow);
 
         for (int d = 1; d < DEPTHS; d++) {
-            int width = 2 + rng.nextInt(2); // 2 or 3
             List<RunNode> row = new ArrayList<RunNode>();
             // Distinct factions within a row, so a choice never shows the same enemy twice.
             List<String> rowFactions = new ArrayList<String>(Arrays.asList(FACTION_POOL));
             Collections.shuffle(rowFactions, rng);
             int next = 0;
-            for (int i = 0; i < width; i++) {
+            for (int i = 0; i < ROW_WIDTH; i++) {
                 NodeType type = (d == 1) ? NodeType.COMBAT : randomType(rng);
-                RunNode node = makeNode("n_d" + d + "_" + i, type, d, i, width);
+                RunNode node = makeNode("n_d" + d + "_" + i, type, d, i, ROW_WIDTH);
                 if (type.isCombat()) {
                     node.setFactionId(rowFactions.get(next++));
                 }
@@ -70,9 +72,13 @@ public final class NodeGraphBuilder {
         bossRow.add(boss);
         rows.add(bossRow);
 
-        // Connect each row to the next, guaranteeing parent + child coverage.
+        // Fully connect each row to the next: every node offers the whole next row.
         for (int d = 0; d < rows.size() - 1; d++) {
-            connect(rows.get(d), rows.get(d + 1), rng);
+            for (RunNode parent : rows.get(d)) {
+                for (RunNode child : rows.get(d + 1)) {
+                    parent.addSuccessor(child.getId());
+                }
+            }
         }
 
         List<RunNode> flat = new ArrayList<RunNode>();
@@ -80,37 +86,6 @@ public final class NodeGraphBuilder {
             flat.addAll(row);
         }
         return flat;
-    }
-
-    private static void connect(List<RunNode> parents, List<RunNode> children, Random rng) {
-        int pw = parents.size();
-        int cw = children.size();
-
-        // Every child gets at least one parent (nearest by normalized index).
-        for (int j = 0; j < cw; j++) {
-            int pi = (cw == 1) ? rng.nextInt(pw) : Math.round((float) j / (cw - 1) * (pw - 1));
-            link(parents.get(pi), children.get(j));
-        }
-        // Every parent gets at least one child; optionally a second for branching.
-        for (int i = 0; i < pw; i++) {
-            RunNode p = parents.get(i);
-            if (p.getSuccessorIds().isEmpty()) {
-                int cj = (pw == 1) ? rng.nextInt(cw) : Math.round((float) i / (pw - 1) * (cw - 1));
-                link(p, children.get(cj));
-            }
-            if (cw > 1 && rng.nextFloat() < 0.4f) {
-                RunNode extra = children.get(rng.nextInt(cw));
-                if (!p.getSuccessorIds().contains(extra.getId())) {
-                    link(p, extra);
-                }
-            }
-        }
-    }
-
-    private static void link(RunNode parent, RunNode child) {
-        if (!parent.getSuccessorIds().contains(child.getId())) {
-            parent.addSuccessor(child.getId());
-        }
     }
 
     private static NodeType randomType(Random rng) {

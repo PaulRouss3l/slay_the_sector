@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
@@ -49,6 +50,8 @@ public class RunDialogPlugin implements InteractionDialogPlugin {
     private static final String OPT_SHOP_FUEL = "sts_shop_fuel";
     private static final String OPT_REWARD_NONE = "sts_reward_none";
     private static final String OPT_SHOP_DONE = "sts_shop_done";
+    private static final String OPT_REFIT = "sts_refit";
+    private static final String OPT_CONTINUE = "sts_continue";
     private static final String START_PREFIX = "start:";
     private static final String REWARD_PREFIX = "reward:";
 
@@ -351,7 +354,16 @@ public class RunDialogPlugin implements InteractionDialogPlugin {
             text("The " + chosen.getHullSpec().getHullNameWithDashClass() + " joins your fleet.");
         }
         rewardChoices = null;
-        showChoices();
+        showPostReward();
+    }
+
+    /** After a reward: let the player refit before picking the next node. */
+    private void showPostReward() {
+        OptionPanelAPI opts = dialog.getOptionPanel();
+        opts.clearOptions();
+        opts.addOption("Refit your fleet", OPT_REFIT);
+        opts.addOption("Continue the descent", OPT_CONTINUE);
+        dialog.setOptionOnEscape("Continue the descent", OPT_CONTINUE);
     }
 
     // --- Event ---
@@ -458,6 +470,11 @@ public class RunDialogPlugin implements InteractionDialogPlugin {
             takeReward(Integer.parseInt(d.substring(REWARD_PREFIX.length())));
         } else if (OPT_REWARD_NONE.equals(d)) {
             takeReward(-1);
+        } else if (OPT_REFIT.equals(d)) {
+            // Open the refit screen; options stay, so closing it returns here.
+            Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.REFIT);
+        } else if (OPT_CONTINUE.equals(d)) {
+            showChoices();
         } else if (OPT_EVENT_SALVAGE.equals(d)) {
             salvageEvent();
         } else if (OPT_EVENT_SKIP.equals(d)) {
