@@ -20,7 +20,7 @@
 	"sts_factionBlacklist": [],
 	"graphics": {
 		"intel": {
-			"sts_hub": "graphics/icons/intel/log_star.png"
+			"sts_hub": "graphics/icons/intel/sts_descent.png"
 		}
 	}
 }
