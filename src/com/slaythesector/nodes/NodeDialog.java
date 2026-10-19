@@ -7,6 +7,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BattleAPI.BattleSide;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode;
@@ -248,21 +249,28 @@ public class NodeDialog implements InteractionDialogPlugin {
             public void notifyLeave(InteractionDialogAPI d) {
                 boolean engaged = false;
                 boolean won = false;
+                float savedShare = 0f;
                 if (fid.getContext() instanceof FleetEncounterContext) {
                     FleetEncounterContext ctx = (FleetEncounterContext) fid.getContext();
                     engaged = ctx.isEngagedInHostilities();
                     won = ctx.didPlayerWinEncounterOutright();
+                    savedShare = savedShare(ctx);
                 }
                 // Measure the enemy before it is removed: what survived, and whether the mark did.
                 float enemyDPAfter = EncounterFactory.dp(enemy);
-                boolean targetAlive = targetId != null && EncounterFactory.has(enemy, targetId);
+                // No mark (e.g. an empty fleet): the Ambush is won only by destroying everything.
+                boolean targetAlive = targetId == null ? enemyDPAfter > 0f : EncounterFactory.has(enemy, targetId);
+                if (enemy.getBattle() != null && !enemy.getBattle().isDone()) {
+                    // A joined ongoing battle (side battle) isn't finished by the vanilla flow.
+                    enemy.getBattle().finish(BattleSide.NO_JOIN, false);
+                }
                 EncounterFactory.despawn(enemy);
                 EncounterFactory.despawn(ally);
                 d.setPlugin(self);
                 d.setInteractionTarget(entity);
                 d.getVisualPanel().fadeVisualOut();
                 d.setPromptText("You decide to...");
-                afterBattle(engaged, won, enemyDPAfter, targetAlive);
+                afterBattle(engaged, won, enemyDPAfter, targetAlive, savedShare);
             }
         };
         dialog.setInteractionTarget(enemy);
@@ -270,7 +278,24 @@ public class NodeDialog implements InteractionDialogPlugin {
         fid.init(dialog);
     }
 
-    private void afterBattle(boolean engaged, boolean won, float enemyDPAfter, boolean targetAlive) {
+    /**
+     * Elite: share of the deployed DP that came out alive. Ships kept in reserve don't count as
+     * saved, and deploying less than half the fleet scores against half the fleet, so retreating a
+     * lone frigate is no win.
+     */
+    private float savedShare(FleetEncounterContext ctx) {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        float deployed = 0f;
+        float saved = 0f;
+        for (FleetMemberAPI m : ctx.getDataFor(pf).getDeployedInLastEngagement()) {
+            deployed += m.getDeploymentPointsCost();
+            if (EncounterFactory.has(pf, m.getId())) saved += m.getDeploymentPointsCost();
+        }
+        float base = Math.max(deployed, 0.5f * playerDPBefore);
+        return base <= 0f ? 0f : saved / base;
+    }
+
+    private void afterBattle(boolean engaged, boolean won, float enemyDPAfter, boolean targetAlive, float savedShare) {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         options.clearOptions();
         if (pf.getFleetData().getNumMembers() == 0) {
@@ -298,7 +323,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                 supplies = STSSettings.rewardSuppliesBoss();
                 break;
             case ELITE: {
-                float saved = playerDPBefore <= 0f ? 0f : EncounterFactory.dp(pf) / playerDPBefore;
+                float saved = savedShare;
                 success = won || saved >= STSSettings.eliteEscapeFraction();
                 text.addPara("You saved %s of your fleet's DP.", success ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
                         Math.round(Math.min(1f, saved) * 100f) + "%");
@@ -307,14 +332,16 @@ public class NodeDialog implements InteractionDialogPlugin {
                 break;
             }
             case AMBUSH:
-                success = won || !targetAlive;
+                // In a pursuit, vanilla counts "the enemy got away" as a player win: only the mark decides.
+                success = !targetAlive;
                 supplies = success ? STSSettings.rewardSuppliesCombat() : STSSettings.ambushEscapedSupplies();
                 picks = success ? 1 : 0;
                 if (!success) text.addPara("The marked target got away.", Misc.getNegativeHighlightColor());
                 break;
             case CONVOY: {
                 float destroyed = Math.max(0f, enemyDPBefore - enemyDPAfter);
-                success = won || (enemyDPBefore > 0f && destroyed / enemyDPBefore >= STSSettings.convoyRewardFraction());
+                success = enemyDPAfter <= 0f
+                        || (enemyDPBefore > 0f && destroyed / enemyDPBefore >= STSSettings.convoyRewardFraction());
                 supplies = Math.round(destroyed * STSSettings.convoySuppliesPerDP());
                 picks = success ? 1 : 0;
                 text.addPara("You destroyed %s DP of the convoy.", Misc.getHighlightColor(), String.valueOf(Math.round(destroyed)));

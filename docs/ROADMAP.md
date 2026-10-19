@@ -89,6 +89,11 @@ Code-complete on branch `s3/special-fights`; in-game checklist: `S3_SMOKE_TEST.m
 - 🟡 Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
 - 🟡 Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
 
+Independent review done and its findings fixed (pursuit "win" counted the mark/convoy as taken,
+Elite scored on undeployed ships, a non-station hull at low Depth, layout written to a copy of the
+battle context). Known: the Event and the sabotage roll can be re-rolled by reloading a save made
+before arriving (save-scumming is accepted).
+
 ## S4 — Full Run and Meta progress ⬜
 
 3 Acts with Act transitions, enemy faction draw per Act, Boss pool, cross-save Meta progress,

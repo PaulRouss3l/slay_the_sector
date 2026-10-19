@@ -11,6 +11,7 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers.OfficerQuality;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
@@ -71,9 +72,12 @@ public final class EncounterFactory {
         return fleet;
     }
 
-    /** Event "battle station": a lone orbital station, larger deeper in the Act. */
+    /**
+     * Event "battle station": a lone tier-1 orbital station (STATION hull), sturdier deeper in the
+     * Act. Tier 2 (~200 FP) would outclass a capped Run fleet.
+     */
     public static CampaignFleetAPI spawnStation(int depth, SectorEntityToken at) {
-        String variant = depth >= 7 ? "station2_midline_Standard" : depth >= 4 ? "station1_midline_Standard" : "station_small_Standard";
+        String variant = depth >= 7 ? "station1_hightech_Standard" : depth >= 4 ? "station1_midline_Standard" : "station1_Standard";
         CampaignFleetAPI fleet = FleetFactoryV3.createEmptyFleet(STSConstants.FACTION_DESCENT, FleetTypes.BATTLESTATION, null);
         FleetMemberAPI station;
         try {
@@ -82,6 +86,8 @@ public final class EncounterFactory {
             STSLog.warn("station variant " + variant + " missing; using station1_Standard");
             station = Global.getFactory().createFleetMember(FleetMemberType.SHIP, "station1_Standard");
         }
+        // Never recoverable into the Run fleet.
+        station.getVariant().addTag(Tags.VARIANT_UNBOARDABLE);
         fleet.getFleetData().addFleetMember(station);
         station.getRepairTracker().setCR(station.getRepairTracker().getMaxCR());
         fleet.setName("Battle Station");

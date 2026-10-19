@@ -152,14 +152,19 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 - Escape and pursuit fights: the enemy fleet carries `$sts_battle` (`escape` / `pursuit`);
   `RunCampaignPlugin.pickBattleCreationPlugin` returns `RunBattleCreationPlugin`, which rebuilds the
   `BattleCreationContext` with the goals (they have no setters) and hands it to the vanilla setup.
-- Elite: enemy ×`sts_eliteFPMult` (1.5); a win is beating it, or keeping ≥ `sts_eliteEscapeFraction`
-  (60 %) of the fleet's DP; supplies 60 × share saved + a Reward pick.
+  Combat runs on the original context, so the layout the setup computed is copied back. A fleeing
+  enemy deploys everything (reserves would count as escaped).
+- Elite: enemy ×`sts_eliteFPMult` (1.5); a win is beating it, or bringing out ≥ `sts_eliteEscapeFraction`
+  (60 %) of the **deployed** DP, measured against at least half the fleet (reserves don't count as
+  saved); supplies 60 × share saved + a Reward pick.
+- Pursuits: vanilla scores "the enemy got away" as a player win, so Ambush and convoy ignore it:
+  only the mark (Ambush) or the share destroyed (convoy) decides.
 - Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in
   combat and names it. Mark destroyed = Supplies + Reward pick, else 15 supplies.
-- Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla station hull
-  by Depth, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
+- Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla tier-1 station
+  hull by Depth, unboardable, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
   −20 %), side battle (`createBattle(ally, enemy)` before the encounter so vanilla's join-an-ongoing-
-  battle flow puts the player with the `sts_ally` side; reward from the helped faction), convoy raid
+  battle flow puts the player with the `sts_ally` side; reward from the helped faction; the joined battle is finished before despawn), convoy raid
   (fleeing freighters; 3 supplies per DP destroyed, Reward pick at ≥ 50 %). Event fights score as won
   only on success; declining resolves the Node with nothing.
 

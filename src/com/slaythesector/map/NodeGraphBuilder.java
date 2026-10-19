@@ -200,7 +200,7 @@ public final class NodeGraphBuilder {
         return true;
     }
 
-    /** At least one Shop per Act: turns a drawn Combat Node whose parents aren't Shops into one. */
+    /** At least one Shop per Act: turns a drawn Combat Node into one (none exists, so no Shop->Shop). */
     private static void ensureShop(Map<String, RunNode> byCell, int rows, Random rng) {
         List<RunNode> candidates = new ArrayList<RunNode>();
         for (RunNode n : byCell.values()) {

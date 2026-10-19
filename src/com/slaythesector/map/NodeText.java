@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.util.DepthScaling;
+import com.slaythesector.util.STSSettings;
 
 /** One-line descriptions of Nodes, shared by the dialogs and the node map. */
 public final class NodeText {
@@ -26,7 +27,9 @@ public final class NodeText {
     public static String full(RunNode n) {
         String s = title(n) + " (Depth " + n.getDepth();
         if (n.getType().isFight()) {
-            s += ", strength " + Math.round(DepthScaling.combatPoints(n.getDepth(), n.getType()));
+            float fp = DepthScaling.combatPoints(n.getDepth(), n.getType());
+            if (n.getType() == NodeType.ELITE) fp *= STSSettings.eliteFPMult();
+            s += ", strength " + Math.round(fp);
         }
         return s + ")";
     }
