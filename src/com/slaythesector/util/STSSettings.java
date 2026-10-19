@@ -82,6 +82,9 @@ public final class STSSettings {
     public static int shopOfficerBase() { return i("sts_shopOfficerBase", 30); }
     public static int shopOfficerPerLevel() { return i("sts_shopOfficerPerLevel", 10); }
     public static float shopRepairMult() { return f("sts_shopRepairMult", 0.5f); }
+    /** Shop price to remove one D-mod: base + per DP of the ship. */
+    public static float shopDModBase() { return f("sts_shopDModBase", 15f); }
+    public static float shopDModPerDP() { return f("sts_shopDModPerDP", 1f); }
 
     private static int i(String key, int def) {
         try {

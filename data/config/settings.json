@@ -47,6 +47,8 @@
 	"sts_shopOfficerBase": 30,
 	"sts_shopOfficerPerLevel": 10,
 	"sts_shopRepairMult": 0.5,
+	"sts_shopDModBase": 15,
+	"sts_shopDModPerDP": 1,
 	"graphics": {
 		"intel": {
 			"sts_hub": "graphics/icons/intel/sts_descent.png"

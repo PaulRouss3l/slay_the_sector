@@ -59,7 +59,7 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private enum Opt {
         ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
-        REPAIR_FLEET, SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
+        REPAIR_FLEET, SHOP, DOCKYARD, SHOP_DMOD, REST_RESTORE, RESTORE_SHIPS, RESTORE_BACK, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
     }
 
     /** Option data: set course for a Node. */
@@ -73,6 +73,16 @@ public class NodeDialog implements InteractionDialogPlugin {
         final String memberId;
         final String modId;
         Smod(String memberId, String modId) { this.memberId = memberId; this.modId = modId; }
+    }
+
+    /**
+     * Option data: a ship to remove D-mods from. Rest and Treasure remove them all; the Shop picks
+     * one ({@code modId}, then paid).
+     */
+    private static class Restore {
+        final String memberId;
+        final String modId;
+        Restore(String memberId, String modId) { this.memberId = memberId; this.modId = modId; }
     }
 
     /** Option data: train this officer (+1 level). */
@@ -117,6 +127,8 @@ public class NodeDialog implements InteractionDialogPlugin {
     private List<Card> treasureCards;
     /** Where the S-mod picker returns on "Back": the Rest menu or the Treasure prizes. */
     private Opt smodFrom;
+    /** Where the D-mod picker came from (Rest, Treasure or the Shop dockyard) and returns on "Back". */
+    private Opt restoreFrom;
     /** Course chosen on the node map; applied on the next frame, after the map has closed. */
     private String pendingCourse;
 
@@ -591,6 +603,9 @@ public class NodeDialog implements InteractionDialogPlugin {
                     options.addOption("Dockyard: repair the whole fleet (" + cost + " supplies)", Opt.DOCKYARD);
                     if (cost > Global.getSector().getPlayerFleet().getCargo().getSupplies()) options.setEnabled(Opt.DOCKYARD, false);
                 }
+                if (!Upgrades.dmodShips(Global.getSector().getPlayerFleet()).isEmpty()) {
+                    options.addOption("Dockyard: remove a D-mod", Opt.SHOP_DMOD);
+                }
                 break;
             case REST:
                 if (!cur.isClaimed()) options.addOption("Rest (choose one)", Opt.REST);
@@ -656,6 +671,8 @@ public class NodeDialog implements InteractionDialogPlugin {
         if (Upgrades.smodShips(pf).isEmpty()) options.setEnabled(Opt.REST_SMOD, false);
         options.addOption("Train an officer (+1 level)", Opt.REST_TRAIN);
         if (Upgrades.trainableOfficers(pf).isEmpty()) options.setEnabled(Opt.REST_TRAIN, false);
+        options.addOption("Restore a ship (remove all its D-mods)", Opt.REST_RESTORE);
+        if (Upgrades.dmodShips(pf).isEmpty()) options.setEnabled(Opt.REST_RESTORE, false);
         options.addOption("Back", Opt.BACK);
         options.setShortcut(Opt.BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
     }
@@ -691,7 +708,8 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private void openTreasure() {
         if (treasureCards == null) {
-            treasureCards = Treasure.offer(state, node, !Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty());
+            CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+            treasureCards = Treasure.offer(state, node, !Upgrades.smodShips(pf).isEmpty(), !Upgrades.dmodShips(pf).isEmpty());
         }
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
                 "Treasure: take one prize", withDP(treasureCards), CardGridDelegate.Mode.SINGLE, 0, "Not now",
@@ -706,6 +724,11 @@ public class NodeDialog implements InteractionDialogPlugin {
                         if (prize.kind == Treasure.Kind.SMOD) {
                             smodFrom = Opt.TREASURE;
                             showSmodShips();
+                            return;
+                        }
+                        if (prize.kind == Treasure.Kind.RESTORE) {
+                            restoreFrom = Opt.TREASURE;
+                            showRestoreShips();
                             return;
                         }
                         text.addPara(Treasure.apply(prize, Global.getSector().getPlayerFleet()));
@@ -745,6 +768,56 @@ public class NodeDialog implements InteractionDialogPlugin {
         node.claim();
         text.addPara(Global.getSettings().getHullModSpec(s.modId).getDisplayName() + " is now built into "
                 + shipName(m) + ".", Misc.getPositiveHighlightColor());
+        showWaypoint();
+    }
+
+    private void showRestoreShips() {
+        options.clearOptions();
+        boolean shop = restoreFrom == Opt.SHOP;
+        text.addPara(shop ? "Choose the ship. The dockyard removes one D-mod per job." : "Choose the ship to restore.");
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        for (FleetMemberAPI m : Upgrades.dmodShips(pf)) {
+            int n = Upgrades.dmods(m).size();
+            String label = shipName(m) + " (" + n + " D-mod" + (n > 1 ? "s" : "") + ")";
+            if (shop) label += ": " + Upgrades.dmodPrice(m) + " supplies per D-mod";
+            Restore choice = new Restore(m.getId(), null);
+            options.addOption(label, choice);
+            if (shop && Upgrades.dmodPrice(m) > pf.getCargo().getSupplies()) options.setEnabled(choice, false);
+        }
+        options.addOption("Back", Opt.RESTORE_BACK);
+        options.setShortcut(Opt.RESTORE_BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+    }
+
+    private void restore(Restore r) {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        FleetMemberAPI m = find(pf, r.memberId);
+        if (m == null) {
+            showRestoreShips();
+            return;
+        }
+        if (restoreFrom != Opt.SHOP) {
+            Upgrades.removeAllDMods(m);
+            node.claim();
+            text.addPara(shipName(m) + " is restored: every D-mod is gone.", Misc.getPositiveHighlightColor());
+            showWaypoint();
+            return;
+        }
+        int price = Upgrades.dmodPrice(m);
+        if (r.modId == null) {
+            options.clearOptions();
+            text.addPara("Which D-mod? " + price + " supplies.");
+            for (HullModSpecAPI spec : Upgrades.dmods(m)) {
+                options.addOption(spec.getDisplayName(), new Restore(m.getId(), spec.getId()));
+            }
+            options.addOption("Back", Opt.RESTORE_SHIPS);
+            options.setShortcut(Opt.RESTORE_SHIPS, Keyboard.KEY_ESCAPE, false, false, false, true);
+            return;
+        }
+        if (price > pf.getCargo().getSupplies()) return;
+        pf.getCargo().removeSupplies(price);
+        String name = Global.getSettings().getHullModSpec(r.modId).getDisplayName();
+        Upgrades.removeDMod(m, r.modId);
+        text.addPara("The dockyard removes " + name + " from " + shipName(m) + " for " + price + " supplies.");
         showWaypoint();
     }
 
@@ -864,6 +937,10 @@ public class NodeDialog implements InteractionDialogPlugin {
             eventChoice((Ev) data);
             return;
         }
+        if (data instanceof Restore) {
+            restore((Restore) data);
+            return;
+        }
         if (data instanceof Smod) {
             smod((Smod) data);
             return;
@@ -937,6 +1014,22 @@ public class NodeDialog implements InteractionDialogPlugin {
                 break;
             case TREASURE:
                 openTreasure();
+                break;
+            case SHOP_DMOD:
+                restoreFrom = Opt.SHOP;
+                showRestoreShips();
+                break;
+            case REST_RESTORE:
+                restoreFrom = Opt.REST;
+                showRestoreShips();
+                break;
+            case RESTORE_SHIPS:
+                showRestoreShips();
+                break;
+            case RESTORE_BACK:
+                if (restoreFrom == Opt.TREASURE) openTreasure();
+                else if (restoreFrom == Opt.REST) showRest();
+                else showWaypoint();
                 break;
             case SMOD_SHIPS:
                 showSmodShips();

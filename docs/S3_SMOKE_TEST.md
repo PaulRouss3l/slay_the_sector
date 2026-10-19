@@ -35,7 +35,14 @@ Tip: save before each new Node type so you can retry.
       Reward pick if ≥ 50 % destroyed. Let it pass -> nothing.
 - [ ] Leaving an Event and coming back shows the same Event (no re-roll).
 
-## 5. Regression
+## 5. D-mod removal
+- [ ] **Rest**: "Restore a ship (remove all its D-mods)" (greyed when no ship has D-mods) -> pick a
+      ship -> all D-mods gone, a "(D)" hull becomes the clean hull. Back returns to the Rest menu.
+- [ ] **Treasure**: a "Restoration" prize appears when a ship has D-mods; taking it runs the same picker.
+- [ ] **Shop**: "Dockyard: remove a D-mod" -> ship (price per D-mod shown, greyed if unaffordable)
+      -> D-mod -> paid, removed. Works after buying too; gone when you leave the beacon.
+
+## 6. Regression
 - [ ] Win a normal fight where some enemies retreat: choose **Let them go** / Leave instead of
       pursuing: "The survivors scatter...", full supplies + Reward pick.
 - [ ] Combat, Boss, Shop, Rest, Treasure, DP cap, save/load mid-Run, Abandon as in S2.

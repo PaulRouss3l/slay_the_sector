@@ -56,15 +56,15 @@ A Node with a story choice that may lead to a special fight (battle station, thi
 _Avoid_: Random encounter, question mark
 
 **Shop**:
-A Node where Supplies buy ships, weapons, officers and repairs, once per visit.
+A Node where Supplies buy ships, weapons, officers, repairs and D-mod removal, once per visit.
 _Avoid_: Store, merchant, market
 
 **Rest**:
-A Node offering one free benefit: full fleet repair, an S-mod, or an officer level.
+A Node offering one free benefit: full fleet repair, an S-mod, an officer level, or removing a ship's D-mods.
 _Avoid_: Campfire, camp, repair node
 
 **Treasure**:
-A Node that grants one rare item (rare ship, rare weapon or an S-mod) with no fight.
+A Node that grants one rare prize (rare ship, rare weapons, an S-mod or a ship's full restoration) with no fight.
 _Avoid_: Chest, loot room
 
 ### Fleets
