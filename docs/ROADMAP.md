@@ -75,3 +75,13 @@ when no run is active. Wired in `RunEntryController` (add) / `RunExitController`
 Replace/augment the text menu with a custom `CustomUIPanelPlugin` map overlay.
 - **Files**: new `ui/` package (`RunMapPanelPlugin`, …).
 - **Verify**: visual map renders nodes/edges, click selects, falls back to text menu.
+
+## Tooling + release pipeline ✅
+Adopted the `starsector-modding` skill (`~/.claude/skills/starsector-modding`); its build, validator,
+log scanner and packager are vendored in `tools/` (see `tools/UPSTREAM.md`).
+- `./build.sh` = compile + static validation (0 errors required); `--strict` before release.
+- Version Checker: `slay_the_sector.version` (hosted raw from GitHub `main`) +
+  `data/config/version/version_files.csv`; `CHANGELOG.md`.
+- Release: bump version in `mod_info.json`, `.version` and `CHANGELOG.md` →
+  `python3 tools/package_mod.py --strict` → `dist/slay-the-sector-<version>.zip`.
+- **Verify**: push `main`, then the raw `.version` URL returns 200; launcher shows no version warning.
