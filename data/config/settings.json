@@ -17,5 +17,10 @@
 	"sts_payoutWin": 50000,
 	"sts_minKnownShips": 8,
 	"sts_bossFactions": ["remnant"],
-	"sts_factionBlacklist": []
+	"sts_factionBlacklist": [],
+	"graphics": {
+		"intel": {
+			"sts_hub": "graphics/icons/intel/log_star.png"
+		}
+	}
 }
