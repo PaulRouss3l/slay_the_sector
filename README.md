@@ -4,6 +4,10 @@
 
 *Beta 0.5.0, for Starsector 0.98a.*
 
+[![Install with TriOS](https://trilink.wispborne.com/badges/install-badge-forthebadge.svg)](https://trilink.wispborne.com/open.html?mod=%7B%22url%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2FPaulRouss3l%2Fslay_the_sector%2Fmain%2Fslay_the_sector.version%22%2C%22id%22%3A%22slay_the_sector%22%7D)
+
+**[Download the latest release](https://github.com/PaulRouss3l/slay_the_sector/releases)** (zip, extract into `mods/`). No dependencies.
+
 The Descent Relay has opened somewhere in the core worlds. Dock with it, plug into its combat
 simulation, and fight your way down **The Descent**: three Acts of branching battles, shops,
 events and Bosses, with a fleet you build as you go. Your real fleet waits safely at the Relay. When
@@ -41,6 +45,10 @@ Every number (difficulty, rewards, caps, prices, map shape) can be tuned in
   your Run first and keep a backup if you plan to remove it.
 
 ## Install
+
+With [TriOS](https://github.com/wispborne/TriOS): click the **Install with TriOS** button above.
+
+Manually:
 
 1. Download the zip from the [Releases](https://github.com/PaulRouss3l/slay_the_sector/releases) page.
 2. Extract it into `Starsector/mods/` (you get `mods/slay-the-sector/`).

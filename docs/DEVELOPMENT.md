@@ -53,6 +53,9 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 
 ## Release
 
-1. Bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`.
+1. Bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`, and point
+   `directDownloadURL` in `slay_the_sector.version` at the new release asset
+   (`releases/download/vX.Y.Z/slay-the-sector-X.Y.Z.zip`). Version Checker, TriOS and the README's
+   TriOS badge all read that file from `main`, so they follow the newest release once it is merged.
 2. `./build.sh --strict`, then `python3 tools/package_mod.py --strict` → `dist/`.
 3. After an in-game test: `python3 tools/log_scan.py --mod .`.
