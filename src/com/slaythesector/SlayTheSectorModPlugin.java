@@ -2,13 +2,20 @@ package com.slaythesector;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.slaythesector.intel.RunIntelPlugin;
-import com.slaythesector.spike.SpikeCampaignPlugin;
-import com.slaythesector.spike.SpikeFtlLock;
-import com.slaythesector.spike.SpikeIds;
-import com.slaythesector.spike.SpikeWorld;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.slaythesector.intel.HubIntel;
+import com.slaythesector.run.NodeType;
+import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunState;
+import com.slaythesector.run.SafetyNetScript;
+import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
+import com.slaythesector.world.RunWatchScript;
+import com.slaythesector.world.HubPlacer;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * Entry point for the Slay the Sector mod.
@@ -21,20 +28,30 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         STSLog.info("application loaded");
     }
 
+    /** Short, stable save names: these classes are saved and must never be renamed after release. */
+    @Override
+    public void configureXStream(XStream x) {
+        x.alias("STS_RunState", RunState.class);
+        x.alias("STS_RunNode", RunNode.class);
+        x.alias("STS_NodeType", NodeType.class);
+        x.alias("STS_HubIntel", HubIntel.class);
+    }
+
     @Override
     public void onGameLoad(boolean newGame) {
         STSLog.info("game loaded (newGame=" + newGame + ")");
-
-        // Persistent "Sector Descent" intel (points to the hub world; describes a run when active).
-        RunIntelPlugin.ensure();
-
-        // Spike milestone (docs/ROADMAP.md): transient hooks, re-added every load.
         SectorAPI sector = Global.getSector();
-        sector.unregisterPlugin(SpikeIds.PLUGIN_ID);
-        sector.registerPlugin(new SpikeCampaignPlugin());
-        if (!sector.hasTransientScript(SpikeFtlLock.class)) {
-            sector.addTransientScript(new SpikeFtlLock());
-        }
-        SpikeWorld.ensureHub();
+
+        // Transient hooks, re-added every load.
+        sector.unregisterPlugin(STSConstants.CAMPAIGN_PLUGIN_ID);
+        sector.registerPlugin(new RunCampaignPlugin());
+        if (!sector.hasTransientScript(RunWatchScript.class)) sector.addTransientScript(new RunWatchScript());
+        sector.addTransientScript(new SafetyNetScript());
+
+        // Run enemies fly under the Descent so commissions and bounties ignore their kills.
+        FactionAPI descent = sector.getFaction(STSConstants.FACTION_DESCENT);
+        if (descent != null) descent.setRelationship(Factions.PLAYER, RepLevel.VENGEFUL);
+
+        HubPlacer.ensureHub();
     }
 }

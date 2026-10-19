@@ -1,28 +1,20 @@
 package com.slaythesector.run;
 
-/** Kind of a run node. */
+/** Kind of a Node. S1 uses START, COMBAT and BOSS; the rest arrive in S2/S3. */
 public enum NodeType {
     START,
     COMBAT,
-    ELITE,
-    EVENT,
-    SHOP,
     BOSS;
 
-    /** True if arriving at this node triggers a battle. */
-    public boolean isCombat() {
-        return this == COMBAT || this == ELITE || this == BOSS;
+    public boolean isFight() {
+        return this == COMBAT || this == BOSS;
     }
 
-    /** Display name shown on the node's menu. */
     public String label() {
         switch (this) {
-            case START:  return "Entry Point";
-            case COMBAT: return "Hostile Contact";
-            case ELITE:  return "Elite Patrol";
-            case EVENT:  return "Anomaly";
-            case SHOP:   return "Black Market";
-            case BOSS:   return "The Apex";
+            case START:  return "Entry Beacon";
+            case COMBAT: return "Combat";
+            case BOSS:   return "Boss";
             default:     return name();
         }
     }

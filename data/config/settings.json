@@ -1,5 +1,26 @@
 {
-	"ruleCommandPackages": [
-		"com.slaythesector.rulecmd"
-	]
+	"sts_actRows": 6,
+	"sts_startingDP": 30,
+	"sts_startingSupplies": 150,
+	"sts_enemyBaseFP": 15,
+	"sts_enemyFPPerDepth": 6,
+	"sts_bossFPMult": 2.0,
+	"sts_crRegenFraction": 0.7,
+	"sts_repairCostMult": 1.0,
+	"sts_sellSuppliesPerDP": 4,
+	"sts_cargoPerShip": 300,
+	"sts_rewardSuppliesCombat": 30,
+	"sts_rewardSuppliesBoss": 80,
+	"sts_payoutMinDepth": 3,
+	"sts_payoutAtMinDepth": 5000,
+	"sts_payoutAtBoss": 25000,
+	"sts_payoutWin": 50000,
+	"sts_minKnownShips": 8,
+	"sts_bossFactions": ["remnant"],
+	"sts_factionBlacklist": [],
+	"graphics": {
+		"intel": {
+			"sts_hub": "graphics/icons/intel/sts_descent.png"
+		}
+	}
 }
