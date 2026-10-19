@@ -87,9 +87,9 @@ public class RunIntel extends BaseIntelPlugin {
         RunState state = RunManager.get();
         if (state == null) return;
         TooltipMakerAPI title = panel.createUIElement(width, 30f, false);
-        title.addTitle("The Descent — Act " + state.getAct());
+        title.addTitle("The Descent: Act " + state.getAct());
         panel.addUIElement(title).inTL(0f, 0f);
-        CustomPanelAPI map = panel.createCustomPanel(width, height - 40f, new NodeMapPanel(state, null));
+        CustomPanelAPI map = panel.createCustomPanel(width, height - 40f, new NodeMapPanel(state, false, null));
         panel.addComponent(map).inTL(0f, 40f);
     }
 

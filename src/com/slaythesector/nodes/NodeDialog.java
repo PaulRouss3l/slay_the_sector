@@ -300,8 +300,11 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private void openMap() {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        boolean overCap = RunFleet.totalDP(pf) > STSSettings.fleetDPCap(state.getAct());
-        String note = overCap ? "Over the Fleet DP cap: sell ships before setting a course." : null;
+        int dp = RunFleet.totalDP(pf);
+        int cap = STSSettings.fleetDPCap(state.getAct());
+        boolean overCap = dp > cap;
+        String note = overCap ? "Course locked: the fleet is at " + dp + " DP, over the Fleet DP cap of " + cap
+                + ". Close the map and sell ships in Fleet services." : null;
         dialog.showCustomVisualDialog(NodeMapDelegate.WIDTH, NodeMapDelegate.HEIGHT,
                 new NodeMapDelegate(state, note, !overCap, new NodeMapDelegate.Listener() {
                     @Override
@@ -340,7 +343,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                 if (!cur.isClaimed()) options.addOption("Browse the shop", Opt.SHOP);
                 int cost = dockyardCost();
                 if (cost > 0) {
-                    options.addOption("Dockyard: repair the whole fleet — " + cost + " supplies", Opt.DOCKYARD);
+                    options.addOption("Dockyard: repair the whole fleet (" + cost + " supplies)", Opt.DOCKYARD);
                     if (cost > Global.getSector().getPlayerFleet().getCargo().getSupplies()) options.setEnabled(Opt.DOCKYARD, false);
                 }
                 break;
@@ -517,19 +520,19 @@ public class NodeDialog implements InteractionDialogPlugin {
             if (cost > 0) {
                 Service repair = new Service(false, m.getId());
                 options.addOption("Repair " + shipName(m) + " (hull " + pct(m.getStatus().getHullFraction())
-                        + ", CR " + pct(m.getRepairTracker().getCR()) + ") — " + cost + " supplies", repair);
+                        + ", CR " + pct(m.getRepairTracker().getCR()) + "): " + cost + " supplies", repair);
                 if (cost > supplies) options.setEnabled(repair, false);
             }
         }
         if (total > 0) {
-            options.addOption("Repair all — " + total + " supplies", Opt.REPAIR_ALL);
+            options.addOption("Repair all: " + total + " supplies", Opt.REPAIR_ALL);
             if (total > supplies) options.setEnabled(Opt.REPAIR_ALL, false);
         } else {
             text.addPara("Every ship is fully repaired.");
         }
         for (FleetMemberAPI m : pf.getFleetData().getMembersListCopy()) {
             if (m.isFlagship() || pf.getFleetData().getNumMembers() <= 1) continue;
-            options.addOption("Sell " + shipName(m) + " — +" + RunFleet.sellValue(m) + " supplies", new Service(true, m.getId()));
+            options.addOption("Sell " + shipName(m) + ": +" + RunFleet.sellValue(m) + " supplies", new Service(true, m.getId()));
         }
         options.addOption("Back", Opt.BACK);
         options.setShortcut(Opt.BACK, Keyboard.KEY_ESCAPE, false, false, false, true);

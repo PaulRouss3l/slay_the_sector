@@ -17,9 +17,9 @@ public final class NodeText {
         return f == null ? n.getFactionId() : f.getDisplayName();
     }
 
-    /** "Combat — Hegemony", "Shop", ... */
+    /** "Combat: Hegemony", "Shop", ... (no em dash: the UI fonts lack it). */
     public static String title(RunNode n) {
-        return n.getType().isFight() ? n.getType().label() + " — " + factionName(n) : n.getType().label();
+        return n.getType().isFight() ? n.getType().label() + ": " + factionName(n) : n.getType().label();
     }
 
     /** Title plus Depth and, for fights, the estimated enemy strength. */

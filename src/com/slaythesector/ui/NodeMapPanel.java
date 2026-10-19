@@ -55,11 +55,14 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
     private RunNode selected;
     private float time;
 
-    /** {@code listener} null = read-only. */
-    public NodeMapPanel(RunState state, Listener listener) {
+    /**
+     * {@code listener} null = read-only. {@code canChoose} false still reports hovers and clicks
+     * but highlights no Node as selectable (e.g. over the Fleet DP cap).
+     */
+    public NodeMapPanel(RunState state, boolean canChoose, Listener listener) {
         this.state = state;
         this.listener = listener;
-        if (listener != null && state.getTargetNodeId() == null) {
+        if (listener != null && canChoose && state.getTargetNodeId() == null) {
             for (RunNode n : state.getChoices()) choices.add(n.getId());
         }
     }
