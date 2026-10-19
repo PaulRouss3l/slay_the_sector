@@ -55,6 +55,18 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Intel | `addIntel` only — the intel manager already advances it; also adding it via `addScript` makes it tick twice. `endImmediately()` to finish. |
 | Testing | No headless runner. After a session: `python3 tools/log_scan.py --mod .`. Dev mode via the `devmode` console command. Smoke-test checklist template: `~/.claude/skills/starsector-modding/templates/SMOKE_TEST.md`. |
 
+## Verified in game (Spike, 2026-10-19, RC8)
+
+| Concern | Fact |
+|---|---|
+| Fleet swap | `sector.setPlayerFleet(newFleet)` while a dialog is open works; camera follows; the detached old fleet held in sector memory survives save/load with ships, officers, cargo, credits. |
+| Stale location | After `loc.removeEntity(fleet)`, `fleet.getContainingLocation()` still returns the old location. Test membership with `loc.getFleets().contains(fleet)`. |
+| Contained system | `dialog.dismiss()` → `setPaused(false)` → `doHyperspaceTransition(pf, from, new JumpDestination(to, null), 1f)` into a system with no jump points: no camera bug; save/load inside works. |
+| Transverse jump lock | Holding `getAbility(Abilities.TRANSVERSE_JUMP).setCooldownLeft(1f)` from a transient `EveryFrameScript` keeps it unusable. |
+| Battle setup | `pickBattleCreationPlugin` returning a `BattleCreationPluginImpl` subclass is honoured for a fleet engaged through the normal vanilla encounter. |
+| Fleet wipe | `pickRespawnPlugin` at `MOD_SPECIFIC` replaces the vanilla defeat flow; restoring + transition from it works. |
+| Canvas | `showCustomVisualDialog` + GL `render` + `processInput` (`isLMBDownEvent`, `isMouseMoveEvent`, Esc) works inside an interaction dialog. |
+
 ## Redesign research (2026-10, from source reading — not yet run in game)
 
 | Concern | Fact |
