@@ -114,6 +114,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private void engage() {
+        RunFleet.restoreCR(Global.getSector().getPlayerFleet());
         final CampaignFleetAPI enemy = EncounterFactory.spawn(node, entity);
         final boolean boss = node.getType() == NodeType.BOSS;
         final InteractionDialogPlugin self = this;

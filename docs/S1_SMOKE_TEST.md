@@ -8,9 +8,9 @@ start with `[SlayTheSector]`. Tunables are in `data/config/settings.json` (`sts_
 - [x] On load, a **Descent Relay** station orbits the star of the most populated core system
       (log: `Hub placed in …`). Find it (intel/map search or fly there).
 - [x] Clicking it opens the Hub menu: **Begin a Run**, Leave.
-- [ ] Intel screen, **Important** tab: a **Descent Relay** entry (also in existing saves).
+- [x] Intel screen, **Important** tab: a **Descent Relay** entry (also in existing saves).
       **Show on map** centres the map on the relay; **Lay in course** plots a course to it.
-- [ ] New game only: the relay sprite stays upright (no spin) and its orbit clears the planets.
+- [x] New game only: the relay sprite stays upright (no spin) and its orbit clears the planets.
 
 ## 2. Archetype + Starting pick
 - [x] **Begin a Run** lists factions (vanilla + modded ones with ships). "More factions..." pages.
@@ -26,30 +26,30 @@ start with `[SlayTheSector]`. Tunables are in `data/config/settings.json` (`sts_
 - [x] At the Entry Beacon: 2-3 "Set course: Combat — <Faction> (Depth 1)" options.
 - [x] Picking one closes the dialog and lays in a course to a new beacon ~3500 units away.
 - [x] Transverse jump unusable. **Supplies don't drop while flying** (hidden logistics hullmod).
-- [ ] The Entry Beacon and Node beacons show a nav-buoy sprite and a name in space and on the map.
+- [x] The Entry Beacon and Node beacons show a nav-buoy sprite and a name in space and on the map.
 
 ## 4. Combat Node
-- [X] At the beacon: description (faction, Depth, strength) → **Engage** → vanilla battle.
-- [X] Depth 1 is winnable with 30 DP (tune `sts_enemyBaseFP` / `sts_enemyFPPerDepth` if not).
-- [X] After a win: vanilla loot/recovery screens (salvage goes to Run cargo, no credits),
+- [x] At the beacon: description (faction, Depth, strength) → **Engage** → vanilla battle.
+- [x] Depth 1 is winnable with 30 DP (tune `sts_enemyBaseFP` / `sts_enemyFPPerDepth` if not).
+- [x] After a win: vanilla loot/recovery screens (salvage goes to Run cargo, no credits),
       then "Victory … 30 supplies", then the **Reward pick** grid: 2 ships + officer or weapons.
       Pick one / Skip; it's applied.
-- [X] Back at the Node: Supplies + ship count, next courses (Depth 2), Fleet services, Refit.
-- [X] CR after the fight is at least ~70 %; hull damage stays.
-- [ ] After several won fights the fleet is **not over capacity**: no salvaged fuel, fuel and
+- [x] Back at the Node: Supplies + ship count, next courses (Depth 2), Fleet services, Refit.
+- [x] CR after the fight is at least ~70 %; hull damage stays.
+- [x] After several won fights the fleet is **not over capacity**: no salvaged fuel, fuel and
       crew capped at capacity, each Run ship has +300 cargo (`sts_cargoPerShip`).
 
 ## 5. Fleet services
-- [X] Repair one ship / Repair all costs supplies; disabled when you can't afford it.
-- [X] Sell a non-flagship ship → supplies added.
+- [x] Repair one ship / Repair all costs supplies; disabled when you can't afford it.
+- [x] Sell a non-flagship ship → supplies added.
 
 ## 6. Retreat / save-load
-- [X] Engage a fight and retreat: "You withdrew … no reward", the Run continues from that Node.
-- [X] Once a course is set it can't be changed (the Node offers only "Resume course").
-- [X] Save and load mid-Run (in the Run system, no dialog open): everything intact.
+- [x] Engage a fight and retreat: "You withdrew … no reward", the Run continues from that Node.
+- [x] Once a course is set it can't be changed (the Node offers only "Resume course").
+- [x] Save and load mid-Run (in the Run system, no dialog open): everything intact.
 
 ## 7. Boss and win
-- [ ] Reach the Boss (Depth 7, Remnant). Its description warns there is no retreat.
+- [x] Reach the Boss (Depth 7, Remnant). Its description warns there is no retreat.
 - [ ] Win → "The Run is won", Payout 50,000 → **Return to the Hub** → jump to the relay,
       **Home fleet back** (ships, officers, cargo) + 50,000 credits. Run fleet gone.
 
@@ -60,6 +60,6 @@ start with `[SlayTheSector]`. Tunables are in `data/config/settings.json` (`sts_
       marines, colony income, faction reputations and commission bounties are as before (apart
       from the Payout). Enemy fleets show as "The Descent" in the battle screens.
 - [x] **Fleet wipe** → our "Run fleet destroyed" screen instead of vanilla's → Hub, Home fleet back.
-- [ ] After every end: Begin a Run works again; no leftover beacons from the old Run.
+- [x] After every end: Begin a Run works again; no leftover beacons from the old Run.
 
 Note anything weird about officers (duplicated, missing) or the player's captain after a Run.

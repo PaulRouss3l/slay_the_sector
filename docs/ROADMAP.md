@@ -51,7 +51,9 @@ may target the parked Home fleet (untested).
 
 Smoke-test feedback, fixed (re-test pending): Hub Intel entry (Important, Show on map, Lay in
 course); Hub keeps the Spike's upright sprite and an orbit clear of planets; Node beacons get a
-sprite; over-capacity Supply drain removed (no salvaged fuel, fuel/crew capped, +300 cargo per ship).
+sprite; over-capacity Supply drain removed (no salvaged fuel, fuel/crew capped, +300 cargo per ship); CR
+floor (`sts_crRegenFraction`) also applied right before each fight, since CR can drop between
+fights (out-of-supplies decay, refit away from a spaceport).
 
 ## S2 — Map and economy Nodes ⬜
 

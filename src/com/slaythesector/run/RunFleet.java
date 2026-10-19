@@ -70,13 +70,21 @@ public final class RunFleet {
 
     /** After every fight: free CR up to the regen fraction, crew and fuel refilled, logistics hullmod on recovered ships. */
     public static void afterFight(CampaignFleetAPI fleet) {
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) ensureLogistics(m);
+        restoreCR(fleet);
+        topUp(fleet);
+    }
+
+    /**
+     * Raises every ship's CR to the regen fraction (never lowers it). Also run before each fight:
+     * CR can drop between fights (vanilla decay when out of supplies or over capacity).
+     */
+    public static void restoreCR(CampaignFleetAPI fleet) {
         float fraction = STSSettings.crRegenFraction();
         for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
-            ensureLogistics(m);
             float target = m.getRepairTracker().getMaxCR() * fraction;
             if (m.getRepairTracker().getCR() < target) m.getRepairTracker().setCR(target);
         }
-        topUp(fleet);
     }
 
     /** Crew to cover every ship plus a margin, fuel to capacity. Neither is a Run resource. */
