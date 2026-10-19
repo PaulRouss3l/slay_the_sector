@@ -58,14 +58,53 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   while they break a rule: no Rest or Elite before row 4, no Ambush before row 3, no Rest on row
   9, no Elite→Elite / Shop→Shop / Rest→Rest, Nodes reached from one parent differ (Combat may
   repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
-  the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
+  the Run (at Ascension Omega, Act 4 follows). All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
   `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
-- Each Act draws 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes name their
-  faction. Bosses come from the Boss pool (Remnant, Omega, Derelict) or the strongest eligible
-  faction.
-- Difficulty follows a fixed curve by Depth (not the player's fleet strength); Ascension adds to
-  it later.
+- Each Act draws its own 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes
+  name their faction.
+
+## Acts and Bosses (S4)
+
+- **Act transition**: Boss won → Boss reward (below) → "Descend to Act N+1": a fresh map in the
+  same Descent system (old beacons cleared); the fleet carries over as it is (damage, Supplies).
+  Winning Act 3's Boss wins the Run.
+- **Bosses**: Act 1 = an "Apex" fleet of one of the Act's enemy factions; Act 2 = Derelict;
+  Act 3 = Remnant. Pilots per `sts_bossOfficers` (default none). Omega is never an Act Boss.
+- **Act 4 (Ascension Omega only)**: Start → one Rest Node → the **true Boss**: a lone **Ziggurat**
+  (`sts_trueBossHull`), no escort, no core, no retreat. Winning it is the true victory (+100,000
+  Payout, "Omega cleared" in the Records); losing it still pays like an Act 3 win.
+- **Difficulty**: enemy strength = (15 + 4.5 × row within the Act) × Act factor (1.0 / 1.6 / 2.2),
+  Bosses ×1.3 (~78 / 125 / 172), never the player's fleet strength. Reward ship sizes and officer
+  levels step up per Act. Ascension adds on top.
+- **Boss reward** (choose one, plus the Boss supplies; replaces the Reward pick):
+  - *Refit*: +1 S-mod slot on one ship of the player's choice, and a free S-mod on any ship.
+  - *Bigger fleet*: +20 Fleet DP soft cap for the rest of the Run (the hard cap moves with it).
+  - *Remnant warship*: Act 1 Brilliant (25 DP, Gamma core), Act 2 Apex (30 DP, Beta core), Act 3
+    Nova (40 DP, Alpha core); tagged `TAG_AUTOMATED_NO_PENALTY` (no Automated Ships skill needed).
+
+## Ascension and Meta progress (S4)
+
+- **Ascension** per Archetype, chosen at Run start; winning at the highest reached level unlocks
+  the next. Levels are named after AI cores (vanilla + RAT), ordered by their officer level; each
+  stacks onto the ones below and adds +50,000 to the Payout (a loss Payout scales by the same
+  factor: (1 + level) ×):
+
+  | Level | Name | Adds |
+  |---|---|---|
+  | 0 | Gamma | nothing (base) |
+  | 1 | Beta | +15 % enemy strength |
+  | 2 | Chronos | −20 Supplies per fight reward (never below 0, with the DP-cap cut) |
+  | 3 | Alpha | more Elites |
+  | 4 | Seraph | Rest heals only half |
+  | 5 | Primordial | Bosses get Gamma cores |
+  | 6 | Omega | unlocks Act 4 and the true Boss |
+
+- **Records** per Archetype: Runs, wins, deepest Depth, highest Ascension won, Omega cleared.
+- **Starting bonuses** (toggled at the Starting pick once unlocked): +5 starting DP (first win),
+  +1 starting officer level (reach Act 3), +50 starting Supplies (win with 3 Archetypes).
+- **Where it shows**: a Hub "Records" page (per-Archetype table, unlocked bonuses); the Archetype
+  list shows each faction's best Ascension; the Run Intel entry shows Act and Ascension.
 
 ## Node types
 
@@ -108,9 +147,10 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Run state** → sector memory `$sts_run_state`: plain `Serializable` POJOs holding ids, plus the
   detached Home fleet and cargo. Aliased in `configureXStream`.
 - **Meta progress** → cross-save JSON in `saves/common/` (`writeJSONToCommon`), never in the
-  save. v1 content: Ascension per Archetype + small permanent starting bonuses.
-- **Payout**: 0 credits for a loss before Node 3, linear with Depth after (e.g. Depth 3 = 5k up to
-  the final Boss = 25k), 50k for a win. Values in `settings.json`.
+  save: Records, Ascension reached per Archetype, unlocked starting bonuses.
+- **Payout**: 0 credits for a loss before Depth 3, linear with Depth across the whole Run after
+  (up to 25k at the Act 3 Boss), 50k for a win; × (1 + Ascension level); +100k for beating the
+  true Boss. Values in `settings.json`.
 
 ## Code layout
 

@@ -100,8 +100,13 @@ before arriving (save-scumming is accepted).
 
 ## S4 — Full Run and Meta progress ⬜
 
-3 Acts with Act transitions, enemy faction draw per Act, Boss pool, cross-save Meta progress,
-Ascension per Archetype, starting bonuses.
+Design settled 2026-10-19 (DESIGN "Acts and Bosses", "Ascension and Meta progress"). Branch `s4/full-run`.
+- ⬜ 3 Acts: Act transition after the Boss, fresh map, enemy factions per Act, Act difficulty factor.
+- ⬜ Bosses per Act (Apex / Derelict / Remnant) and the Boss reward choice (S-mod slot + S-mod,
+  +20 DP cap, Remnant warship with an AI core).
+- ⬜ Ascension Gamma → Omega per Archetype, its handicaps and Payout scaling.
+- ⬜ Act 4 at Omega: Rest + true Boss (lone Ziggurat, `sts_trueBossHull`).
+- ⬜ Cross-save Meta progress: Records, Ascension reached, starting bonuses; Hub Records page.
 
 ## S5 — Polish and release ⬜
 
