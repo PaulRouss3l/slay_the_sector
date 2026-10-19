@@ -74,7 +74,7 @@ public final class Rewards {
             FleetMemberAPI m = picks.get(i);
             String faction = Global.getSector().getFaction(pickFactions.get(i)).getDisplayName();
             cards.add(new Card(new Reward(Kind.SHIP, m, 0, null), m.getHullSpec().getHullName(),
-                    faction + " · " + m.getVariant().getDisplayName() + " · " + (int) m.getDeploymentPointsCost() + " DP", m, 0));
+                    faction + " - " + m.getVariant().getDisplayName() + " - " + (int) m.getDeploymentPointsCost() + " DP", m, 0));
         }
 
         List<String> weapons = weaponBundle(pool, rng);

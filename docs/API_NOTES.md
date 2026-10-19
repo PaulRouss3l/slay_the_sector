@@ -79,6 +79,11 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Custom entity | `"baseId"` inherits another entity's fields. Our beacon (sprite, `useLightColor:false`, no `baseId`) renders in the no-star Run system; `setCircularOrbitPointingDown` spins the sprite, `setCircularOrbit` does not. |
 | Cards | `CardGridDelegate` (rebuild in the delegate's `advance`, not in the click) works for Starting and Reward picks. |
 
+## UI text
+
+The game's UI fonts have no em dash, middle dot or multiplication sign: "—", "·" and "×" render
+as "?". Keep UI strings ASCII.
+
 ## Redesign research (2026-10, from source reading — not yet run in game)
 
 | Concern | Fact |

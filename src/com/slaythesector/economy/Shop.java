@@ -64,7 +64,7 @@ public final class Shop {
         for (FleetMemberAPI m : ships) {
             int price = Math.round(m.getDeploymentPointsCost() * STSSettings.shopSuppliesPerDP());
             cards.add(new Card(new Item(Kind.SHIP, m, null, 0), m.getHullSpec().getHullName(),
-                    m.getHullSpec().getManufacturer() + " · " + (int) m.getDeploymentPointsCost() + " DP · "
+                    m.getHullSpec().getManufacturer() + " - " + (int) m.getDeploymentPointsCost() + " DP - "
                             + price + " supplies", m, price, 1));
         }
 
@@ -72,14 +72,14 @@ public final class Shop {
             WeaponSpecAPI spec = Global.getSettings().getWeaponSpec(id);
             int price = weaponPrice(spec);
             cards.add(new Card(new Item(Kind.WEAPON, null, id, 0), spec.getWeaponName(),
-                    spec.getSize().getDisplayName() + " " + spec.getMountType().getDisplayName() + " · "
+                    spec.getSize().getDisplayName() + " " + spec.getMountType().getDisplayName() + " - "
                             + price + " supplies", null, price, 1));
         }
 
         int level = DepthScaling.officerLevel(node.getDepth());
         int price = STSSettings.shopOfficerBase() + level * STSSettings.shopOfficerPerLevel();
         cards.add(new Card(new Item(Kind.OFFICER, null, null, level), "Officer (level " + level + ")",
-                "Joins the Run fleet · " + price + " supplies", null, price, 1));
+                "Joins the Run fleet - " + price + " supplies", null, price, 1));
         return cards;
     }
 
@@ -107,7 +107,7 @@ public final class Shop {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> e : counts.entrySet()) {
             if (sb.length() > 0) sb.append(", ");
-            sb.append(e.getValue() > 1 ? e.getValue() + "× " : "").append(e.getKey());
+            sb.append(e.getValue() > 1 ? e.getValue() + "x " : "").append(e.getKey());
         }
         return sb.toString();
     }

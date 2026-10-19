@@ -45,7 +45,7 @@ public final class Treasure {
         FleetMemberAPI ship = rareShip(state, node, rng);
         if (ship != null) {
             cards.add(new Card(new Prize(Kind.SHIP, ship, null), ship.getHullSpec().getHullName(),
-                    "Rare hull · " + ship.getHullSpec().getManufacturer() + " · "
+                    "Rare hull - " + ship.getHullSpec().getManufacturer() + " - "
                             + (int) ship.getDeploymentPointsCost() + " DP", ship, 0));
         }
 

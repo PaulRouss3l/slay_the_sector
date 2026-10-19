@@ -92,7 +92,7 @@ public class HubDialog implements InteractionDialogPlugin {
         List<Card> cards = new ArrayList<Card>();
         for (FleetMemberAPI m : Archetypes.shipPool(factionId, budget, 24)) {
             int dp = (int) Math.ceil(m.getDeploymentPointsCost());
-            cards.add(new Card(m, m.getHullSpec().getHullName(), m.getVariant().getDisplayName() + " · " + dp + " DP", m, dp));
+            cards.add(new Card(m, m.getHullSpec().getHullName(), m.getVariant().getDisplayName() + " - " + dp + " DP", m, dp));
         }
         if (cards.isEmpty()) {
             text.addPara(faction.getDisplayName() + " has no ships within " + budget + " DP. Pick another faction.");
