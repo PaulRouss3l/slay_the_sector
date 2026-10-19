@@ -55,6 +55,23 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Intel | `addIntel` only — the intel manager already advances it; also adding it via `addScript` makes it tick twice. `endImmediately()` to finish. |
 | Testing | No headless runner. After a session: `python3 tools/log_scan.py --mod .`. Dev mode via the `devmode` console command. Smoke-test checklist template: `~/.claude/skills/starsector-modding/templates/SMOKE_TEST.md`. |
 
+## Redesign research (2026-10, from source reading — not yet run in game)
+
+| Concern | Fact |
+|---|---|
+| Custom canvas | `InteractionDialogAPI.showCustomVisualDialog(w, h, CustomVisualDialogDelegate)`; plugin gets `render/renderBelow` (GL), `processInput`, `advance`, `buttonPressed`. Vanilla precedent: `impl/campaign/eventide/DuelDialogDelegate` (1024×700). LunaLib `OpenCustomPanelFromDialog` hides visual/text panels for ~80 % screen. |
+| Intel panel | `IntelInfoPlugin.hasLargeDescription()` + `createLargeDescription(CustomPanelAPI, w, h)`; open with `showCoreUITab(INTEL, intel)`. Usable outside dialogs. |
+| Card-grid dialog | `dialog.showCustomDialog(w, h, CustomDialogDelegate)` — Nexerelin `Nex_NGCCustomStartFleet` (ship grid with +/-; no budget enforcement — add our own). Simpler: `showFleetMemberPickerDialog(...)` (no live counter). |
+| Command tab | `CoreUITabId.OUTPOSTS`. AotD extends it via AshLib reflection on obfuscated classes (not public API). Not used. |
+| Core screens from a dialog | `dialog.getVisualPanel().showCore(CoreUITabId, target, CoreUITradeMode.NONE, CoreInteractionListener)` (`OpenCoreTab` rulecmd). Refit cannot be filtered per member — the Run fleet must *be* the player fleet. |
+| Battle setup override | `CampaignPlugin.pickBattleCreationPlugin(opponent)` → own `BattleCreationPlugin.initBattle(ctx, MissionDefinitionAPI loader)` (map size, terrain, objectives, `loader.addPlugin`). `BattleCreationPluginImpl` overwrites standoff/escape/burn fields set elsewhere. Examples: RAT `AbyssBattleCreationPlugin`, MagicLib `MagicBountyBattleCreationPlugin`. |
+| Vanilla battle flow | `FleetInteractionDialogPluginImpl(FIDConfig)` gives CR/crew loss, XP, recovery, loot. `FIDDelegate.battleContextCreated` (boss: `aiRetreatAllowed=false; fightToTheLast=true; objectivesAllowed=false; enemyDeployAll=true`), `postPlayerSalvageGeneration`, `notifyLeave`. Raw `dialog.startBattle` applies **nothing**. |
+| Flee / escape fights | `BattleCreationContext(pf, ATTACK, enemy, FleetGoal.ESCAPE)` = vanilla pursuit; player `ESCAPE` = escape battle (escaped ships in `getRetreated()`). Combat: `CombatFleetManagerAPI.getRetreatedCopy/getDestroyedCopy`, `endCombat(delay, side)`, `maintainStatusForPlayerShip`, `setMaxStrength` (DP cap). |
+| Fleet wipe | `CampaignPlugin.pickRespawnPlugin()` — return own dialog at `MOD_SPECIFIC`. No `reportPlayerDefeated`. No vanilla ironman. |
+| Cross-save data | `SettingsAPI.writeJSONToCommon/readJSONFromCommon`, `writeTextFileToCommon` (≤ 1 MB) → `<install>/saves/common/<name>.data`. Vanilla: `SharedUnlockData`. |
+| Contained system | RAT `AbyssGenerator`: tags `THEME_HIDDEN`, `SYSTEM_CUT_OFF_FROM_HYPER`, `DO_NOT_SHOW_STRANDED_DIALOG`; entry via `doHyperspaceTransition(fleet, from, JumpDestination, 0.01f)` from a campaign-plugin-picked interaction. Cut-off tag does **not** obviously block `fracture_jump` — keep our own lock. |
+| New game | `newGameCreationEntryPoint` / `newGameSectorProcGen` overridable in settings.json (Nexerelin). No API to start a new game from inside a save. Not used. |
+
 ## Must re-verify before coding
 
 Use `api_lookup.py` (above) or `javap` (`JAR=/home/ubik/Downloads/starsector/starfarer.api.jar`).

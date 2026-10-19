@@ -1,127 +1,130 @@
 # DESIGN — Slay the Sector
 
-See `API_NOTES.md` for the verified Starsector API calls referenced below.
+Terms are defined in `GLOSSARY.md`. API facts in `API_NOTES.md`. Why the Run lives in a contained
+star system: `adr/0001-run-in-contained-system.md`. Milestones: `ROADMAP.md`.
 
-## CURRENT ARCHITECTURE (dialog-only) — supersedes the system/teleport design below
+Status: **design settled, not implemented** (redesign of 2026-10). Mechanisms marked 🧪 must be
+proven by the Spike milestone before content is built on them.
 
-The whole run plays out inside **one interaction dialog** — no custom star system, no fleet
-movement, no node entities, no FTL lockout. This replaced the RAT-style "enter an isolated system"
-approach because relocating the player fleet from inside the hub dialog left the camera/current-
-location stuck (teleport never visually completed).
+## Goals
 
-Flow:
-- `rules.csv`: `PopulateOptions` on Jangala (`$market.id == jangala`) adds the "Descend into the
-  Sector" option (order 99, just above Leave). Selecting it → `DialogOptionSelected $option ==
-  sts_enter` → `rulecmd/STS_EnterRun`.
-- `STS_EnterRun` **hijacks the open hub dialog**: `dialog.setPlugin(new RunDialogPlugin()); plugin.init(dialog);`
-- `dialog/RunDialogPlugin` runs the entire descent: builds the graph (`NodeGraphBuilder`), shows the
-  current node's successors as **text options** (fog = only immediate successors shown; picking one
-  locks the path since siblings are never reoffered). Per node type:
-  - combat/elite/boss → `dialog.startBattle(new BattleCreationContext(player, ATTACK, enemy, ATTACK))`
-    with `enemy` from `EncounterFleetFactory` (parked on the player's location, despawned after);
-    result handled in `backFromEngagement`.
-  - event/shop/recruit → sub-option menus mutating cargo/credits/fleet.
-  - boss win → `endRun(won)`; any loss/abandon → `endRun`. `endRun` records meta + ends the dialog.
-- Run state still mirrored into sector memory (`RunStateManager`) so `intel/RunIntelPlugin` (persistent,
-  Important, points to Jangala) can describe an active run.
+- A Slay-the-Spire-style roguelite **inside a normal campaign**: works with any modded ships and
+  factions, never touches the vanilla sector, and has **zero impact on the player's campaign**
+  except the Payout.
+- Every fight is a real vanilla battle. Saving is possible between Nodes, so a Run can be long.
 
-**Run fleet (temporary):** at run start the player picks a starting ship (Wolf always; meta-unlocked
-hulls add more). The real fleet is stashed into the **mothball bay** (`player.getCargo().getMothballedShips()`)
-— it travels safely, never fights, and keeps the player "alive" so a wiped run fleet can't trigger the
-"fleet destroyed" game-over. The active fleet is replaced with the chosen ship (flagship, player as
-captain). Each non-boss combat win offers **3 ships of the faction just fought**, sized to the fight's
-depth (`DepthScaling.rewardSize` → `gen/RewardShipFactory` generates a throwaway faction fleet and
-buckets members by `HullSize`); the picked hull is added to the run fleet. At run end (`endRun`,
-including loss — runs before the dialog dismisses) the run fleet is dropped and the originals pulled
-back out of the mothball bay. Combat nodes name the faction in the path label + intro; boss is always
-Remnants. No Recruit node (rewards replace it).
+## Player journey: step → screen
 
-Kept classes: `dialog/RunDialogPlugin`, `gen/NodeGraphBuilder`, `gen/EncounterFleetFactory`,
-`run/{RunState,RunStateManager,RunNode,NodeType,MetaProgress,MetaProgressManager}`,
-`util/{DepthScaling,STSConstants,STSLog}`, `hub/HubManager`, `intel/RunIntelPlugin`,
-`rulecmd/STS_EnterRun`.
-Removed: RunSystemGenerator, NodeEntityFactory, NodeProgress, STSCampaignPlugin, FtlLockScript,
-DeferredEnter/Exit, RunEntryController/RunExitController, NodeInteractionDialogPlugin,
-STS_AbandonRun, STS_RunExitMenu.
+| # | Step | Screen | Built with |
+|---|---|---|---|
+| 1 | Entry | Hub station dialog: Start Run / Meta progress / Restore Home fleet | interaction dialog |
+| 2 | Setup | Archetype list → Starting pick grid (30 DP cap) → free refit | dialog options → card grid → vanilla Refit (`CoreUITradeMode.NONE`) |
+| 3 | Map | Node map canvas; read-only copy in the Intel tab | `showCustomVisualDialog` 🧪 + `IntelInfoPlugin.createLargeDescription` |
+| 4 | Choose Node | click on the map → fly to the Node entity in the Run system | canvas → campaign map |
+| 5a | Fight Nodes | Node dialog → vanilla fleet battle with a per-type battle setup | `FleetInteractionDialogPluginImpl` + `FIDConfig` + own `BattleCreationPlugin` 🧪 + combat plugin |
+| 5b | Event | Node dialog text + choices, may chain into a fight | interaction dialog |
+| 5c | Shop / Treasure | card grid priced in Supplies | card grid |
+| 5d | Rest | choose one: repair all / S-mod / officer level | dialog options + ship picker |
+| 6 | Reward pick | 3 cards with tooltips | card grid |
+| 7 | Build | vanilla Refit + Fleet tabs, usable anytime in the Run system | vanilla, no code |
+| 8 | Repair / sell | Fleet services panel after each Node | custom dialog |
+| 9 | Act transition | Boss win → jump to the next Act | `doHyperspaceTransition` 🧪 |
+| 10 | Run end | summary dialog (Depth, Payout, Unlocks) → back at the Hub, Home fleet restored | interaction dialog |
+| 11 | Meta | Hub dialog page; data in `saves/common/` | `writeJSONToCommon` |
 
----
+Only **two custom UI components** exist: the **card grid** (Starting pick, Shop, Treasure, Reward
+pick) and the **node map** (canvas and Intel). Everything else is vanilla dialogs and screens.
 
-## Original (superseded) system/teleport design
+## Entering and leaving a Run
 
-Mirrors RAT's Abyssal-Depths patterns (`github.com/Lukas22041/Random-Assortment-of-Things`, `abyss/`).
+- **Hub station**: a custom entity the mod places once (idempotent, also in old saves) in a core
+  system; no market. Works in Nexerelin random sectors.
+- **Start**: Archetype → Starting pick → the Home fleet and all cargo (credits included) are
+  detached into saved Run state (a fleet object not placed in any location + a cargo object);
+  the player fleet becomes the Run fleet with empty cargo plus starting Supplies → refit →
+  jump transition into the Run system 🧪.
+- **Contained**: the Run system has no jump points; our script blocks `fracture_jump`.
+- **End** (win or loss): Run fleet and Run cargo are discarded, Home fleet and cargo restored,
+  Payout added, Meta progress recorded, player returned to the Hub.
+- **Safety net**: the Hub always offers "Restore Home fleet". On game load, stored Home assets
+  with no active Run are restored automatically.
 
-## Package / class layout
+## Map
 
-Root package `com.slaythesector` (under `src/com/slaythesector/`):
+- 3 Acts × 8 rows, 3-4 Nodes per row, StS placement rules: no Elite in rows 1-2, a Rest before
+  each Boss, ≥ 1 Shop per Act, Treasure mid-Act. Winning Act 3 wins the Run. All counts in
+  `settings.json`.
+- Path lock: only successors of the current Node are selectable.
+- Each Act draws 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes name their
+  faction. Bosses come from the Boss pool (Remnant, Omega, Derelict) or the strongest eligible
+  faction.
+- Difficulty follows a fixed curve by Depth (not the player's fleet strength); Ascension adds to
+  it later.
 
-| Package | Class | Role |
-|---|---|---|
-| `` (root) | `SlayTheSectorModPlugin` | Lifecycle. `onGameLoad`: re-register persistent EveryFrameScripts (FTL lock, run watcher), build/repair hub. |
-| `run/` | `RunState` | Memory singleton: node graph, current node, revealed successors, depth, `hasGenerated`. |
-| `run/` | `RunStateManager` | Static accessor on sector memory `$sts_run_state`: `getOrCreate / store / clear`. |
-| `run/` | `RunNode` | One node: `id`, `NodeType`, `depth`, `successorIds`, `cleared`; transient resolved entity. |
-| `run/` | `NodeType` | enum: START, COMBAT, ELITE, EVENT, SHOP, RECRUIT, BOSS. |
-| `run/` | `MetaProgress` | Unlocks (ships/captains/bonuses) + counters. |
-| `run/` | `MetaProgressManager` | Static accessor on persistent `sts_meta`: `get / store / unlock / recordRunEnd`. |
-| `gen/` | `RunSystemGenerator` | createStarSystem, init star, tag hidden + cut-off, place one entity per node. |
-| `gen/` | `NodeGraphBuilder` | Pure layered-DAG logic (no API calls → unit-testable). |
-| `gen/` | `NodeEntityFactory` | Creates a `CustomCampaignEntityAPI` per node, sets `$sts_node_id`, positions it. |
-| `gen/` | `EncounterFleetFactory` | Builds enemy `CampaignFleetAPI` via `FleetFactoryV3`, depth-scaled. |
-| `nodes/` | `NodeHandler` (iface) + `Combat/Elite/Boss/Event/Shop/Recruit` handlers, `NodeHandlerRegistry` | Per-type arrival/resolution behavior. |
-| `travel/` | `RunEntryController` | hub → run (generate, switch location, place fleet, lock FTL). |
-| `travel/` | `RunExitController` | run → hub (award meta, restore fleet, cleanup/remove system). |
-| `travel/` | `RunTeleporter` | Teleport fleet to a node entity; update current node; reveal successors. |
-| `ftl/` | `FtlLockScript` | EveryFrameScript: pin `fracture_jump` cooldown + set `$cfai_noJump` while in run. |
-| `dialog/` | `NodeSelectDialogPlugin` | Text "Go to A / B / C" menu. |
-| `dialog/` | `Combat/Event/Shop/Recruit` dialog plugins, `DialogUtil` | Per-type interaction dialogs + helpers. |
-| `rulecmd/` | `STS_EnterRun`, `STS_OpenNodeMenu`, `STS_AbandonRun` | RuleCmds (package registered via `ruleCommandPackages`). |
-| `intel/` | `RunIntelPlugin` | `BaseIntelPlugin`: current depth + text map. |
-| `hub/` | `HubManager` | Idempotent hub entity in a vanilla system; attaches enter-run interaction. |
-| `util/` | `STSConstants` | All string keys (memory/persistent keys, entity type ids, system name). |
-| `util/` | `STSLog`, `DepthScaling` | Logger wrapper; depth → {fleet points, quality, loot} scalars. |
+## Node types
 
-## Data model
+| Type | Content |
+|---|---|
+| Combat | standard battle; Reward pick + Supplies |
+| Elite (Escape) | encircled by a stronger fleet, player `FleetGoal.ESCAPE`; win = reach the edge with ≥ N% of DP; reward scales with ships saved |
+| Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
+| Boss | no retreat, fight to the last, enemy deploys all; Reward pick + bonus S-mod; retreat = Run lost |
+| Event | text choice: battle station (fight or flee free; win = 3 Reward picks), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
+| Shop | buy ships, weapons, officers, repairs with Supplies |
+| Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level |
+| Treasure | choose 1 of 3 rare items (`rare_bp` hulls/weapons, Boss-pool ships, S-mod), scaled by Depth |
 
-- **Run state** → sector memory `$sts_run_state` (`getMemoryWithoutUpdate()`). Per-save; vanishes
-  when the run ends. Store node **ids**, not entity refs — resolve `SectorEntityToken`s lazily by
-  scanning the run system for entity memory `$sts_node_id == id` (avoids XStream serialization
-  issues). `hasGenerated` guard: `getOrCreate()` returns existing if the key is present, else builds
-  fresh.
-- **Meta** → persistent data `sts_meta` (`getPersistentData()`). Survives runs.
-  `RunStateManager.clear()` only unsets `$sts_run_state` / `$sts_in_run`; it **never** touches
-  `sts_meta`.
-- **Fog of war**: on arrival at node N → mark N cleared, add `N.successorIds` to `revealedNodeIds`.
-  The node-select dialog only offers revealed-and-uncleared successors of the current node.
+## Fleet, resources and rules
 
-## Core flows
+- **Archetypes**: `getAllFactions()` filtered by `isShowInIntelTab()`, ≥ ~8 known ships, not
+  player/neutral/independent; blacklist/whitelist `sts_factionBlacklist` in `settings.json`.
+  Boss-pool factions are never Archetypes.
+- **Starting pick**: Archetype's known ships (stock variants), hard 30 DP cap, then free refit
+  with the Archetype's known weapons; 1 starting officer.
+- **Reward pick**: 1 of 3 among ship (faction just fought) / officer / weapon bundle. Never an
+  S-mod; S-mods come only from Rest, Treasure and as a Boss bonus.
+- **Supplies**: the only currency. Earned from fights (Combat < Elite < Boss), Events, selling
+  ships. Spent on repairs and Shops.
+- **Attrition**: hull/armor damage carries over; CR regenerates for free up to ~70 % after each
+  fight, Supplies top it up; crew refilled free after each fight; fuel unlimited. Ships destroyed
+  in a fight are lost unless recovered right after (vanilla recovery flow).
+- **Fleet DP cap** grows with Act (e.g. 30 → 60 → 100); above it the player must sell or scrap.
+- **Character skills** of the player carry into the Run (accepted).
+- **Run loss**: fleet wiped (intercepted via `CampaignPlugin.pickRespawnPlugin` 🧪) or no
+  deployable ship left. Retreating from a non-Boss fight = that fight lost (no reward), Run goes on.
+- **Save-scumming**: accepted in v1 (ironman-lite later).
 
-**Enter run** (`RunEntryController.enter`):
-get/create `MetaProgress` → `RunSystemGenerator.generate(seed, meta)` (createStarSystem, init star,
-add tags `SYSTEM_CUT_OFF_FROM_HYPER` + `THEME_HIDDEN` to center, **no** jump points, place node
-entities) → build + store `RunState` (current = start, reveal start successors) →
-`setCurrentLocation(sys)` + place player fleet at START → `addScript(new FtlLockScript())`, set
-`$sts_in_run` → open START node menu.
+## Persistence
 
-**Travel** (`NodeSelectDialogPlugin` + `RunTeleporter`):
-node interaction fires `STS_OpenNodeMenu` → dialog lists revealed-uncleared successors of current
-node → on pick, `RunTeleporter` resolves target entity, `playerFleet.setLocation(...)`, updates
-`currentNodeId`, adds target successors to `revealedNodeIds`, dispatches to
-`NodeHandlerRegistry.get(type).onArrive(...)`.
+- **Run state** → sector memory `$sts_run_state`: plain `Serializable` POJOs holding ids, plus the
+  detached Home fleet and cargo. Aliased in `configureXStream`.
+- **Meta progress** → cross-save JSON in `saves/common/` (`writeJSONToCommon`), never in the
+  save. v1 content: Ascension per Archetype + small permanent starting bonuses.
+- **Payout**: 0 credits for a loss before Node 3, linear with Depth after (e.g. Depth 3 = 5k up to
+  the final Boss = 25k), 50k for a win. Values in `settings.json`.
 
-**Combat** (`CombatNodeHandler` + `CombatNodeDialogPlugin`):
-`EncounterFleetFactory.create(depth, meta)` → `system.spawnFleet(...)` at the node → pre-battle
-dialog → on "Engage": `dialog.startBattle(new BattleCreationContext(player, FleetGoal.ATTACK, enemy,
-FleetGoal.DEFEND))` → `backFromEngagement(result)`: win → clear node + advance (if BOSS →
-`RunExitController.win()`); loss → `RunExitController.lose()`.
+## Code layout (planned)
 
-**End run** (`RunExitController`):
-award/skip meta unlocks (persist to `sts_meta`) → teleport player to hub (`setCurrentLocation(hub)`,
-place fleet) → `RunStateManager.clear()` + `removeStarSystemNextFrame(sys)`. `FtlLockScript` sees
-`$sts_in_run` gone → `isDone()` unwinds it. Next `enter()` regenerates fresh.
+Root package `com.slaythesector`. Kept from the old code (rewritten as needed): `NodeGraphBuilder`,
+`DepthScaling`, `STSConstants`, `STSLog`, the Run-state accessor pattern. Deleted: the
+dialog-only Run (`RunDialogPlugin`, mothball swap, Jangala rule).
 
-## Data files (created with their milestones, not upfront)
+| Package | Responsibility |
+|---|---|
+| `hub/` | Hub station placement, Hub dialog, Restore |
+| `run/` | Run state, start/end, Home fleet stash, Payout |
+| `map/` | graph generation, node map model |
+| `world/` | Run system generation, Node entities, `fracture_jump` lock, transitions |
+| `combat/` | battle setups per Node type, combat plugins (objectives, placement), respawn intercept |
+| `nodes/` | per-type Node dialogs (Event, Shop, Rest, Treasure) |
+| `ui/` | card grid, node map canvas, Intel overview |
+| `meta/` | cross-save Meta progress, Ascension |
+| `util/` | constants, logging, scaling |
 
-- `data/config/settings.json`: `{ "ruleCommandPackages": ["com.slaythesector.rulecmd"] }`
-- `data/campaign/rules.csv`: route node-entity interaction (`$sts_node`) → `STS_OpenNodeMenu`;
-  hub option `sts_enter` → `STS_EnterRun`.
-- MVP enemies use vanilla `Factions.PIRATES`; node entities reuse the `"stable_location"` type.
+## History
+
+1. **Isolated system + teleport** (RAT-style, M1-M5): moving the player fleet from inside an open
+   dialog left the camera stuck.
+2. **Dialog-only Run** (post-M5): worked, but leaked Run gains into the campaign (cargo, weapons,
+   Supplies), gave no vanilla post-battle flow, and blocked saving during a Run. Replaced by this
+   design; see the ADR.

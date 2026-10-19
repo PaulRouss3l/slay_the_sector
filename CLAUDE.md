@@ -29,13 +29,14 @@ style of *Slay the Spire*. **Java only** (no Kotlin). Domain terms: `GLOSSARY.md
 
 ## Architecture (one paragraph)
 
-The whole **run** plays out inside **one interaction dialog** (`dialog/RunDialogPlugin`),
-hijacked from the Jangala market menu via `dialog.setPlugin(...)`. No custom star system, no
-fleet movement, no node entities. The player picks among the next nodes as text options (fog of
-war: only immediate successors shown; picking one locks the path). Combat nodes call
-`dialog.startBattle(...)`. The home fleet waits in the mothball bay while a temporary run fleet
-fights. Win or loss ends the run and restores the home fleet; **meta progress persists** across
-runs. A graphical node map comes later (M6). Full flow: `docs/DESIGN.md` "CURRENT ARCHITECTURE".
+**Redesign settled, not yet implemented** (see `docs/DESIGN.md`, ADR `docs/adr/0001-*`). A
+**Run** lives in a **contained star system** inside a normal campaign, entered from the mod's
+own **Hub** station by a jump transition. On start, the Home fleet and cargo are detached into
+saved Run state and the player fleet becomes the Run fleet (Starting pick, 30 DP). The player
+picks the next Node on a custom node-map canvas, flies to it, and fights through the vanilla
+fleet encounter flow with a per-Node-type battle setup. Supplies are the Run's only currency.
+Run end restores the Home fleet and grants a Payout; Meta progress is cross-save. The current
+code in `src/` is the superseded dialog-only Run, to be replaced milestone by milestone.
 
 ## Hard constraints
 
@@ -43,17 +44,26 @@ runs. A graphical node map comes later (M6). Full flow: `docs/DESIGN.md` "CURREN
 - **Never wipe / regenerate the vanilla sector.** The mod is purely additive.
 - **Never relocate the player fleet from inside an open dialog** (camera gets stuck; this is why
   the system/teleport design was scrapped).
+- **Zero campaign impact**: a Run must never change the player's campaign except the Payout.
+  Every Run start/end swaps fleet and cargo exactly once.
 - **State storage**: run state → sector memory key `$sts_run_state` (per-save, dies with the run).
-  Meta progress → persistent data key `sts_meta` (**survives runs** — ending a run must never
-  touch it).
-- **XStream-safe serialization**: saved state holds ids and plain `Serializable` POJOs only, never
-  game objects (`SectorEntityToken`, `FleetMemberAPI`, …). No static fields holding game objects.
-  Never rename a saved class after release.
+  Meta progress → cross-save JSON in `saves/common/` (`writeJSONToCommon`), never in the save.
+- **XStream-safe serialization**: saved state holds ids and plain `Serializable` POJOs, not
+  references to live world objects (`SectorEntityToken`s, fleets in a location). The one deliberate
+  exception is the detached Home fleet + cargo held during a Run (see ADR 0001). No static fields
+  holding game objects. Alias saved classes in `configureXStream`; never rename them after release.
+
+## Workflow
+
+- **When a feature is done, update `docs/ROADMAP.md`** in the same change: tick the item
+  (⬜ → 🟡 code-complete, ✅ verified in game) and the "Current target" line.
+- New domain terms go in `GLOSSARY.md`; hard-to-reverse design choices get an ADR in `docs/adr/`.
 
 ## Pointers
 
 - `GLOSSARY.md` — canonical domain terms.
-- `docs/DESIGN.md` — current architecture (top), superseded system design (below).
+- `docs/DESIGN.md` — settled design: step → screen map, Node types, rules, planned packages.
+- `docs/adr/` — architecture decisions.
 - `docs/ROADMAP.md` — milestones and status.
 - `docs/API_NOTES.md` — verified Starsector API facts + pitfalls relevant to this mod.
 
