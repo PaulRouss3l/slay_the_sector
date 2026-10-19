@@ -1,0 +1,9 @@
+{
+	"sts_spike_station": {
+		"baseId": "station_mining00",
+		"defaultName": "Descent Relay",
+		"nameInText": "descent relay",
+		"shortName": "relay",
+		"tags": []
+	}
+}

@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: Spike.**
+**Current target: S1.**
 
 ## Done before the redesign
 
@@ -16,14 +16,21 @@ Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ veri
 - 🗑️ **M0-M5 (old designs)**: isolated-system teleport, then dialog-only Run. Superseded; see
   `DESIGN.md` "History" and `adr/0001-run-in-contained-system.md`.
 
-## Spike — prove the risky mechanisms ⬜
+## Spike — prove the risky mechanisms ✅
 
-Throwaway-quality code allowed; each item gets a smoke-test line.
-- ⬜ Jump transition from the Hub into a contained Run system and back, no camera bug; `fracture_jump` blocked.
-- ⬜ Own `BattleCreationPlugin` picked for an enemy fleet tagged `$sts_scenario` (map size, no objectives, fight to the last).
-- ⬜ Fleet wipe intercepted via `pickRespawnPlugin` → Run ends cleanly.
-- ⬜ Custom canvas (`showCustomVisualDialog`) draws nodes/edges and receives clicks.
-- ⬜ Home fleet + cargo detached into Run state survive save/load and restore intact (officers included).
+Throwaway code in `src/com/slaythesector/spike/`; in-game checklist: `SPIKE_SMOKE_TEST.md`.
+- ✅ Jump transition from the Hub into a contained Run system and back, no camera bug; `fracture_jump` blocked.
+- ✅ Own `BattleCreationPlugin` picked for an enemy fleet tagged `$sts_scenario` (no objectives, no enemy retreat, fight to the last).
+- ✅ Fleet wipe intercepted via `pickRespawnPlugin` → Run ends cleanly.
+- ✅ Custom canvas (`showCustomVisualDialog`) draws nodes/edges and receives clicks.
+- ✅ Home fleet + cargo detached into Run state survive save/load and restore intact (officers included).
+
+Smoke-tested in game 2026-10-19 (RC8, with Nexerelin/RAT/MagicLib loaded); no mod errors in the log.
+Carried into S1:
+- Vanilla post-battle loot/recovery screens after a *won* tagged fight: not yet seen (test fight was
+  too strong: 7 pirate ships at 40 FP vs Wolf + Hammerhead).
+- `getContainingLocation()` stays set after `removeEntity` — check `loc.getFleets().contains(fleet)`
+  before re-adding a swapped fleet.
 
 ## S1 — One Act, Combat + Boss ⬜
 
