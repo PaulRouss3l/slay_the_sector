@@ -48,8 +48,11 @@ public final class HomeFleet {
         LocationAPI loc = run.getContainingLocation();
         Vector2f pos = new Vector2f(run.getLocation());
 
-        // Monthly income and payroll settle on the player fleet's credits: hand them back.
-        home.getCargo().getCredits().add(run.getCargo().getCredits().get());
+        // Monthly income and pay settle on the player fleet's credits: hand them back, refunding the
+        // Run fleet's pay and charging the Home fleet's (RunPayrollListener), as if no Run happened.
+        RunState state = RunManager.get();
+        float refund = state == null ? 0f : state.getPayrollRefund();
+        home.getCargo().getCredits().add(run.getCargo().getCredits().get() + refund);
         becomePlayerFleet(home, loc, pos);
         if (loc != null && loc.getFleets().contains(run)) loc.removeEntity(run);
         mem().unset(STSConstants.MEM_HOME_FLEET);

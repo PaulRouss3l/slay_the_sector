@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -12,11 +13,13 @@ import org.lwjgl.util.vector.Vector2f;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
+import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSSettings;
 
 /**
@@ -76,6 +79,22 @@ public final class Archetypes {
             }
         });
         return out.size() > limit ? new ArrayList<FleetMemberAPI>(out.subList(0, limit)) : out;
+    }
+
+    /**
+     * Shuffled {@link #shipPool} of a faction (no automated hulls, which need a skill to crew),
+     * no larger than {@code maxSize}. Empty for an unknown faction.
+     */
+    public static List<FleetMemberAPI> shipsUpTo(String factionId, HullSize maxSize, Random rng) {
+        List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>();
+        if (factionId == null || Global.getSector().getFaction(factionId) == null) return pool;
+        for (FleetMemberAPI m : shipPool(factionId, 999f, 40)) {
+            if (m.getHullSpec().getHullSize().ordinal() > maxSize.ordinal()) continue;
+            if (Misc.isAutomated(m)) continue;
+            pool.add(m);
+        }
+        Collections.shuffle(pool, rng);
+        return pool;
     }
 
     private static CampaignFleetAPI throwawayFleet(String factionId, float fp) {

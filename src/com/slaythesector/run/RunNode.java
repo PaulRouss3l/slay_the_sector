@@ -22,6 +22,8 @@ public class RunNode implements Serializable {
     private String factionId;
     private boolean resolved;
     private boolean won;
+    /** Shop/Rest/Treasure: the service was used (one visit per Node). */
+    private boolean claimed;
 
     public RunNode(String id, NodeType type, int depth, int column) {
         this.id = id;
@@ -39,6 +41,8 @@ public class RunNode implements Serializable {
     public void setFactionId(String factionId) { this.factionId = factionId; }
     public boolean isResolved() { return resolved; }
     public boolean isWon() { return won; }
+    public boolean isClaimed() { return claimed; }
+    public void claim() { claimed = true; }
 
     public void addSuccessor(String nodeId) {
         if (!successorIds.contains(nodeId)) successorIds.add(nodeId);

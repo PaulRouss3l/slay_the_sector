@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S2** — map and economy Nodes.
+**Current target: S3** — special fights and Events.
 
 ## Done before the redesign
 
@@ -56,9 +56,29 @@ points in a Run re-earns that XP afterwards; an AI fleet already pursuing the pl
 may target the parked Home fleet (untested). One unexplained 0 % CR at a Boss start (not
 reproduced after reload; covered by the pre-fight CR floor).
 
-## S2 — Map and economy Nodes ⬜
+## S2 — Map and economy Nodes ✅
 
-Node map canvas + Intel overview, Shop, Rest, Treasure, Fleet DP cap.
+Smoke-tested in game 2026-10-19 (RC8, Nexerelin/RAT/MagicLib loaded), checklist `S2_SMOKE_TEST.md`;
+no mod errors in the log. Still unseen: the Boss **win** path (carried from S1).
+- ✅ Act layout generated like Slay the Spire (grid + non-crossing paths, 10 rows + Boss) with its
+  placement rules (see DESIGN "Map"); checked offline on 5,000 maps. Enemy strength per Depth
+  4.5 FP; Reward ships: destroyers from Depth 4, cruisers from Depth 8.
+- ✅ Boss eased after the S2 playtest: no officers or AI cores (`sts_bossOfficers` = none / gamma /
+  normal), `sts_bossFPMult` 1.65 → 1.3 (~78 FP at Depth 11).
+- ✅ Node map canvas (GL lines + vanilla intel icons), hover info, click + "Set course"; replaces
+  the course text options. Read-only copy as the large description of a Run Intel entry.
+- ✅ Shop: card grid in budget mode priced in Supplies (ships one size above the Reward cap,
+  weapons, an officer); dockyard repair at half price; stock gone once you leave.
+- ✅ Rest: one of free full repair / S-mod / officer +1 level (skill picked in the vanilla Fleet screen).
+- ✅ Treasure: one of a rare (bigger) ship, top-tier weapons, an S-mod.
+- ✅ Fleet DP cap: soft cap `sts_fleetDPCap` (Act 1 = 80), each DP over cuts fight rewards by
+  `sts_overCapSuppliesPerDP` (5); hard cap = soft + `sts_fleetDPHardMargin` (30) blocks setting or
+  resuming a course until ships are sold. Warnings on the beacon, encounter, map, grids and Intel.
+
+Independent review done and its findings fixed (DP cap bypass via Resume course, repeat
+purchases, wasted officer training, payroll charged to the Home fleet, GL state, course set from
+inside the map's dismissal). Salaries made exact: Run-fleet pay is refunded and the Home fleet's
+normal pay still charged at Run end (`RunPayrollListener`).
 
 ## S3 — Special fights and Events ⬜
 

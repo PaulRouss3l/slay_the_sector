@@ -51,9 +51,14 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 
 ## Map
 
-- 3 Acts × 8 rows, 3-4 Nodes per row, StS placement rules: no Elite in rows 1-2, a Rest before
-  each Boss, ≥ 1 Shop per Act, Treasure mid-Act. Winning Act 3 wins the Run. All counts in
-  `settings.json`.
+- 3 Acts × 10 rows + Boss, generated like Slay the Spire: on a 5-column grid, 4 paths climb row
+  by row to one of the 3 nearest cells, never crossing (the first two start apart); only touched
+  cells become Nodes. Rows 1-2 Combat, row 5 Treasure, row 10 Rest (then the Boss). Other Nodes
+  are drawn by weight (Combat 7, Shop 1.5, Rest 1.5; Elite/Event in S3) and re-drawn while they
+  break a rule: no Rest before row 4 or on row 9, no Shop→Shop or Rest→Rest, Nodes reached from
+  one parent differ (Combat may repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
+  the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
+  `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
 - Each Act draws 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes name their
   faction. Bosses come from the Boss pool (Remnant, Omega, Derelict) or the strongest eligible
@@ -68,7 +73,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 | Combat | standard battle; Reward pick + Supplies |
 | Elite (Escape) | encircled by a stronger fleet, player `FleetGoal.ESCAPE`; win = reach the edge with ≥ N% of DP; reward scales with ships saved |
 | Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
-| Boss | no retreat, fight to the last, enemy deploys all; Reward pick + bonus S-mod; retreat = Run lost |
+| Boss | no retreat, fight to the last, enemy deploys all; pilots per `sts_bossOfficers` (default none: no officers or AI cores); strength ×`sts_bossFPMult` (1.3); Reward pick + bonus S-mod; retreat = Run lost |
 | Event | text choice: battle station (fight or flee free; win = 3 Reward picks), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
 | Shop | buy ships, weapons, officers, repairs with Supplies |
 | Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level |
@@ -89,7 +94,9 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Attrition**: hull/armor damage carries over; CR regenerates for free up to ~70 % after each
   fight, Supplies top it up; crew refilled free after each fight; fuel unlimited. Ships destroyed
   in a fight are lost unless recovered right after (vanilla recovery flow).
-- **Fleet DP cap** grows with Act (e.g. 30 → 60 → 100); above it the player must sell or scrap.
+- **Fleet DP cap** grows with Act: soft cap 80 / 110 / 140. Each DP over the soft cap cuts every
+  fight reward by 5 Supplies; the hard cap (soft + 30) blocks setting a course until ships are sold.
+  Gaining ships is never blocked.
 - **Character skills** of the player carry into the Run (accepted).
 - **Run loss**: fleet wiped (intercepted via `CampaignPlugin.pickRespawnPlugin` 🧪) or no
   deployable ship left. Retreating from a non-Boss fight = that fight lost (no reward), Run goes on.
@@ -106,7 +113,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 
 ## Code layout
 
-Root package `com.slaythesector` (S1 state; later packages added as their milestones land).
+Root package `com.slaythesector` (S2 state; later packages added as their milestones land).
 
 | Package / class | Responsibility |
 |---|---|
@@ -114,12 +121,13 @@ Root package `com.slaythesector` (S1 state; later packages added as their milest
 | `RunCampaignPlugin` | routes Hub/Node interactions, fleet-wipe intercept (`pickRespawnPlugin`) |
 | `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
 | `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
-| `map/NodeGraphBuilder` | pure-logic Act layout |
-| `intel/HubIntel` | Permanent Important Intel entry locating the Hub |
+| `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
+| `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
 | `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
-| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick → Fleet services → next course |
-| `ui/` | `CardGridDelegate` + `Card` (the shared picker) |
+| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
+| `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
+| `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
 | `util/` | `STSConstants`, `STSSettings` (`sts_*` keys in settings.json), `DepthScaling`, `STSLog` |
 
@@ -138,6 +146,22 @@ Root package `com.slaythesector` (S1 state; later packages added as their milest
   end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+
+**Implementation notes (S2)**
+- Shop, Rest and Treasure resolve on arrival but never count as won (Payout stays on fights).
+  Their service is claimed once (`RunNode.claimed`): Rest and Treasure on use; an opened Shop or
+  Treasure when the player leaves the beacon (no re-roll); any unused service when a course is
+  set. Each Shop item sells once; the Shop can be visited repeatedly until the player leaves.
+- The Fleet DP cap is checked whenever a course is set or resumed.
+- The node map's course is applied on the dialog's next frame, after the map has closed.
+- Salaries: vanilla charges pay each economy tick for whatever fleet is the player fleet.
+  `RunPayrollListener` adds up the Run fleet's pay minus the Home fleet's during a Run; Run end
+  hands back the Run fleet's credits plus that total, so the campaign's credits come out as if
+  no Run happened (Run pay refunded, Home pay still charged).
+- Officer training gives the officer exactly the XP for its next level; the player picks the
+  skill in the vanilla Fleet screen. S-mods use `addPermaMod(id, true)` within
+  `Misc.getMaxPermanentMods`.
+- Ship pools skip automated hulls (they need a skill to crew).
 - Deferred from S1: free starting weapons from the Archetype's known weapons (refit uses what the
   ships carry plus salvage), Fleet DP cap (S2), Meta progress (S4).
 

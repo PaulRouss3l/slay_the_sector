@@ -140,6 +140,13 @@ public final class RunFleet {
         m.getRepairTracker().setCR(m.getRepairTracker().getMaxCR());
     }
 
+    /** Deployment points of the whole fleet, checked against the Fleet DP cap. */
+    public static int totalDP(CampaignFleetAPI fleet) {
+        float dp = 0f;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) dp += m.getDeploymentPointsCost();
+        return Math.round(dp);
+    }
+
     public static int sellValue(FleetMemberAPI m) {
         return Math.round(m.getDeploymentPointsCost() * STSSettings.sellSuppliesPerDP());
     }

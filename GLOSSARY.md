@@ -47,6 +47,10 @@ _Avoid_: Fog, lock-in
 A Node with a story choice that may lead to a special fight (battle station, third-party battle, convoy raid) or a setback.
 _Avoid_: Random encounter, question mark
 
+**Shop**:
+A Node where Supplies buy ships, weapons, officers and repairs, once per visit.
+_Avoid_: Store, merchant, market
+
 **Rest**:
 A Node offering one free benefit: full fleet repair, an S-mod, or an officer level.
 _Avoid_: Campfire, camp, repair node
@@ -66,7 +70,7 @@ The player's real campaign fleet, stored safely while a Run is in progress and r
 _Avoid_: Original fleet, stash, main fleet
 
 **Fleet DP cap**:
-The maximum total deployment points the Run fleet may hold; it grows with each Act.
+The Run fleet's total deployment points limit, growing with each Act: above the soft cap every fight reward loses Supplies per DP over; above the hard cap no new course can be set.
 _Avoid_: Fleet limit, deck size
 
 **Archetype**:

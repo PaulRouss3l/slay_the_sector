@@ -10,11 +10,13 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers.OfficerQuality;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.util.DepthScaling;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
+import com.slaythesector.util.STSSettings;
 
 /** Builds the enemy fleet for a fight Node, placed on the Node entity. */
 public final class EncounterFactory {
@@ -29,6 +31,7 @@ public final class EncounterFactory {
                 fp, 0f, 0f, 0f, 0f, 0f, 0f);
         // Same difficulty whatever the state of the Sector's markets.
         params.ignoreMarketFleetSizeMult = true;
+        if (node.getType() == NodeType.BOSS) applyBossOfficers(params);
         CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
         if (fleet == null || fleet.getFleetData().getNumMembers() == 0) {
             STSLog.warn("createFleet gave no ships for " + node.getFactionId() + "; using a fallback fleet");
@@ -48,6 +51,19 @@ public final class EncounterFactory {
         fleet.setLocation(at.getLocation().x, at.getLocation().y);
         fleet.setDoNotAdvanceAI(true);
         return fleet;
+    }
+
+    /**
+     * Boss pilots ({@code sts_bossOfficers}): "none" = no officers or AI cores at all, "gamma" =
+     * Gamma cores only on automated ships, anything else = the faction's normal officers/cores.
+     */
+    private static void applyBossOfficers(FleetParamsV3 params) {
+        String mode = STSSettings.bossOfficers();
+        if ("none".equals(mode)) {
+            params.withOfficers = false;
+        } else if ("gamma".equals(mode)) {
+            params.aiCores = OfficerQuality.AI_GAMMA;
+        }
     }
 
     public static void despawn(CampaignFleetAPI fleet) {

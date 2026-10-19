@@ -41,7 +41,10 @@ public final class RunManager {
         // Not security-sensitive: map/enemy randomness only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         state.getEnemyFactionIds().addAll(drawEnemyFactions(archetypeId, rng));
-        NodeGraphBuilder.build(state, STSSettings.actRows(), state.getEnemyFactionIds(), bossFaction(rng), rng.nextLong());
+        NodeGraphBuilder.build(state, STSSettings.actRows(), STSSettings.mapColumns(), STSSettings.mapPaths(),
+                state.getEnemyFactionIds(), bossFaction(rng),
+                new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest()),
+                rng.nextLong());
         snapshot(state);
         if (!HomeFleet.stash(RunFleet.create(picks))) return null;
         Global.getSector().getMemoryWithoutUpdate().set(STSConstants.MEM_RUN_STATE, state);
@@ -59,7 +62,7 @@ public final class RunManager {
     public static int end(boolean won) {
         RunState state = get();
         int depth = state == null ? 0 : state.getMaxDepthWon();
-        int payout = payout(depth, won);
+        int payout = payout(state, won);
         CampaignFleetAPI home = HomeFleet.restore();
         if (state != null) restoreSnapshot(state);
         if (payout > 0) home.getCargo().getCredits().add(payout);
@@ -108,11 +111,14 @@ public final class RunManager {
     }
 
     /** By deepest Node won: 0 before the minimum Depth, linear up to the Boss, a fixed amount for a win. */
-    public static int payout(int depth, boolean won) {
+    /** Payout for ending {@code state}'s Run: linear in the deepest Node won, up to the Boss. */
+    public static int payout(RunState state, boolean won) {
         if (won) return STSSettings.payoutWin();
+        if (state == null) return 0;
+        int depth = state.getMaxDepthWon();
         int min = STSSettings.payoutMinDepth();
         if (depth < min) return 0;
-        int bossDepth = STSSettings.actRows() + 1;
+        int bossDepth = state.getBossDepth();
         float t = bossDepth <= min ? 1f : Math.min(1f, (depth - min) / (float) (bossDepth - min));
         return Math.round(STSSettings.payoutAtMinDepth() + t * (STSSettings.payoutAtBoss() - STSSettings.payoutAtMinDepth()));
     }

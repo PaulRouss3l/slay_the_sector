@@ -2,6 +2,7 @@ package com.slaythesector.run;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,10 @@ public class RunState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String archetypeId;
+    /** Current Act, 1-based (one Act until S3). 0 in saves from before the field existed. */
+    private int act = 1;
+    /** Width of the map grid Node columns refer to; 0 in older maps, whose columns index their row. */
+    private int gridColumns;
     private final Map<String, RunNode> nodes = new LinkedHashMap<String, RunNode>();
     private final List<String> enemyFactionIds = new ArrayList<String>();
     /** Last Node the player resolved (or START). Its successors are the next choices. */
@@ -34,6 +39,8 @@ public class RunState implements Serializable {
     private float snapMarines;
     private float snapMarineXp;
     private long snapDeferredBonusXp;
+    /** Run-fleet pay minus the Home fleet's pay since the Run started; refunded at the end (RunPayrollListener). */
+    private float payrollRefund;
     /** Player skill id -> level at Run start; skills learned during the Run are removed at the end. */
     private final HashMap<String, Float> snapSkills = new HashMap<String, Float>();
 
@@ -42,6 +49,17 @@ public class RunState implements Serializable {
     }
 
     public String getArchetypeId() { return archetypeId; }
+    public int getAct() { return Math.max(1, act); }
+    public int getGridColumns() { return gridColumns; }
+    public void setGridColumns(int gridColumns) { this.gridColumns = gridColumns; }
+    public Collection<RunNode> getNodes() { return nodes.values(); }
+
+    /** Depth of the Boss: the deepest Node of this Run's map (S1 maps were one row shorter). */
+    public int getBossDepth() {
+        int max = 1;
+        for (RunNode n : nodes.values()) max = Math.max(max, n.getDepth());
+        return max;
+    }
     public List<String> getEnemyFactionIds() { return enemyFactionIds; }
     public String getCurrentNodeId() { return currentNodeId; }
     public void setCurrentNodeId(String id) { this.currentNodeId = id; }
@@ -71,6 +89,8 @@ public class RunState implements Serializable {
     public long getSnapDeferredBonusXp() { return snapDeferredBonusXp; }
     public void setSnapDeferredBonusXp(long xp) { snapDeferredBonusXp = xp; }
     public Map<String, Float> getSnapSkills() { return snapSkills; }
+    public float getPayrollRefund() { return payrollRefund; }
+    public void addPayrollRefund(float credits) { payrollRefund += credits; }
 
     public void addNode(RunNode node) {
         nodes.put(node.getId(), node);

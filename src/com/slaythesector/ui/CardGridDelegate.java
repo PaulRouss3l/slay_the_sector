@@ -2,7 +2,9 @@ package com.slaythesector.ui;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 
@@ -38,7 +40,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private static final int ROWS = 2;
     private static final float CARD_W = 236f;
     private static final float CARD_H = 250f;
-    private static final float HEADER_H = 90f;
+    private static final float HEADER_H = 110f;
 
     private final String title;
     private final List<Card> cards;
@@ -47,6 +49,13 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private final String cancelText;
     private final Listener listener;
     private final int[] counts;
+    /** BUDGET mode: what the budget counts, e.g. "Deployment points" or "Supplies". */
+    private String budgetLabel = "Deployment points";
+    /** BUDGET mode: show a "Random" button that fills the budget with random cards. */
+    private boolean randomButton;
+    /** Optional line under the title (e.g. the Fleet DP reminder), and its colour. */
+    private String headerNote;
+    private Color headerNoteColor;
 
     private CustomPanelAPI root;
     private CustomPanelAPI content;
@@ -68,6 +77,22 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         this.cancelText = cancelText;
         this.listener = listener;
         this.counts = new int[cards.size()];
+    }
+
+    public CardGridDelegate withBudgetLabel(String label) {
+        this.budgetLabel = label;
+        return this;
+    }
+
+    public CardGridDelegate withNote(String note, Color color) {
+        this.headerNote = note;
+        this.headerNoteColor = color;
+        return this;
+    }
+
+    public CardGridDelegate withRandomButton() {
+        this.randomButton = true;
+        return this;
     }
 
     private final CustomUIPanelPlugin plugin = new CustomUIPanelPlugin() {
@@ -113,7 +138,8 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
 
         TooltipMakerAPI header = panel.createUIElement(WIDTH - 20f, HEADER_H, false);
         header.addTitle(title);
-        status = header.addPara("", 6f);
+        if (headerNote != null) header.addPara(headerNote, headerNoteColor, 4f);
+        status = header.addPara("", 4f);
         ButtonAPI prev = header.addButton("< Prev", "prev", 90f, 24f, 8f);
         ButtonAPI next = header.addButton("Next >", "next", 90f, 24f, 0f);
         next.getPosition().rightOfTop(prev, 8f);
@@ -122,6 +148,10 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         if (mode == Mode.BUDGET) {
             confirm = header.addButton("Confirm", "confirm", 140f, 24f, 0f);
             confirm.getPosition().rightOfTop(cancel, 8f);
+            if (randomButton) {
+                ButtonAPI random = header.addButton("Random", "random", 120f, 24f, 0f);
+                random.getPosition().rightOfTop(confirm, 24f);
+            }
         }
         panel.addUIElement(header).inTL(10f, 6f);
         rebuild();
@@ -137,6 +167,9 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
                 for (int k = 0; k < counts[i]; k++) picks.add(cards.get(i));
             }
             close(picks);
+        } else if (id.equals("random")) {
+            fillRandom();
+            dirty = true;
         } else if (id.equals("prev")) {
             if (page > 0) page--;
             dirty = true;
@@ -149,7 +182,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
             close(picks);
         } else if (id.startsWith("add:")) {
             int i = Integer.parseInt(id.substring(4));
-            if (used() + cards.get(i).cost <= budget) counts[i]++;
+            if (canAdd(i)) counts[i]++;
             dirty = true;
         } else if (id.startsWith("rem:")) {
             int i = Integer.parseInt(id.substring(4));
@@ -163,6 +196,26 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         closed = true;
         result = picks;
         callbacks.dismissDialog();
+    }
+
+    /** Clears the picks, then adds random affordable cards until none fits; each press rolls again. */
+    private void fillRandom() {
+        // Not security-sensitive: a random starting fleet.
+        Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
+        Arrays.fill(counts, 0);
+        List<Integer> fits = new ArrayList<Integer>();
+        do {
+            fits.clear();
+            for (int i = 0; i < cards.size(); i++) {
+                if (cards.get(i).cost > 0 && canAdd(i)) fits.add(i);
+            }
+            if (!fits.isEmpty()) counts[fits.get(rng.nextInt(fits.size()))]++;
+        } while (!fits.isEmpty());
+    }
+
+    private boolean canAdd(int i) {
+        Card c = cards.get(i);
+        return used() + c.cost <= budget && (c.maxCount <= 0 || counts[i] < c.maxCount);
     }
 
     private int used() {
@@ -179,7 +232,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         int pages = Math.max(1, (cards.size() + perPage - 1) / perPage);
         String pageText = "Page " + (page + 1) + "/" + pages;
         if (mode == Mode.BUDGET) {
-            status.setText("Deployment points: " + used() + " / " + budget + "     " + pageText);
+            status.setText(budgetLabel + ": " + used() + " / " + budget + "     " + pageText);
             confirm.setEnabled(used() > 0);
         } else {
             status.setText(pageText);
@@ -207,12 +260,13 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         }
         ui.addPara(c.title, Misc.getHighlightColor(), 6f);
         ui.addPara(c.subtitle, 3f);
+        if (c.note != null) ui.addPara(c.note, c.noteColor, 3f);
         if (mode == Mode.SINGLE) {
             ui.addButton("Pick", "pick:" + i, CARD_W - 20f, 24f, 8f);
         } else {
-            ui.addPara("In fleet: " + counts[i], 4f);
+            ui.addPara("Selected: " + counts[i], 4f);
             ButtonAPI add = ui.addButton("+ Add", "add:" + i, 100f, 24f, 6f);
-            add.setEnabled(used() + c.cost <= budget);
+            add.setEnabled(canAdd(i));
             ButtonAPI rem = ui.addButton("- Remove", "rem:" + i, 100f, 24f, 0f);
             rem.getPosition().rightOfTop(add, 8f);
             rem.setEnabled(counts[i] > 0);
