@@ -5,52 +5,52 @@ its all-Combat map: start a new Run to see Shop/Rest/Treasure. Afterwards I run 
 Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts_shop*`).
 
 ## 1. Node map
-- [ ] At the Entry Beacon, **Open the node map**: Start at the bottom, Boss at the top, 10 rows of
+- [x] At the Entry Beacon, **Open the node map**: Start at the bottom, Boss at the top, 10 rows of
       branching and merging paths (5 columns, lines never cross), one icon per Node type (Boss larger; Shop = credits sign, Rest = green station). Rows 1-2 are Combat, row 5 Treasure, row 10 Rest. Never two Rests or two
       Shops in a row along a path.
-- [ ] Legend column on the right: icon + name + meaning of each Node type, and what the rings
+- [x] Legend column on the right: icon + name + meaning of each Node type, and what the rings
       and the gold path mean. Same legend in the Intel map.
-- [ ] Hover shows the Node (type, faction, Depth, strength) and what it offers.
-- [ ] Only the current Node's successors pulse; clicking another says it is not reachable.
-- [ ] Click a pulsing Node → **Set course** → dialog closes, course laid in. Esc/Close cancels.
-- [ ] Later in the Run: travelled path drawn gold, visited Nodes dimmed.
-- [ ] Intel screen: **The Descent: current Run** entry (Important) with summary; its large view
+- [x] Hover shows the Node (type, faction, Depth, strength) and what it offers.
+- [x] Only the current Node's successors pulse; clicking another says it is not reachable.
+- [x] Click a pulsing Node → **Set course** → dialog closes, course laid in. Esc/Close cancels.
+- [x] Later in the Run: travelled path drawn gold, visited Nodes dimmed.
+- [x] Intel screen: **The Descent: current Run** entry (Important) with summary; its large view
       shows the same map, read-only. Hidden when no Run is active.
 
 ## 2. Shop
-- [ ] Arrive: trader text, **Browse the shop**: ships (DP + price), weapons, an officer; budget =
+- [x] Arrive: trader text, **Browse the shop**: ships (DP + price), weapons, an officer; budget =
       your Supplies; +/- per card; Confirm buys, supplies deducted, items in fleet/cargo.
-- [ ] **Dockyard** repair-all costs half the Fleet services price.
-- [ ] Each item can be taken once. Buy, close, sell a ship in Fleet services, reopen: the rest of
+- [x] **Dockyard** repair-all costs half the Fleet services price.
+- [x] Each item can be taken once. Buy, close, sell a ship in Fleet services, reopen: the rest of
       the stock is still there. Leave the beacon (or set a course) and come back: shop gone.
 
 ## 3. Rest
-- [ ] **Rest (choose one)**: free full repair / S-mod / train an officer; impossible ones greyed.
-- [ ] S-mod: pick ship → pick hullmod → it shows as an S-mod in Refit. Back returns to the menu.
-- [ ] Train: officer gets a level-up; choose the skill in the Fleet screen.
-- [ ] After one choice the Rest option is gone. Setting a course without choosing forfeits it.
+- [x] **Rest (choose one)**: free full repair / S-mod / train an officer; impossible ones greyed.
+- [x] S-mod: pick ship → pick hullmod → it shows as an S-mod in Refit. Back returns to the menu.
+- [x] Train: officer gets a level-up; choose the skill in the Fleet screen.
+- [x] After one choice the Rest option is gone. Setting a course without choosing forfeits it.
 
 ## 4. Treasure
-- [ ] **Open the cache**: up to 3 prizes (a bigger ship, rare weapons, S-mod). Take one; it's
+- [x] **Open the cache**: up to 3 prizes (a bigger ship, rare weapons, S-mod). Take one; it's
       applied (S-mod goes through the ship/hullmod picker). "Not now" keeps it until you leave.
 
 ## 5. Fleet DP cap
-- [ ] Beacon text shows `Fleet DP x / 80 (hard cap 110)`. Reward/Shop/Treasure grids show the same
+- [x] Beacon text shows `Fleet DP x / 80 (hard cap 110)`. Reward/Shop/Treasure grids show the same
       line plus the penalty rule under their title, and each ship card "Fleet DP after: y / 80"
       (red past 80).
-- [ ] Above 80: red warning on the beacon, the encounter and the map ("N DP over the soft cap:
+- [x] Above 80: red warning on the beacon, the encounter and the map ("N DP over the soft cap:
       every fight reward is cut by 5×N supplies"); courses still work. Win a fight: reward reduced,
       with a line saying how much.
-- [ ] Above 110: the map opens locked with the reason; "Resume course" refuses too. Sell ships,
+- [x] Above 110: the map opens locked with the reason; "Resume course" refuses too. Sell ships,
       then courses work again.
 
 ## 6. Regression
-- [ ] Starting pick: **Random** fills up to 30 DP with random ships; each press rolls again;
+- [x] Starting pick: **Random** fills up to 30 DP with random ships; each press rolls again;
       +/- still adjust; Confirm starts the Run.
-- [ ] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.
-- [ ] Boss: strength ~78 in its description; no AI-core officers on its ships (check a ship's
+- [x] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.
+- [x] Boss: strength ~78 in its description; no AI-core officers on its ships (check a ship's
       captain in the battle screen); winnable with a decent ~70-80 DP fleet.
-- [ ] No Rest/Shop/Treasure counts toward the Payout (Payout = deepest **fight** won).
-- [ ] Salaries: note your credits before a Run that crosses a month end (buy officers in the
+- [x] No Rest/Shop/Treasure counts toward the Payout (Payout = deepest **fight** won).
+- [x] Salaries: note your credits before a Run that crosses a month end (buy officers in the
       Shop). After the Run, credits = before + Payout + colony income − your Home fleet's usual
       pay; the Run's officers/crew cost you nothing.

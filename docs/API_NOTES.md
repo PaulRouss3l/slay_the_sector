@@ -79,6 +79,17 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Custom entity | `"baseId"` inherits another entity's fields. Our beacon (sprite, `useLightColor:false`, no `baseId`) renders in the no-star Run system; `setCircularOrbitPointingDown` spins the sprite, `setCircularOrbit` does not. |
 | Cards | `CardGridDelegate` (rebuild in the delegate's `advance`, not in the click) works for Starting and Reward picks. |
 
+## Verified in game (S2, 2026-10-19, RC8)
+
+| Concern | Fact |
+|---|---|
+| GL map | A `CustomUIPanelPlugin` drawing GL lines + `SpriteAPI.renderAtCenter` works in `showCustomVisualDialog` and in an intel `createLargeDescription` panel. Wrap `render` in `glPushAttrib/glPopAttrib`. The visual dialog is see-through: draw an opaque quad in the root plugin's `renderBelow`. |
+| Sprites | Sprites listed under a `graphics.<category>` key in our `settings.json` load at startup; `getSprite(category, key)` / `getSpriteName(...)` (also for `beginImageWithText`). White glyphs tint with `setColor`. |
+| Hidden intel | Overriding `isHidden()` (true outside a Run) hides a permanent intel entry. |
+| S-mods | `variant.addPermaMod(id, true)` + `member.updateStats()`; limit `Misc.getMaxPermanentMods(member, playerStats)`; skip `Tags.HULLMOD_NO_BUILD_IN`/`dmod`. |
+| Officer training | `OfficerDataAPI.addXP(xpForNextLevel - xp)` gives a pending level-up; the player picks the skill in the vanilla Fleet screen. |
+| Boss pilots | `FleetParamsV3.withOfficers=false` (no officers/cores) or `aiCores = OfficerQuality.AI_GAMMA`. |
+
 ## UI text
 
 The game's UI fonts have no em dash, middle dot or multiplication sign: "—", "·" and "×" render
