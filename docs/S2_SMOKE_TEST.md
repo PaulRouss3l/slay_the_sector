@@ -5,8 +5,9 @@ its all-Combat map: start a new Run to see Shop/Rest/Treasure. Afterwards I run 
 Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts_shop*`).
 
 ## 1. Node map
-- [ ] At the Entry Beacon, **Open the node map**: Start at the bottom, Boss at the top, 7 rows of
-      2-3 Nodes, one icon per Node type (Boss larger; Shop = credits sign, Rest = green station). Rows 1-2 are Combat, the middle row Treasure, the row before the Boss Rest.
+- [ ] At the Entry Beacon, **Open the node map**: Start at the bottom, Boss at the top, 10 rows of
+      branching and merging paths (5 columns, lines never cross), one icon per Node type (Boss larger; Shop = credits sign, Rest = green station). Rows 1-2 are Combat, row 5 Treasure, row 10 Rest. Never two Rests or two
+      Shops in a row along a path.
 - [ ] Legend column on the right: icon + name + meaning of each Node type, and what the rings
       and the gold path mean. Same legend in the Intel map.
 - [ ] Hover shows the Node (type, faction, Depth, strength) and what it offers.

@@ -41,7 +41,8 @@ public final class RunManager {
         // Not security-sensitive: map/enemy randomness only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         state.getEnemyFactionIds().addAll(drawEnemyFactions(archetypeId, rng));
-        NodeGraphBuilder.build(state, STSSettings.actRows(), state.getEnemyFactionIds(), bossFaction(rng),
+        NodeGraphBuilder.build(state, STSSettings.actRows(), STSSettings.mapColumns(), STSSettings.mapPaths(),
+                state.getEnemyFactionIds(), bossFaction(rng),
                 new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest()),
                 rng.nextLong());
         snapshot(state);

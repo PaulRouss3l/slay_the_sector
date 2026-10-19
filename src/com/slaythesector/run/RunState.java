@@ -19,6 +19,8 @@ public class RunState implements Serializable {
     private final String archetypeId;
     /** Current Act, 1-based (one Act until S3). 0 in saves from before the field existed. */
     private int act = 1;
+    /** Width of the map grid Node columns refer to; 0 in older maps, whose columns index their row. */
+    private int gridColumns;
     private final Map<String, RunNode> nodes = new LinkedHashMap<String, RunNode>();
     private final List<String> enemyFactionIds = new ArrayList<String>();
     /** Last Node the player resolved (or START). Its successors are the next choices. */
@@ -48,6 +50,8 @@ public class RunState implements Serializable {
 
     public String getArchetypeId() { return archetypeId; }
     public int getAct() { return Math.max(1, act); }
+    public int getGridColumns() { return gridColumns; }
+    public void setGridColumns(int gridColumns) { this.gridColumns = gridColumns; }
     public Collection<RunNode> getNodes() { return nodes.values(); }
 
     /** Depth of the Boss: the deepest Node of this Run's map (S1 maps were one row shorter). */

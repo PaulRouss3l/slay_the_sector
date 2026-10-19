@@ -21,8 +21,8 @@ public final class DepthScaling {
 
     /** Largest hull size offered as a ship Reward at this Depth. */
     public static HullSize rewardSize(int depth) {
-        if (depth >= 6) return HullSize.CRUISER;
-        if (depth >= 3) return HullSize.DESTROYER;
+        if (depth >= 8) return HullSize.CRUISER;
+        if (depth >= 4) return HullSize.DESTROYER;
         return HullSize.FRIGATE;
     }
 

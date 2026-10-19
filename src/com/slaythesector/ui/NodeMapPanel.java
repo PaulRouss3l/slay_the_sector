@@ -98,7 +98,11 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
         float h = pos.getHeight() - 2f * MARGIN_Y;
         for (List<RunNode> row : rows.values()) {
             for (RunNode n : row) {
-                float x = pos.getX() + MARGIN_X + w * (n.getColumn() + 0.5f) / row.size();
+                // Grid maps place Nodes by grid column; older maps spread each row evenly.
+                int cols = state.getGridColumns();
+                float x = cols > 0
+                        ? pos.getX() + MARGIN_X + w * (n.getColumn() + 0.5f) / cols
+                        : pos.getX() + MARGIN_X + w * (n.getColumn() + 0.5f) / row.size();
                 // GL y runs bottom-up: Depth 0 at the bottom, the Boss at the top.
                 float y = pos.getY() + MARGIN_Y + h * n.getDepth() / maxDepth;
                 layout.put(n.getId(), new float[] { x, y });

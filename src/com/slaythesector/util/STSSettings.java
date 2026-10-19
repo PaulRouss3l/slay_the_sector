@@ -12,11 +12,13 @@ public final class STSSettings {
 
     private STSSettings() {}
 
-    public static int actRows() { return i("sts_actRows", 7); }
+    public static int actRows() { return i("sts_actRows", 10); }
+    public static int mapColumns() { return i("sts_mapColumns", 5); }
+    public static int mapPaths() { return i("sts_mapPaths", 4); }
     public static int startingDP() { return i("sts_startingDP", 30); }
     public static int startingSupplies() { return i("sts_startingSupplies", 150); }
     public static float enemyBaseFP() { return f("sts_enemyBaseFP", 15f); }
-    public static float enemyFPPerDepth() { return f("sts_enemyFPPerDepth", 6f); }
+    public static float enemyFPPerDepth() { return f("sts_enemyFPPerDepth", 4.5f); }
     public static float bossFPMult() { return f("sts_bossFPMult", 1.65f); }
     public static float crRegenFraction() { return f("sts_crRegenFraction", 0.7f); }
     public static float repairCostMult() { return f("sts_repairCostMult", 1f); }
@@ -32,8 +34,8 @@ public final class STSSettings {
     public static List<String> bossFactions() { return list("sts_bossFactions"); }
     public static List<String> factionBlacklist() { return list("sts_factionBlacklist"); }
     /** Relative weights of Node types on rows without a fixed type. */
-    public static float weightCombat() { return f("sts_nodeWeightCombat", 6f); }
-    public static float weightShop() { return f("sts_nodeWeightShop", 2f); }
+    public static float weightCombat() { return f("sts_nodeWeightCombat", 7f); }
+    public static float weightShop() { return f("sts_nodeWeightShop", 1.5f); }
     public static float weightRest() { return f("sts_nodeWeightRest", 1.5f); }
     /** Hard cap = soft cap + this; above it no course can be set. */
     public static int fleetDPHardMargin() { return i("sts_fleetDPHardMargin", 30); }

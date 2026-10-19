@@ -59,8 +59,9 @@ reproduced after reload; covered by the pre-fight CR floor).
 ## S2 — Map and economy Nodes 🟡
 
 Code-complete on branch `s2/map-economy`; in-game checklist: `S2_SMOKE_TEST.md`.
-- 🟡 Act layout with StS placement rules: rows 1-2 Combat, middle row Treasure, row before the
-  Boss Rest, other rows weighted Combat/Shop/Rest (`sts_nodeWeight*`), ≥ 1 Shop, no Rest in row 3.
+- 🟡 Act layout generated like Slay the Spire (grid + non-crossing paths, 10 rows + Boss) with its
+  placement rules (see DESIGN "Map"); checked offline on 5,000 maps. Enemy strength per Depth
+  4.5 FP (Boss ~99 FP); Reward ships: destroyers from Depth 4, cruisers from Depth 8.
 - 🟡 Node map canvas (GL lines + vanilla intel icons), hover info, click + "Set course"; replaces
   the course text options. Read-only copy as the large description of a Run Intel entry.
 - 🟡 Shop: card grid in budget mode priced in Supplies (ships one size above the Reward cap,

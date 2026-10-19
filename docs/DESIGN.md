@@ -51,9 +51,14 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 
 ## Map
 
-- 3 Acts × 8 rows, 3-4 Nodes per row, StS placement rules: no Elite in rows 1-2, a Rest before
-  each Boss, ≥ 1 Shop per Act, Treasure mid-Act. Winning Act 3 wins the Run. All counts in
-  `settings.json`.
+- 3 Acts × 10 rows + Boss, generated like Slay the Spire: on a 5-column grid, 4 paths climb row
+  by row to one of the 3 nearest cells, never crossing (the first two start apart); only touched
+  cells become Nodes. Rows 1-2 Combat, row 5 Treasure, row 10 Rest (then the Boss). Other Nodes
+  are drawn by weight (Combat 7, Shop 1.5, Rest 1.5; Elite/Event in S3) and re-drawn while they
+  break a rule: no Rest before row 4 or on row 9, no Shop→Shop or Rest→Rest, Nodes reached from
+  one parent differ (Combat may repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
+  the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
+  `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
 - Each Act draws 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes name their
   faction. Bosses come from the Boss pool (Remnant, Omega, Derelict) or the strongest eligible
