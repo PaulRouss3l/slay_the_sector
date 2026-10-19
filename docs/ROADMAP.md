@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S3** — code-complete, awaiting the in-game smoke test (`S3_SMOKE_TEST.md`).
+**Current target: S3** — tested in game; three late additions still to test (see below).
 
 ## Done before the redesign
 
@@ -47,7 +47,7 @@ Smoke-tested in game 2026-10-19 (RC8, Nexerelin/RAT/MagicLib loaded), checklist
   crew/fuel refill, logistics hullmod, no over-capacity drain).
 - ✅ Fleet services (repair/sell), retreat, save/load mid-Run, Abandon, fleet-wipe intercept, Run end
   + Payout, Home fleet restored, campaign untouched.
-- 🟡 Boss **win** path (Payout 50,000, Home fleet back): not seen — the tester lost the Boss.
+- ✅ Boss **win** path (Payout 50,000, Home fleet back): seen in game 2026-10-19 (S3 build).
   Boss strength lowered afterwards (`sts_bossFPMult` 2.0 → 1.65, ~114 → ~94 FP at Depth 7).
 
 Known, not fixed (review, low impact): debris/wrecks inside a Run still yield supplies via
@@ -59,7 +59,7 @@ reproduced after reload; covered by the pre-fight CR floor).
 ## S2 — Map and economy Nodes ✅
 
 Smoke-tested in game 2026-10-19 (RC8, Nexerelin/RAT/MagicLib loaded), checklist `S2_SMOKE_TEST.md`;
-no mod errors in the log. Still unseen: the Boss **win** path (carried from S1).
+no mod errors in the log. The Boss win path was confirmed later, in the S3 test.
 - ✅ Act layout generated like Slay the Spire (grid + non-crossing paths, 10 rows + Boss) with its
   placement rules (see DESIGN "Map"); checked offline on 5,000 maps. Enemy strength per Depth
   4.5 FP; Reward ships: destroyers from Depth 4, cruisers from Depth 8.
@@ -80,14 +80,17 @@ purchases, wasted officer training, payroll charged to the Home fleet, GL state,
 inside the map's dismissal). Salaries made exact: Run-fleet pay is refunded and the Home fleet's
 normal pay still charged at Run end (`RunPayrollListener`).
 
-## S3 — Special fights and Events 🟡
+## S3 — Special fights and Events ✅
 
-Code-complete on branch `s3/special-fights`; in-game checklist: `S3_SMOKE_TEST.md`.
-- 🟡 Map: Elite, Ambush and Event Node types with weights and placement rules (checked offline on
+Tested in game 2026-10-19 (RC8, Nexerelin/RAT/MagicLib loaded): the new Nodes work, the Boss
+was beaten (Payout 50,000); log shows both `battle setup: escape` and `pursuit`, no mod errors.
+- ✅ Map: Elite, Ambush and Event Node types with weights and placement rules (checked offline on
   5,000 maps), icons and legend.
-- 🟡 Escape/pursuit battle setups via our `BattleCreationPlugin` (rebuilt context goals).
-- 🟡 Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
-- 🟡 Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
+- ✅ Escape/pursuit battle setups via our `BattleCreationPlugin` (rebuilt context goals).
+- ✅ Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
+- ✅ Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
+- 🟡 Not yet tested: winning a fight without chasing retreated survivors; beacon menu "Repair the
+  fleet" + "Refit" label; D-mod removal (Rest, Treasure, Shop dockyard).
 
 Independent review done and its findings fixed (pursuit "win" counted the mark/convoy as taken,
 Elite scored on undeployed ships, a non-station hull at low Depth, layout written to a copy of the
