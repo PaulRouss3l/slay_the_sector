@@ -154,20 +154,21 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 
 ## Code layout
 
-Root package `com.slaythesector` (S2 state; later packages added as their milestones land).
+Root package `com.slaythesector` (S4 state).
 
 | Package / class | Responsibility |
 |---|---|
 | `SlayTheSectorModPlugin` | lifecycle, XStream aliases, registers transient hooks, places the Hub |
 | `RunCampaignPlugin` | routes Hub/Node interactions, fleet-wipe intercept (`pickRespawnPlugin`) |
 | `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
-| `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
+| `run/` | `RunState`/`RunNode`/`NodeType` (saved), `Ascension` (level names/effects), `FleetCap`, `RunManager` (start/next Act/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
 | `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
 | `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
 | `combat/` | `EncounterFactory` (all Run fleets), `RunBattleCreationPlugin` + `MarkedTargetPlugin` (escape/pursuit setups, Ambush mark), `Rewards` (Reward pick), `RunRespawnDialog` |
 | `nodes/NodeDialog`, `nodes/Events` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
 | `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
+| `meta/MetaProgress` | cross-save Records, Ascension reached, starting bonuses (`saves/common/slay_the_sector_meta.json`) |
 | `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
 | `util/` | `STSConstants`, `STSSettings` (`sts_*` keys in settings.json), `DepthScaling`, `STSLog` |
@@ -187,6 +188,16 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
   end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+
+**Implementation notes (S4)**
+- Acts are stacked by global Depth (`RunState.depthOffset`): each new Act's map is laid out below
+  the previous one, so its Start beacon appears where the Boss was; "Descend" only rebuilds the
+  map (no jump, no relocation).
+- Boss reward "Refit" adds a variant tag `sts_smod_slot_N`; the hidden `sts_run_logistics` hullmod
+  turns each into +1 `Stats.MAX_PERMANENT_HULLMODS_MOD`. The Remnant warship carries
+  `Tags.TAG_AUTOMATED_NO_PENALTY` and an AI-core captain.
+- The Run counts as won once Act 3's Boss falls (`act3Won`): losing, abandoning or being wiped in
+  Act 4 still ends a won Run.
 
 **Implementation notes (S3)**
 - Escape and pursuit fights: the enemy fleet carries `$sts_battle` (`escape` / `pursuit`);

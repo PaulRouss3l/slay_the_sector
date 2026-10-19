@@ -70,7 +70,7 @@ public final class Treasure {
 
     /** The largest hull the Archetype or this Run's enemies field, one size above the Reward cap. */
     private static FleetMemberAPI rareShip(RunState state, RunNode node, Random rng) {
-        HullSize size = Shop.bigger(DepthScaling.rewardSize(node.getDepth()));
+        HullSize size = Shop.bigger(DepthScaling.rewardSize(state, node.getDepth()));
         List<String> factions = new ArrayList<String>(state.getEnemyFactionIds());
         factions.add(0, state.getArchetypeId());
         FleetMemberAPI best = null;

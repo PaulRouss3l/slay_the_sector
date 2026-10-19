@@ -16,22 +16,26 @@ public class RunRespawnDialog implements InteractionDialogPlugin {
     private static final String OPT_RETURN = "sts_respawn_return";
 
     private InteractionDialogAPI dialog;
+    private boolean won;
 
     @Override
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
         RunState state = RunManager.get();
         int depth = state == null ? 0 : state.getMaxDepthWon();
-        dialog.getTextPanel().addPara("Your Run fleet has been destroyed. The Run is lost.", Misc.getNegativeHighlightColor());
+        // Destroyed in Act 4: the Run was already won in Act 3.
+        won = state != null && state.isAct3Won();
+        dialog.getTextPanel().addPara("Your Run fleet has been destroyed. " + (won ? "The true Boss stands, but the Run was won."
+                : "The Run is lost."), won ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor());
         dialog.getTextPanel().addPara("Deepest Node won: %s. Payout: %s.", Misc.getHighlightColor(),
-                String.valueOf(depth), Misc.getDGSCredits(RunManager.payout(state, false)));
+                String.valueOf(depth), Misc.getDGSCredits(RunManager.payout(state, won)));
         dialog.getOptionPanel().addOption("Return to the Hub", OPT_RETURN);
     }
 
     @Override
     public void optionSelected(String optionText, Object optionData) {
         if (!OPT_RETURN.equals(optionData)) return;
-        RunManager.end(false);
+        RunManager.end(won);
         dialog.dismiss();
         RunManager.returnToHub();
     }

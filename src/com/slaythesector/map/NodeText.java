@@ -3,7 +3,9 @@ package com.slaythesector.map;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.slaythesector.run.NodeType;
+import com.slaythesector.run.RunManager;
 import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunState;
 import com.slaythesector.util.DepthScaling;
 import com.slaythesector.util.STSSettings;
 
@@ -23,11 +25,13 @@ public final class NodeText {
         return n.getType().isFight() ? n.getType().label() + ": " + factionName(n) : n.getType().label();
     }
 
-    /** Title plus Depth and, for fights, the estimated enemy strength. */
+    /** Title plus Depth (across the Run) and, for fights, the estimated enemy strength. */
     public static String full(RunNode n) {
-        String s = title(n) + " (Depth " + n.getDepth();
+        RunState state = RunManager.get();
+        if (state == null) return title(n);
+        String s = title(n) + " (Depth " + state.getGlobalDepth(n);
         if (n.getType().isFight()) {
-            float fp = DepthScaling.combatPoints(n.getDepth(), n.getType());
+            float fp = DepthScaling.combatPoints(state, n);
             if (n.getType() == NodeType.ELITE) fp *= STSSettings.eliteFPMult();
             s += ", strength " + Math.round(fp);
         }

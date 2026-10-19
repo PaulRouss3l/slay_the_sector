@@ -13,6 +13,7 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.map.NodeText;
+import com.slaythesector.run.Ascension;
 import com.slaythesector.run.FleetCap;
 import com.slaythesector.run.RunManager;
 import com.slaythesector.run.RunNode;
@@ -63,8 +64,9 @@ public class RunIntel extends BaseIntelPlugin {
         Color h = Misc.getHighlightColor();
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         FactionAPI archetype = Global.getSector().getFaction(state.getArchetypeId());
-        info.addPara("Archetype: %s. Act %s.", 0f, h,
-                archetype == null ? state.getArchetypeId() : archetype.getDisplayName(), String.valueOf(state.getAct()));
+        info.addPara("Archetype: %s. Act %s of %s. Ascension %s.", 0f, h,
+                archetype == null ? state.getArchetypeId() : archetype.getDisplayName(), String.valueOf(state.getAct()),
+                String.valueOf(state.getFinalAct()), Ascension.name(state.getAscension()));
         info.addPara("Deepest Node won: %s. Supplies: %s.", opad, h,
                 String.valueOf(state.getMaxDepthWon()), String.valueOf((int) pf.getCargo().getSupplies()));
         info.addPara(FleetCap.summary(pf, state) + ".", opad);

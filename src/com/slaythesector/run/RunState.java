@@ -17,8 +17,19 @@ public class RunState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String archetypeId;
-    /** Current Act, 1-based (one Act until S3). 0 in saves from before the field existed. */
+    /** Current Act, 1-based. 0 in saves from before the field existed. */
     private int act = 1;
+    /** Ascension level 0 (Gamma) .. 6 (Omega). */
+    private int ascension;
+    /** Depth of the current Act's Start: Acts are laid out one below the other (global Depth). */
+    private int depthOffset;
+    /** Fleet DP soft cap added by Boss rewards. */
+    private int softCapBonus;
+    /** Act 3's Boss beaten: the Run is won whatever happens in Act 4. */
+    private boolean act3Won;
+    private boolean trueBossWon;
+    /** Starting bonuses taken for this Run (Meta progress unlocks). */
+    private boolean bonusOfficerLevel;
     /** Width of the map grid Node columns refer to; 0 in older maps, whose columns index their row. */
     private int gridColumns;
     private final Map<String, RunNode> nodes = new LinkedHashMap<String, RunNode>();
@@ -50,6 +61,32 @@ public class RunState implements Serializable {
 
     public String getArchetypeId() { return archetypeId; }
     public int getAct() { return Math.max(1, act); }
+    public void setAct(int act) { this.act = act; }
+    public int getAscension() { return ascension; }
+    public void setAscension(int ascension) { this.ascension = ascension; }
+    public int getDepthOffset() { return depthOffset; }
+    public void setDepthOffset(int depthOffset) { this.depthOffset = depthOffset; }
+    public int getSoftCapBonus() { return softCapBonus; }
+    public void addSoftCapBonus(int dp) { softCapBonus += dp; }
+    public boolean isAct3Won() { return act3Won; }
+    public void setAct3Won() { act3Won = true; }
+    public boolean isTrueBossWon() { return trueBossWon; }
+    public void setTrueBossWon() { trueBossWon = true; }
+    public boolean isBonusOfficerLevel() { return bonusOfficerLevel; }
+    public void setBonusOfficerLevel(boolean on) { bonusOfficerLevel = on; }
+
+    /** The last Act of this Run: 3, or 4 (the true Boss) at Ascension Omega. */
+    public int getFinalAct() { return ascension >= Ascension.OMEGA ? 4 : 3; }
+
+    /** Depth across the whole Run (Acts stacked). */
+    public int getGlobalDepth(RunNode n) { return depthOffset + n.getDepth(); }
+
+    /** Drops the current Act's map, keeping everything else. */
+    public void clearNodes() {
+        nodes.clear();
+        currentNodeId = null;
+        targetNodeId = null;
+    }
     public int getGridColumns() { return gridColumns; }
     public void setGridColumns(int gridColumns) { this.gridColumns = gridColumns; }
     public Collection<RunNode> getNodes() { return nodes.values(); }
@@ -127,7 +164,7 @@ public class RunState implements Serializable {
         target.resolve(won);
         currentNodeId = target.getId();
         targetNodeId = null;
-        maxDepthReached = Math.max(maxDepthReached, target.getDepth());
-        if (won) maxDepthWon = Math.max(maxDepthWon, target.getDepth());
+        maxDepthReached = Math.max(maxDepthReached, getGlobalDepth(target));
+        if (won) maxDepthWon = Math.max(maxDepthWon, getGlobalDepth(target));
     }
 }

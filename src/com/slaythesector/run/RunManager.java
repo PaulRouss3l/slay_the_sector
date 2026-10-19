@@ -10,11 +10,14 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
+import com.fs.starfarer.api.characters.OfficerDataAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.PlayerFleetPersonnelTracker;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
+import com.slaythesector.economy.Upgrades;
 import com.slaythesector.map.NodeGraphBuilder;
+import com.slaythesector.meta.MetaProgress;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
 import com.slaythesector.util.STSSettings;
@@ -35,25 +38,66 @@ public final class RunManager {
         return get() != null;
     }
 
-    /** Swaps in the Run fleet built from {@code picks} and prepares the Run system. Call from the Hub dialog. */
-    public static RunState start(String archetypeId, List<FleetMemberAPI> picks) {
+    /**
+     * Swaps in the Run fleet built from {@code picks} and prepares Act 1. Call from the Hub dialog.
+     * {@code ascension} 0 (Gamma) .. 6 (Omega); the bonuses are the Meta-progress unlocks taken.
+     */
+    public static RunState start(String archetypeId, List<FleetMemberAPI> picks, int ascension,
+                                 int bonusSupplies, boolean bonusOfficerLevel) {
         RunState state = new RunState(archetypeId);
-        // Not security-sensitive: map/enemy randomness only.
-        Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
-        state.getEnemyFactionIds().addAll(drawEnemyFactions(archetypeId, rng));
-        NodeGraphBuilder.build(state, STSSettings.actRows(), STSSettings.mapColumns(), STSSettings.mapPaths(),
-                state.getEnemyFactionIds(), bossFaction(rng),
-                new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest(),
-                        STSSettings.weightElite(), STSSettings.weightAmbush(), STSSettings.weightEvent()),
-                rng.nextLong());
+        state.setAscension(ascension);
+        state.setBonusOfficerLevel(bonusOfficerLevel);
         snapshot(state);
-        if (!HomeFleet.stash(RunFleet.create(picks))) return null;
+        CampaignFleetAPI runFleet = RunFleet.create(picks);
+        if (bonusSupplies > 0) runFleet.getCargo().addSupplies(bonusSupplies);
+        if (bonusOfficerLevel) {
+            // A pending level-up: the player picks the skill in the vanilla Fleet screen.
+            for (OfficerDataAPI od : runFleet.getFleetData().getOfficersCopy()) Upgrades.train(od);
+        }
+        if (!HomeFleet.stash(runFleet)) return null;
         Global.getSector().getMemoryWithoutUpdate().set(STSConstants.MEM_RUN_STATE, state);
         RunSystem.ensure();
         RunSystem.clear();
+        buildAct(state, 1);
         RunSystem.ensureNodeEntity(state.getCurrentNode());
-        STSLog.info("Run started: archetype=" + archetypeId + ", enemies=" + state.getEnemyFactionIds());
+        STSLog.info("Run started: archetype=" + archetypeId + ", ascension=" + Ascension.name(ascension)
+                + ", enemies=" + state.getEnemyFactionIds());
         return state;
+    }
+
+    /**
+     * After an Act's Boss: the next Act's map, laid out below the old one so its Start sits where
+     * the Boss was (where the player is). The caller has dismissed its dialog.
+     */
+    public static void nextAct(RunState state) {
+        RunNode boss = state.getCurrentNode();
+        int bossDepth = boss == null ? STSSettings.actRows() + 1 : boss.getDepth();
+        RunSystem.clearNodesAndFleets();
+        state.setDepthOffset(state.getDepthOffset() + bossDepth);
+        buildAct(state, state.getAct() + 1);
+        RunSystem.ensureNodeEntity(state.getCurrentNode());
+        STSLog.info("Act " + state.getAct() + " begins: enemies=" + state.getEnemyFactionIds());
+    }
+
+    /** Fresh map and enemy factions for Act {@code act}. */
+    private static void buildAct(RunState state, int act) {
+        // Not security-sensitive: map/enemy randomness only.
+        Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
+        state.clearNodes();
+        state.setAct(act);
+        state.getEnemyFactionIds().clear();
+        state.getEnemyFactionIds().addAll(drawEnemyFactions(state.getArchetypeId(), rng));
+        if (act >= 4) {
+            NodeGraphBuilder.buildFinal(state, STSSettings.mapColumns());
+            return;
+        }
+        float elite = STSSettings.weightElite()
+                + (state.getAscension() >= Ascension.ALPHA ? STSSettings.ascensionEliteWeight() : 0f);
+        NodeGraphBuilder.build(state, STSSettings.actRows(), STSSettings.mapColumns(), STSSettings.mapPaths(),
+                state.getEnemyFactionIds(), bossFaction(act, state.getEnemyFactionIds(), rng),
+                new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest(),
+                        elite, STSSettings.weightAmbush(), STSSettings.weightEvent()),
+                rng.nextLong());
     }
 
     /**
@@ -67,6 +111,7 @@ public final class RunManager {
         CampaignFleetAPI home = HomeFleet.restore();
         if (state != null) restoreSnapshot(state);
         if (payout > 0) home.getCargo().getCredits().add(payout);
+        if (state != null) MetaProgress.load().recordRun(state, won);
         Global.getSector().getMemoryWithoutUpdate().unset(STSConstants.MEM_RUN_STATE);
         STSLog.info("Run ended: won=" + won + ", depth=" + depth + ", payout=" + payout);
         Global.getSector().getCampaignUI().addMessage("Run " + (won ? "won" : "lost") + " at Depth " + depth
@@ -111,17 +156,28 @@ public final class RunManager {
         RunSystem.clearNodesAndFleets();
     }
 
-    /** By deepest Node won: 0 before the minimum Depth, linear up to the Boss, a fixed amount for a win. */
-    /** Payout for ending {@code state}'s Run: linear in the deepest Node won, up to the Boss. */
+    /**
+     * Payout for ending {@code state}'s Run: a fixed amount for a win, else linear in the deepest
+     * Node won up to the Act 3 Boss (0 before the minimum Depth); × (1 + Ascension level); plus the
+     * true-Boss bonus.
+     */
     public static int payout(RunState state, boolean won) {
-        if (won) return STSSettings.payoutWin();
-        if (state == null) return 0;
-        int depth = state.getMaxDepthWon();
-        int min = STSSettings.payoutMinDepth();
-        if (depth < min) return 0;
-        int bossDepth = state.getBossDepth();
-        float t = bossDepth <= min ? 1f : Math.min(1f, (depth - min) / (float) (bossDepth - min));
-        return Math.round(STSSettings.payoutAtMinDepth() + t * (STSSettings.payoutAtBoss() - STSSettings.payoutAtMinDepth()));
+        if (state == null) return won ? STSSettings.payoutWin() : 0;
+        int base;
+        if (won) {
+            base = STSSettings.payoutWin();
+        } else {
+            int depth = state.getMaxDepthWon();
+            int min = STSSettings.payoutMinDepth();
+            int finalDepth = 3 * (STSSettings.actRows() + 1);
+            if (depth < min) return 0;
+            float t = finalDepth <= min ? 1f : Math.min(1f, (depth - min) / (float) (finalDepth - min));
+            base = Math.round(STSSettings.payoutAtMinDepth() + t * (STSSettings.payoutAtBoss() - STSSettings.payoutAtMinDepth()));
+        }
+        int total = base + state.getAscension() * (won ? STSSettings.ascensionPayout()
+                : Math.round(base * (float) STSSettings.ascensionPayout() / STSSettings.payoutWin()));
+        if (state.isTrueBossWon()) total += STSSettings.trueBossPayout();
+        return total;
     }
 
     private static List<String> drawEnemyFactions(String archetypeId, Random rng) {
@@ -135,11 +191,10 @@ public final class RunManager {
         return new ArrayList<String>(pool.subList(0, n));
     }
 
-    private static String bossFaction(Random rng) {
-        List<String> bosses = new ArrayList<String>();
-        for (String id : STSSettings.bossFactions()) {
-            if (Global.getSector().getFaction(id) != null) bosses.add(id);
-        }
-        return bosses.isEmpty() ? Factions.REMNANTS : bosses.get(rng.nextInt(bosses.size()));
+    /** Act Boss faction: {@code sts_actBossFactions}, or one of the Act's enemy factions when empty. */
+    private static String bossFaction(int act, List<String> enemies, Random rng) {
+        String id = STSSettings.actBossFaction(act);
+        if (id != null && !id.isEmpty() && Global.getSector().getFaction(id) != null) return id;
+        return enemies.isEmpty() ? Factions.PIRATES : enemies.get(rng.nextInt(enemies.size()));
     }
 }

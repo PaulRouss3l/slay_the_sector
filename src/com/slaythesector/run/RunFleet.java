@@ -1,6 +1,7 @@
 package com.slaythesector.run;
 
 import java.util.List;
+import java.util.Random;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -12,8 +13,11 @@ import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.events.OfficerManagerEvent;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.ids.Abilities;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.VariantSource;
+import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSSettings;
 
@@ -138,6 +142,42 @@ public final class RunFleet {
     public static void repair(FleetMemberAPI m) {
         m.getStatus().repairFully();
         m.getRepairTracker().setCR(m.getRepairTracker().getMaxCR());
+    }
+
+    /** Repairs {@code fraction} of the missing hull, armor and CR (Rest at Ascension Seraph). */
+    public static void repairPartial(FleetMemberAPI m, float fraction) {
+        m.getStatus().repairFraction(fraction);
+        float cr = m.getRepairTracker().getCR();
+        m.getRepairTracker().setCR(cr + (m.getRepairTracker().getMaxCR() - cr) * fraction);
+    }
+
+    /** Variant tag prefix of the extra S-mod slots granted by Boss rewards (counted by RunLogistics). */
+    public static final String TAG_SMOD_SLOT = "sts_smod_slot_";
+
+    /** +1 S-mod slot on {@code m} (Boss reward "Refit"). */
+    public static void addSmodSlot(FleetMemberAPI m) {
+        int n = 1;
+        while (m.getVariant().hasTag(TAG_SMOD_SLOT + n)) n++;
+        m.getVariant().addTag(TAG_SMOD_SLOT + n);
+        m.updateStats();
+    }
+
+    /**
+     * Boss reward "Remnant warship": Brilliant / Apex / Nova by Act, with a Gamma / Beta / Alpha
+     * core captain. Tagged so it needs no Automated Ships skill (vanilla would set its CR to 0).
+     */
+    public static FleetMemberAPI addRemnantShip(CampaignFleetAPI fleet, int act) {
+        String variant = act >= 3 ? "nova_Standard" : act == 2 ? "apex_Standard" : "brilliant_Standard";
+        String core = act >= 3 ? Commodities.ALPHA_CORE : act == 2 ? Commodities.BETA_CORE : Commodities.GAMMA_CORE;
+        FleetMemberAPI m = addShip(fleet, Global.getSettings().getVariant(variant));
+        m.getVariant().addTag(Tags.TAG_AUTOMATED_NO_PENALTY);
+        // Not security-sensitive: officer generation only.
+        PersonAPI captain = Misc.getAICoreOfficerPlugin(core).createPerson(core, Factions.PLAYER, new Random()); // nosemgrep: java-lang-security-audit-crypto-weak-random
+        m.setCaptain(captain);
+        m.updateStats();
+        m.getRepairTracker().setCR(m.getRepairTracker().getMaxCR());
+        topUp(fleet);
+        return m;
     }
 
     /** Deployment points of the whole fleet, checked against the Fleet DP cap. */

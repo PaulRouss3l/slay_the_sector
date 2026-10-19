@@ -14,7 +14,9 @@ import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.slaythesector.run.NodeType;
+import com.slaythesector.run.RunManager;
 import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunState;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
 
@@ -82,7 +84,10 @@ public final class RunSystem {
         for (SectorEntityToken e : doomed) sys.removeEntity(e);
     }
 
-    /** The world entity for a Node, created on demand at its map position. */
+    /**
+     * The world entity for a Node, created on demand at its map position. Acts are stacked by
+     * global Depth, so a new Act's Start sits exactly where the previous Act's Boss was.
+     */
     public static SectorEntityToken ensureNodeEntity(RunNode node) {
         StarSystemAPI sys = ensure();
         SectorEntityToken existing = findNodeEntity(node.getId());
@@ -91,7 +96,9 @@ public final class RunSystem {
         SectorEntityToken e = sys.addCustomEntity(null, name, STSConstants.NODE_ENTITY_TYPE, Factions.NEUTRAL);
         e.addTag(STSConstants.TAG_NODE);
         e.getMemoryWithoutUpdate().set(STSConstants.MEM_NODE_ID, node.getId());
-        e.setFixedLocation(node.getColumn() * NODE_SPACING_X - NODE_SPACING_X, -node.getDepth() * NODE_SPACING_Y);
+        RunState state = RunManager.get();
+        int depth = state == null ? node.getDepth() : state.getGlobalDepth(node);
+        e.setFixedLocation(node.getColumn() * NODE_SPACING_X - NODE_SPACING_X, -depth * NODE_SPACING_Y);
         return e;
     }
 

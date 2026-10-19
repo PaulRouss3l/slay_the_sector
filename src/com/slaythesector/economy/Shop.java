@@ -51,7 +51,7 @@ public final class Shop {
         // Not security-sensitive: stock variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         List<Card> cards = new ArrayList<Card>();
-        HullSize maxSize = bigger(DepthScaling.rewardSize(node.getDepth()));
+        HullSize maxSize = bigger(DepthScaling.rewardSize(state, node.getDepth()));
 
         List<FleetMemberAPI> ships = new ArrayList<FleetMemberAPI>();
         List<FleetMemberAPI> own = Archetypes.shipsUpTo(state.getArchetypeId(), maxSize, rng);
@@ -76,7 +76,7 @@ public final class Shop {
                             + price + " supplies", null, price, 1));
         }
 
-        int level = DepthScaling.officerLevel(node.getDepth());
+        int level = DepthScaling.officerLevel(state, node.getDepth());
         int price = STSSettings.shopOfficerBase() + level * STSSettings.shopOfficerPerLevel();
         cards.add(new Card(new Item(Kind.OFFICER, null, null, level), "Officer (level " + level + ")",
                 "Joins the Run fleet - " + price + " supplies", null, price, 1));
