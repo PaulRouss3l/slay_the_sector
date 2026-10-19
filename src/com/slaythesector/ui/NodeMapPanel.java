@@ -2,6 +2,8 @@ package com.slaythesector.ui;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +16,11 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunState;
@@ -220,6 +226,41 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
             if (Math.abs(mx - p[0]) <= r && Math.abs(my - p[1]) <= r) return n;
         }
         return null;
+    }
+
+    /** Width of the legend column built by {@link #legend}. */
+    public static final float LEGEND_W = 190f;
+
+    /**
+     * Legend for the map: icon + name + one-line meaning of each Node type present in the Run, then
+     * what the rings and the gold path mean. The caller places the returned element.
+     */
+    public static TooltipMakerAPI legend(CustomPanelAPI parent, RunState state, float height) {
+        TooltipMakerAPI ui = parent.createUIElement(LEGEND_W, height, false);
+        ui.addSectionHeading("Legend", Alignment.MID, 0f);
+        EnumSet<NodeType> present = EnumSet.noneOf(NodeType.class);
+        for (RunNode n : state.getNodes()) present.add(n.getType());
+        for (NodeType type : present) {
+            TooltipMakerAPI row = ui.beginImageWithText(Global.getSettings().getSpriteName("sts_map", type.name()), 24f);
+            row.addPara(type.label(), Misc.getHighlightColor(), 0f);
+            row.addPara(LEGEND_TEXT.get(type), Misc.getGrayColor(), 0f);
+            ui.addImageWithText(8f);
+        }
+        ui.addPara("Gold ring: where you are or your locked course.", RING_CURRENT, 12f);
+        ui.addPara("Pulsing blue ring: Nodes you can choose next.", RING_CHOICE, 4f);
+        ui.addPara("Gold line: the path travelled.", EDGE_TAKEN, 4f);
+        ui.addPara("Dimmed: visited.", Misc.getGrayColor(), 4f);
+        return ui;
+    }
+
+    private static final Map<NodeType, String> LEGEND_TEXT = new EnumMap<NodeType, String>(NodeType.class);
+    static {
+        LEGEND_TEXT.put(NodeType.START, "Entry of the Descent");
+        LEGEND_TEXT.put(NodeType.COMBAT, "Fight: Supplies + Reward");
+        LEGEND_TEXT.put(NodeType.BOSS, "The Apex, no retreat");
+        LEGEND_TEXT.put(NodeType.SHOP, "Buy with Supplies");
+        LEGEND_TEXT.put(NodeType.REST, "Repair, S-mod or train");
+        LEGEND_TEXT.put(NodeType.TREASURE, "One rare prize");
     }
 
     /** Whether the Node can be chosen as the next course. */

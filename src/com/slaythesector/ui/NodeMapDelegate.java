@@ -137,8 +137,10 @@ public class NodeMapDelegate implements CustomVisualDialogDelegate {
                 info.setText("Selected: " + describe(node));
             }
         });
-        CustomPanelAPI body = panel.createCustomPanel(WIDTH, HEIGHT - HEADER_H - 10f, map);
+        float bodyH = HEIGHT - HEADER_H - 10f;
+        CustomPanelAPI body = panel.createCustomPanel(WIDTH - NodeMapPanel.LEGEND_W - 20f, bodyH, map);
         panel.addComponent(body).inTL(0f, HEADER_H + 10f);
+        panel.addUIElement(NodeMapPanel.legend(panel, state, bodyH)).inTL(WIDTH - NodeMapPanel.LEGEND_W - 10f, HEADER_H + 10f);
     }
 
     private static String describe(RunNode n) {

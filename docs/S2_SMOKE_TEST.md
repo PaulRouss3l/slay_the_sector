@@ -7,6 +7,8 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
 ## 1. Node map
 - [ ] At the Entry Beacon, **Open the node map**: Start at the bottom, Boss at the top, 7 rows of
       2-3 Nodes, one icon per Node type (Boss larger). Rows 1-2 are Combat, the middle row Treasure, the row before the Boss Rest.
+- [ ] Legend column on the right: icon + name + meaning of each Node type, and what the rings
+      and the gold path mean. Same legend in the Intel map.
 - [ ] Hover shows the Node (type, faction, Depth, strength) and what it offers.
 - [ ] Only the current Node's successors pulse; clicking another says it is not reachable.
 - [ ] Click a pulsing Node → **Set course** → dialog closes, course laid in. Esc/Close cancels.

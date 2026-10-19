@@ -87,8 +87,10 @@ public class RunIntel extends BaseIntelPlugin {
         TooltipMakerAPI title = panel.createUIElement(width, 30f, false);
         title.addTitle("The Descent: Act " + state.getAct());
         panel.addUIElement(title).inTL(0f, 0f);
-        CustomPanelAPI map = panel.createCustomPanel(width, height - 40f, new NodeMapPanel(state, false, null));
+        CustomPanelAPI map = panel.createCustomPanel(width - NodeMapPanel.LEGEND_W - 10f, height - 40f,
+                new NodeMapPanel(state, false, null));
         panel.addComponent(map).inTL(0f, 40f);
+        panel.addUIElement(NodeMapPanel.legend(panel, state, height - 40f)).inTL(width - NodeMapPanel.LEGEND_W, 40f);
     }
 
     @Override
