@@ -18,13 +18,14 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
 - [ ] Arrive: trader text, **Browse the shop**: ships (DP + price), weapons, an officer; budget =
       your Supplies; +/- per card; Confirm buys, supplies deducted, items in fleet/cargo.
 - [ ] **Dockyard** repair-all costs half the Fleet services price.
-- [ ] Close the shop without buying, reopen: same stock. Leave the beacon and come back: shop gone.
+- [ ] Each item can be taken once. Buy, close, sell a ship in Fleet services, reopen: the rest of
+      the stock is still there. Leave the beacon (or set a course) and come back: shop gone.
 
 ## 3. Rest
 - [ ] **Rest (choose one)**: free full repair / S-mod / train an officer; impossible ones greyed.
 - [ ] S-mod: pick ship → pick hullmod → it shows as an S-mod in Refit. Back returns to the menu.
 - [ ] Train: officer gets a level-up; choose the skill in the Fleet screen.
-- [ ] After one choice the Rest option is gone.
+- [ ] After one choice the Rest option is gone. Setting a course without choosing forfeits it.
 
 ## 4. Treasure
 - [ ] **Open the cache**: up to 3 prizes (a bigger ship, rare weapons, S-mod). Take one; it's
@@ -32,7 +33,7 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
 
 ## 5. Fleet DP cap
 - [ ] Waypoint shows `Fleet DP: x / 60`. Buy or win ships past 60: the map opens read-only with
-      a note; sell ships in Fleet services, then courses work again.
+      a note, and "Resume course" refuses too; sell ships in Fleet services, then courses work again.
 
 ## 6. Regression
 - [ ] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.

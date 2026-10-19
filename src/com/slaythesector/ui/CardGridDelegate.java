@@ -156,7 +156,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
             close(picks);
         } else if (id.startsWith("add:")) {
             int i = Integer.parseInt(id.substring(4));
-            if (used() + cards.get(i).cost <= budget) counts[i]++;
+            if (canAdd(i)) counts[i]++;
             dirty = true;
         } else if (id.startsWith("rem:")) {
             int i = Integer.parseInt(id.substring(4));
@@ -170,6 +170,11 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         closed = true;
         result = picks;
         callbacks.dismissDialog();
+    }
+
+    private boolean canAdd(int i) {
+        Card c = cards.get(i);
+        return used() + c.cost <= budget && (c.maxCount <= 0 || counts[i] < c.maxCount);
     }
 
     private int used() {
@@ -219,7 +224,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         } else {
             ui.addPara("Selected: " + counts[i], 4f);
             ButtonAPI add = ui.addButton("+ Add", "add:" + i, 100f, 24f, 6f);
-            add.setEnabled(used() + c.cost <= budget);
+            add.setEnabled(canAdd(i));
             ButtonAPI rem = ui.addButton("- Remove", "rem:" + i, 100f, 24f, 0f);
             rem.getPosition().rightOfTop(add, 8f);
             rem.setEnabled(counts[i] > 0);

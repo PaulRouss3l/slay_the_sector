@@ -47,6 +47,13 @@ public class RunState implements Serializable {
     public String getArchetypeId() { return archetypeId; }
     public int getAct() { return Math.max(1, act); }
     public Collection<RunNode> getNodes() { return nodes.values(); }
+
+    /** Depth of the Boss: the deepest Node of this Run's map (S1 maps were one row shorter). */
+    public int getBossDepth() {
+        int max = 1;
+        for (RunNode n : nodes.values()) max = Math.max(max, n.getDepth());
+        return max;
+    }
     public List<String> getEnemyFactionIds() { return enemyFactionIds; }
     public String getCurrentNodeId() { return currentNodeId; }
     public void setCurrentNodeId(String id) { this.currentNodeId = id; }

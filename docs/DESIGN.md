@@ -142,8 +142,13 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 
 **Implementation notes (S2)**
 - Shop, Rest and Treasure resolve on arrival but never count as won (Payout stays on fights).
-  Their service is claimed once (`RunNode.claimed`); an opened Shop or Treasure is claimed when
-  the player leaves, so leaving and returning can't re-roll it.
+  Their service is claimed once (`RunNode.claimed`): Rest and Treasure on use; an opened Shop or
+  Treasure when the player leaves the beacon (no re-roll); any unused service when a course is
+  set. Each Shop item sells once; the Shop can be visited repeatedly until the player leaves.
+- The Fleet DP cap is checked whenever a course is set or resumed.
+- The node map's course is applied on the dialog's next frame, after the map has closed.
+- Run-fleet credits are handed back to the Home fleet only when positive (Run payroll is never
+  charged to the campaign).
 - Officer training gives the officer exactly the XP for its next level; the player picks the
   skill in the vanilla Fleet screen. S-mods use `addPermaMod(id, true)` within
   `Misc.getMaxPermanentMods`.

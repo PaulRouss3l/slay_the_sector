@@ -9,6 +9,7 @@ import com.fs.starfarer.api.characters.OfficerDataAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.plugins.OfficerLevelupPlugin;
 import com.fs.starfarer.api.util.Misc;
@@ -37,7 +38,8 @@ public final class Upgrades {
         for (String id : v.getNonBuiltInHullmods()) {
             if (v.getSMods().contains(id) || STSConstants.HULLMOD_RUN_LOGISTICS.equals(id)) continue;
             HullModSpecAPI spec = Global.getSettings().getHullModSpec(id);
-            if (spec == null || spec.isHidden() || spec.isHiddenEverywhere() || spec.hasTag("dmod")) continue;
+            if (spec == null || spec.isHidden() || spec.isHiddenEverywhere() || spec.hasTag(Tags.HULLMOD_DMOD)
+                    || spec.hasTag(Tags.HULLMOD_NO_BUILD_IN)) continue;
             out.add(spec);
         }
         return out;
@@ -48,14 +50,14 @@ public final class Upgrades {
         m.updateStats();
     }
 
-    /** Run officers (never the player) below their max level. */
+    /** Run officers (never the player) below their max level, with no level-up already waiting. */
     public static List<OfficerDataAPI> trainableOfficers(CampaignFleetAPI fleet) {
         List<OfficerDataAPI> out = new ArrayList<OfficerDataAPI>();
         OfficerLevelupPlugin plugin = levelup();
         for (OfficerDataAPI od : fleet.getFleetData().getOfficersCopy()) {
             PersonAPI p = od.getPerson();
             if (p.isPlayer() || p.isAICore()) continue;
-            if (p.getStats().getLevel() >= plugin.getMaxLevel(p)) continue;
+            if (p.getStats().getLevel() >= plugin.getMaxLevel(p) || od.canLevelUp()) continue;
             out.add(od);
         }
         return out;
@@ -65,10 +67,12 @@ public final class Upgrades {
      * Gives the officer exactly the XP for its next level; the player then picks the new skill in
      * the vanilla Fleet screen.
      */
-    public static void train(OfficerDataAPI od) {
+    public static boolean train(OfficerDataAPI od) {
         PersonAPI p = od.getPerson();
         long need = levelup().getXPForLevel(p.getStats().getLevel() + 1) - p.getStats().getXP();
-        if (need > 0) od.addXP(need);
+        if (need <= 0) return false;
+        od.addXP(need);
+        return true;
     }
 
     private static OfficerLevelupPlugin levelup() {

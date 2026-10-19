@@ -24,7 +24,7 @@ public class RunRespawnDialog implements InteractionDialogPlugin {
         int depth = state == null ? 0 : state.getMaxDepthWon();
         dialog.getTextPanel().addPara("Your Run fleet has been destroyed. The Run is lost.", Misc.getNegativeHighlightColor());
         dialog.getTextPanel().addPara("Deepest Node won: %s. Payout: %s.", Misc.getHighlightColor(),
-                String.valueOf(depth), Misc.getDGSCredits(RunManager.payout(depth, false)));
+                String.valueOf(depth), Misc.getDGSCredits(RunManager.payout(state, false)));
         dialog.getOptionPanel().addOption("Return to the Hub", OPT_RETURN);
     }
 

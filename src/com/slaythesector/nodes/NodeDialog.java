@@ -56,7 +56,7 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private enum Opt {
         ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
-        SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK
+        SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
     }
 
     /** Option data: set course for a Node. */
@@ -99,6 +99,8 @@ public class NodeDialog implements InteractionDialogPlugin {
     private List<Card> treasureCards;
     /** Where the S-mod picker returns on "Back": the Rest menu or the Treasure prizes. */
     private Opt smodFrom;
+    /** Course chosen on the node map; applied on the next frame, after the map has closed. */
+    private String pendingCourse;
 
     @Override
     public void init(InteractionDialogAPI dialog) {
@@ -304,7 +306,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                 new NodeMapDelegate(state, note, !overCap, new NodeMapDelegate.Listener() {
                     @Override
                     public void done(RunNode chosen) {
-                        if (chosen != null) setCourse(chosen.getId());
+                        if (chosen != null) pendingCourse = chosen.getId();
                     }
                 }));
     }
@@ -354,11 +356,15 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private int dockyardCost() {
+        return Math.round(repairAllCost() * STSSettings.shopRepairMult());
+    }
+
+    private int repairAllCost() {
         int total = 0;
         for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
             total += RunFleet.repairCost(m);
         }
-        return Math.round(total * STSSettings.shopRepairMult());
+        return total;
     }
 
     private void dockyard() {
@@ -385,7 +391,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                             if (total <= pf.getCargo().getSupplies()) {
                                 pf.getCargo().removeSupplies(total);
                                 text.addPara("Bought for " + total + " supplies: " + Shop.apply(picked, pf) + ".");
-                                node.claim();
+                                shopCards.removeAll(picked);
                             }
                         }
                         showWaypoint();
@@ -397,7 +403,7 @@ public class NodeDialog implements InteractionDialogPlugin {
         options.clearOptions();
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         options.addOption("Full repair of the fleet (free)", Opt.REST_REPAIR);
-        if (dockyardCost() == 0) options.setEnabled(Opt.REST_REPAIR, false);
+        if (repairAllCost() == 0) options.setEnabled(Opt.REST_REPAIR, false);
         options.addOption("Build in an S-mod on one ship", Opt.REST_SMOD);
         if (Upgrades.smodShips(pf).isEmpty()) options.setEnabled(Opt.REST_SMOD, false);
         options.addOption("Train an officer (+1 level)", Opt.REST_TRAIN);
@@ -426,7 +432,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void train(Train t) {
         for (OfficerDataAPI od : Upgrades.trainableOfficers(Global.getSector().getPlayerFleet())) {
             if (!od.getPerson().getId().equals(t.personId)) continue;
-            Upgrades.train(od);
+            if (!Upgrades.train(od)) break;
             node.claim();
             text.addPara(od.getPerson().getNameString() + " is ready to level up: pick the new skill in the Fleet screen.",
                     Misc.getPositiveHighlightColor());
@@ -483,8 +489,8 @@ public class NodeDialog implements InteractionDialogPlugin {
             for (HullModSpecAPI spec : Upgrades.smodChoices(m)) {
                 options.addOption(spec.getDisplayName(), new Smod(m.getId(), spec.getId()));
             }
-            options.addOption("Back", Opt.SMOD_BACK);
-            options.setShortcut(Opt.SMOD_BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+            options.addOption("Back", Opt.SMOD_SHIPS);
+            options.setShortcut(Opt.SMOD_SHIPS, Keyboard.KEY_ESCAPE, false, false, false, true);
             return;
         }
         Upgrades.buildIn(m, s.modId);
@@ -560,8 +566,20 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private void setCourse(String nodeId) {
-        // Path lock: once set, a course can only be resumed, never swapped.
-        if (state.getTargetNodeId() == null) state.setTargetNodeId(nodeId);
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        if (RunFleet.totalDP(pf) > STSSettings.fleetDPCap(state.getAct())) {
+            text.addPara("The fleet is over the Fleet DP cap. Sell ships (Fleet services) first.",
+                    Misc.getNegativeHighlightColor());
+            showWaypoint();
+            return;
+        }
+        // Path lock: once set, a course can only be resumed, never swapped. Setting out also ends
+        // this Node's unused service: it can't be kept for later.
+        if (state.getTargetNodeId() == null) {
+            state.setTargetNodeId(nodeId);
+            RunNode cur = state.getCurrentNode();
+            if (cur != null) cur.claim();
+        }
         nodeId = state.getTargetNodeId();
         SectorEntityToken target = RunSystem.ensureNodeEntity(state.getNode(nodeId));
         leave();
@@ -573,7 +591,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void showRunEnd(boolean won) {
         runWon = won;
         options.clearOptions();
-        int payout = RunManager.payout(state.getMaxDepthWon(), won);
+        int payout = RunManager.payout(state, won);
         if (won) {
             text.addPara("The Apex fleet breaks apart. The Run is won.", Misc.getPositiveHighlightColor());
         } else {
@@ -665,6 +683,9 @@ public class NodeDialog implements InteractionDialogPlugin {
             case TREASURE:
                 openTreasure();
                 break;
+            case SMOD_SHIPS:
+                showSmodShips();
+                break;
             case SMOD_BACK:
                 if (smodFrom == Opt.TREASURE) openTreasure();
                 else showRest();
@@ -700,6 +721,11 @@ public class NodeDialog implements InteractionDialogPlugin {
         if (pendingReward) {
             pendingReward = false;
             openRewardPick();
+        }
+        if (pendingCourse != null) {
+            String id = pendingCourse;
+            pendingCourse = null;
+            setCourse(id);
         }
     }
     @Override public void backFromEngagement(EngagementResultAPI battleResult) {}

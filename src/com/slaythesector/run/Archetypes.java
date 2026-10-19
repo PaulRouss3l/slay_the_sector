@@ -19,7 +19,7 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
-import com.fs.starfarer.api.impl.campaign.ids.HullMods;
+import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSSettings;
 
 /**
@@ -90,7 +90,7 @@ public final class Archetypes {
         if (factionId == null || Global.getSector().getFaction(factionId) == null) return pool;
         for (FleetMemberAPI m : shipPool(factionId, 999f, 40)) {
             if (m.getHullSpec().getHullSize().ordinal() > maxSize.ordinal()) continue;
-            if (m.getVariant().hasHullMod(HullMods.AUTOMATED)) continue;
+            if (Misc.isAutomated(m)) continue;
             pool.add(m);
         }
         Collections.shuffle(pool, rng);

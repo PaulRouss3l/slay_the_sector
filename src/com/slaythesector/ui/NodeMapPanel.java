@@ -101,6 +101,8 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
     @Override
     public void render(float alphaMult) {
         if (pos == null) return;
+        // Leave no GL state behind (line smoothing/width, blend) for the rest of the UI.
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_LINE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -153,6 +155,7 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
             icon.setAlphaMult(alphaMult);
             icon.renderAtCenter(p[0], p[1]);
         }
+        GL11.glPopAttrib();
     }
 
     /** A Node is on the travelled path if it was resolved, or is where the player stands. */

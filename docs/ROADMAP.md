@@ -67,7 +67,13 @@ Code-complete on branch `s2/map-economy`; in-game checklist: `S2_SMOKE_TEST.md`.
   weapons, an officer); dockyard repair at half price; stock gone once you leave.
 - 🟡 Rest: one of free full repair / S-mod / officer +1 level (skill picked in the vanilla Fleet screen).
 - 🟡 Treasure: one of a rare (bigger) ship, top-tier weapons, an S-mod.
-- 🟡 Fleet DP cap (`sts_fleetDPCap`, Act 1 = 60): over the cap, no course can be set until ships are sold.
+- 🟡 Fleet DP cap (`sts_fleetDPCap`, Act 1 = 60): over the cap, no course can be set or resumed
+  until ships are sold.
+
+Independent review done and its findings fixed (DP cap bypass via Resume course, repeat
+purchases, wasted officer training, payroll charged to the Home fleet, GL state, course set from
+inside the map's dismissal). Known, not fixed: Run-fleet payroll still eats into colony income
+received during a Run (the hand-back can't tell them apart; the Home fleet never pays more).
 
 ## S3 — Special fights and Events ⬜
 

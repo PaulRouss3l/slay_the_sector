@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ListInfoMode;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -62,8 +63,9 @@ public class RunIntel extends BaseIntelPlugin {
         float opad = 10f;
         Color h = Misc.getHighlightColor();
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        FactionAPI archetype = Global.getSector().getFaction(state.getArchetypeId());
         info.addPara("Archetype: %s. Act %s.", 0f, h,
-                Global.getSector().getFaction(state.getArchetypeId()).getDisplayName(), String.valueOf(state.getAct()));
+                archetype == null ? state.getArchetypeId() : archetype.getDisplayName(), String.valueOf(state.getAct()));
         info.addPara("Deepest Node won: %s. Supplies: %s.", opad, h,
                 String.valueOf(state.getMaxDepthWon()), String.valueOf((int) pf.getCargo().getSupplies()));
         int dp = RunFleet.totalDP(pf);
