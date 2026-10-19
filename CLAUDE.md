@@ -29,14 +29,14 @@ style of *Slay the Spire*. **Java only** (no Kotlin). Domain terms: `GLOSSARY.md
 
 ## Architecture (one paragraph)
 
-**Redesign settled, not yet implemented** (see `docs/DESIGN.md`, ADR `docs/adr/0001-*`). A
+Design: `docs/DESIGN.md`, ADR `docs/adr/0001-*`; progress: `docs/ROADMAP.md`. A
 **Run** lives in a **contained star system** inside a normal campaign, entered from the mod's
 own **Hub** station by a jump transition. On start, the Home fleet and cargo are detached into
 saved Run state and the player fleet becomes the Run fleet (Starting pick, 30 DP). The player
 picks the next Node on a custom node-map canvas, flies to it, and fights through the vanilla
 fleet encounter flow with a per-Node-type battle setup. Supplies are the Run's only currency.
-Run end restores the Home fleet and grants a Payout; Meta progress is cross-save. The current
-code in `src/` is the superseded dialog-only Run, to be replaced milestone by milestone.
+Run end restores the Home fleet and grants a Payout; Meta progress is cross-save. `src/` holds
+S1 (one Act, Combat + Boss, text course choice); later milestones add to it.
 
 ## Hard constraints
 
