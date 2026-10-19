@@ -2,7 +2,9 @@ package com.slaythesector.ui;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 
@@ -49,6 +51,8 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private final int[] counts;
     /** BUDGET mode: what the budget counts, e.g. "Deployment points" or "Supplies". */
     private String budgetLabel = "Deployment points";
+    /** BUDGET mode: show a "Random" button that fills the budget with random cards. */
+    private boolean randomButton;
 
     private CustomPanelAPI root;
     private CustomPanelAPI content;
@@ -74,6 +78,11 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
 
     public CardGridDelegate withBudgetLabel(String label) {
         this.budgetLabel = label;
+        return this;
+    }
+
+    public CardGridDelegate withRandomButton() {
+        this.randomButton = true;
         return this;
     }
 
@@ -129,6 +138,10 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         if (mode == Mode.BUDGET) {
             confirm = header.addButton("Confirm", "confirm", 140f, 24f, 0f);
             confirm.getPosition().rightOfTop(cancel, 8f);
+            if (randomButton) {
+                ButtonAPI random = header.addButton("Random", "random", 120f, 24f, 0f);
+                random.getPosition().rightOfTop(confirm, 24f);
+            }
         }
         panel.addUIElement(header).inTL(10f, 6f);
         rebuild();
@@ -144,6 +157,9 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
                 for (int k = 0; k < counts[i]; k++) picks.add(cards.get(i));
             }
             close(picks);
+        } else if (id.equals("random")) {
+            fillRandom();
+            dirty = true;
         } else if (id.equals("prev")) {
             if (page > 0) page--;
             dirty = true;
@@ -170,6 +186,21 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         closed = true;
         result = picks;
         callbacks.dismissDialog();
+    }
+
+    /** Clears the picks, then adds random affordable cards until none fits; each press rolls again. */
+    private void fillRandom() {
+        // Not security-sensitive: a random starting fleet.
+        Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
+        Arrays.fill(counts, 0);
+        List<Integer> fits = new ArrayList<Integer>();
+        do {
+            fits.clear();
+            for (int i = 0; i < cards.size(); i++) {
+                if (cards.get(i).cost > 0 && canAdd(i)) fits.add(i);
+            }
+            if (!fits.isEmpty()) counts[fits.get(rng.nextInt(fits.size()))]++;
+        } while (!fits.isEmpty());
     }
 
     private boolean canAdd(int i) {

@@ -110,7 +110,7 @@ public class HubDialog implements InteractionDialogPlugin {
                         }
                         startRun(factionId, picked);
                     }
-                }));
+                }).withRandomButton());
     }
 
     private void startRun(String factionId, List<Card> picked) {
