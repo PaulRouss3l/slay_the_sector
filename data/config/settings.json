@@ -4,7 +4,7 @@
 	"sts_startingSupplies": 150,
 	"sts_enemyBaseFP": 15,
 	"sts_enemyFPPerDepth": 6,
-	"sts_bossFPMult": 2.0,
+	"sts_bossFPMult": 1.65,
 	"sts_crRegenFraction": 0.7,
 	"sts_repairCostMult": 1.0,
 	"sts_sellSuppliesPerDP": 4,

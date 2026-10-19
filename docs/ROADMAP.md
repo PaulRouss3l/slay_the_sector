@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S1** — code-complete, awaiting the in-game smoke test.
+**Current target: S2** — map and economy Nodes.
 
 ## Done before the redesign
 
@@ -32,29 +32,29 @@ Carried into S1:
 - `getContainingLocation()` stays set after `removeEntity` — check `loc.getFleets().contains(fleet)`
   before re-adding a swapped fleet.
 
-## S1 — One Act, Combat + Boss 🟡
+## S1 — One Act, Combat + Boss ✅
 
-Code-complete on branch `s1/one-act`; in-game checklist: `S1_SMOKE_TEST.md`. Independent review
-done and its findings fixed (campaign leaks, Payout exploit).
-- 🟡 Hub station (idempotent placement, no market), Hub Intel entry, Hub dialog, Archetype list (runtime faction filter).
-- 🟡 Starting pick (card grid, 30 DP), free refit (weapon stock deferred).
-- 🟡 Run system with Node entities, course choice as dialog options (map canvas in S2), Path lock.
-- 🟡 Combat and Boss Nodes via the vanilla fleet encounter flow.
-- 🟡 Reward pick (card grid), Supplies, attrition (CR to ~70 %, crew/fuel refill, logistics hullmod).
-- 🟡 Fleet services (repair/sell), Run end + Payout, fleet-wipe intercept, Restore safety net.
-- 🟡 Zero campaign impact enforced (Descent faction, stat snapshot, credits hand-back), XStream aliases.
+Smoke-tested in game 2026-10-19 (RC8, Nexerelin/RAT/MagicLib loaded), checklist
+`S1_SMOKE_TEST.md`; no mod errors in the log.
+- ✅ Hub station (no market), Hub Intel entry (Important, Show on map, Lay in course), Hub dialog,
+  Archetype list (runtime faction filter).
+- ✅ Starting pick (card grid, 30 DP), free refit (weapon stock deferred).
+- ✅ Run system with Node entities (beacon sprite), course choice as dialog options (map canvas in
+  S2), Path lock.
+- ✅ Combat and Boss Nodes via the vanilla fleet encounter flow; vanilla loot/recovery after a win.
+- ✅ Reward pick (card grid: one ship of the defeated faction, one of the Archetype, plus officer or
+  weapons), Supplies, attrition (CR floor `sts_crRegenFraction` after and before each fight,
+  crew/fuel refill, logistics hullmod, no over-capacity drain).
+- ✅ Fleet services (repair/sell), retreat, save/load mid-Run, Abandon, fleet-wipe intercept, Run end
+  + Payout, Home fleet restored, campaign untouched.
+- 🟡 Boss **win** path (Payout 50,000, Home fleet back): not seen — the tester lost the Boss.
+  Boss strength lowered afterwards (`sts_bossFPMult` 2.0 → 1.65, ~114 → ~94 FP at Depth 7).
 
 Known, not fixed (review, low impact): debris/wrecks inside a Run still yield supplies via
 scavenging; core's `xpAtLastStoryPointGain` has no API, so a max-level player who earns story
 points in a Run re-earns that XP afterwards; an AI fleet already pursuing the player at the Hub
-may target the parked Home fleet (untested).
-
-Smoke-test feedback, fixed (re-test pending): Hub Intel entry (Important, Show on map, Lay in
-course); Hub keeps the Spike's upright sprite and an orbit clear of planets; Node beacons get a
-sprite; over-capacity Supply drain removed (no salvaged fuel, fuel/crew capped, +300 cargo per ship); CR
-floor (`sts_crRegenFraction`) also applied right before each fight, since CR can drop between
-fights (out-of-supplies decay, refit away from a spaceport). Reward pick offers one ship of the
-defeated faction and one of the Archetype (faction shown on the card).
+may target the parked Home fleet (untested). One unexplained 0 % CR at a Boss start (not
+reproduced after reload; covered by the pre-fight CR floor).
 
 ## S2 — Map and economy Nodes ⬜
 
