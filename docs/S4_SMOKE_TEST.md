@@ -8,11 +8,11 @@ one-Act Run. Afterwards I run `log_scan` myself (mod lines: `Run started ... asc
 start fresh. Tip: save before each Boss.
 
 ## 1. Hub
-- [ ] Main menu: **Records** page (empty at first; shows the starting bonuses as locked).
-- [ ] First Run: no Ascension or bonus screen (only Gamma, nothing unlocked); straight to the pick.
+- [x] Main menu: **Records** page (empty at first; shows the starting bonuses as locked).
+- [x] First Run: no Ascension or bonus screen (only Gamma, nothing unlocked); straight to the pick.
 
 ## 2. Acts and Bosses
-- [ ] Act 1 Boss: "The Act 1 Boss: a <enemy faction> fleet", strength ~78.
+- [x] Act 1 Boss: "The Act 1 Boss: a <enemy faction> fleet", strength ~78.
 - [ ] Win it: Boss supplies, then the **Boss reward** choice (no Reward pick):
   - [ ] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
         ship. Press Back instead: "Choose your free S-mod (Boss reward)" stays on the beacon menu until used.

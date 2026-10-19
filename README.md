@@ -1,65 +1,90 @@
-# Slay the Sector — Starsector mod (VSCode)
+# Slay the Sector
 
-A VSCode port of the [Starsector IntelliJ template](https://github.com/wispborne/Starsector-IntelliJ-Template),
-adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
+**A Slay the Spire style roguelite, played inside your Starsector campaign.**
 
-> **Project context & design**: see [`CLAUDE.md`](CLAUDE.md) and [`docs/`](docs/)
-> ([DESIGN](docs/DESIGN.md), [ROADMAP](docs/ROADMAP.md), [API_NOTES](docs/API_NOTES.md)).
+*Beta 0.5.0, for Starsector 0.98a.*
 
-## Prerequisites (one-time)
+The Descent Relay has opened somewhere in the core worlds. Dock with it, plug into its combat
+simulation, and fight your way down **The Descent**: three Acts of branching battles, shops,
+events and Bosses, with a fleet you build as you go. Your real fleet waits safely at the Relay. When
+the Run ends, win or lose, you get it back exactly as you left it, plus a credit Payout for how deep
+you went.
 
-1. **JDK 17** (the game ships a JRE only — no compiler):
-   ```sh
-   sudo apt install openjdk-17-jdk
-   ```
-   Confirm the path matches `.vscode/settings.json`:
-   ```sh
-   readlink -f $(which javac)   # expect /usr/lib/jvm/java-17-openjdk-amd64/...
-   ```
-2. **VSCode extensions**: `redhat.java` + `vscjava.vscode-java-debug`
-   (VSCode prompts to install them from `.vscode/extensions.json`).
-3. **Symlink the project into the game's `mods/`** so the launcher loads it:
-   ```sh
-   ln -s /home/ubik/localhost/perso/slay-the-sector \
-         /home/ubik/Downloads/starsector/mods/slay-the-sector
-   ```
+## How it plays
 
-## Layout
+1. **Find the Relay.** Open the Intel screen: *The Descent awaits (Slay the Sector)* is in the
+   Important tab, with **Show on map** and **Lay in course**.
+2. **Pick a faction and a fleet.** Any faction with enough ships, modded ones included. Spend
+   **30 DP** on its ships (or press Random), then refit.
+3. **Descend.** Each Act is a node map: choose the next beacon, fly there, resolve it.
+   - **Combat**, **Elite** (break out of an encirclement), **Ambush** (hunt a fleeing flagship)
+   - **Events**: battle station, sabotage, a side battle with allies, a convoy raid
+   - **Shop**, **Rest**, **Treasure**, and a **Boss** at the bottom of every Act
+4. **Grow the fleet.** After each win, pick a ship, an officer or weapons. Supplies are the only
+   currency: repairs, shops and fleet size all compete for them. Watch the **Fleet DP cap**.
+5. **Climb the Ascensions.** Winning unlocks harder levels per faction (Gamma to Omega), each worth a
+   bigger Payout. Omega hides one last fight.
 
-| Path | Purpose |
-|------|---------|
-| `mod_info.json` | Mod metadata; `modPlugin` points at the entry class |
-| `src/com/slaythesector/` | Java sources |
-| `jars/SlayTheSector.jar` | Build output (referenced by `mod_info.json`) |
-| `build.sh` | Compile `src/` → `jars/SlayTheSector.jar`, then validate (`--strict` for releases) |
-| `tools/` | Build/validate/log-scan/package scripts vendored from the starsector-modding skill (`tools/UPSTREAM.md`) |
-| `slay_the_sector.version` | Version Checker file (hosted raw from GitHub `main`) |
-| `run.sh` | Launch the game from the install dir with a debug agent on `:5005` |
-| `.vscode/settings.json` | Wires game jars for IntelliSense (API autocomplete + javadoc) |
-| `.vscode/tasks.json` | "Build mod" and "Run Starsector" tasks |
-| `.vscode/launch.json` | "Debug Starsector" — build, launch, attach debugger |
+Every number (difficulty, rewards, caps, prices, map shape) can be tuned in
+`data/config/settings.json` (`sts_*` keys).
 
-## Workflow
+## Compatibility
 
-- **Build only:** `Ctrl+Shift+B`, or `./build.sh` (needs `python3` + JDK 17).
-- **Run with debugging:** Run panel → **Debug Starsector** (F5). Builds, launches
-  the game, attaches to `:5005`. Set breakpoints in `src/` and they hit.
-- **Run without debugging:** `./run.sh`.
+- **Other mods:** works with them. Factions and ships are read from the game at runtime, so modded
+  factions show up as playable factions and as enemies. Tested alongside Nexerelin, Random
+  Assortment of Things, MagicLib, LazyLib, LunaLib and GraphicsLib.
+- **No dependencies.**
+- **Existing saves:** safe to add to a game in progress. The Relay appears the next time you load.
+- **Your campaign:** a Run changes nothing in it except the Payout. XP, skills, story points,
+  marines, reputation, bounties, cargo and salaries are all restored when the Run ends.
+- **Removing the mod:** not supported yet. A save that has used the mod needs it to load. Finish
+  your Run first and keep a backup if you plan to remove it.
 
-## Adjusting paths
+## Install
 
-`gameVersion` in `mod_info.json` is `0.98a-RC8` (the installed version). If the launcher shows a
-"version mismatch" warning, set it to the exact version printed on the launcher screen.
+1. Download the zip from the [Releases](https://github.com/PaulRouss3l/slay_the_sector/releases) page.
+2. Extract it into `Starsector/mods/` (you get `mods/slay-the-sector/`).
+3. Enable **Slay the Sector** in the launcher.
 
-## Release
+Version Checker (bundled with Nexerelin and LunaLib) will tell you when an update is out.
 
-1. Bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`.
-2. `./build.sh --strict`, then `python3 tools/package_mod.py --strict` → `dist/`.
-3. After an in-game test: `python3 tools/log_scan.py --mod .`.
+## Beta notes
 
-# MODS SOURCES / EXAMPLES
+This is a beta: balance is rough and bugs are expected. Reports are welcome on the forum thread or as
+GitHub issues. Please attach your `starsector.log`; the mod's lines start with `[SlayTheSector]`.
 
-https://github.com/wispborne/Starsector-IntelliJ-Template
-https://github.com/Lukas22041/SecondInCommand
-https://github.com/Histidine91/Nexerelin
-https://github.com/tracesfx/starsector-modding-skill
+## Credits
+
+Thanks to the people whose work and open source code taught me how Starsector mods are made, and
+whose mods I love playing:
+
+- **wispborne**, for the Starsector IntelliJ Template this project started from, and for
+  everything they do for the modding community.
+- **Lukas22041**, for Second In Command and Random Assortment of Things, the inspiration for this
+  mod and a great example of what a Starsector mod can be.
+- **Histidine91**, for Nexerelin, a reference for nearly every campaign question.
+- **tracesfx**, for the starsector-modding skill: the build, validation and log tools, and the API
+  notes this project relies on.
+
+And to Alex and the Fractal Softworks team for Starsector.
+
+## AI use disclaimer
+
+Some or all assets and code in this mod were created using AI tools:
+
+- **Code:** Claude Opus 5.5 (Anthropic), through Claude Code. It wrote most of the Java code, the
+  build and test tooling configuration, and the design and API documentation.
+- **Text:** in-game text, this README and the changelog were drafted with Claude and edited by me.
+- **Code review:** Claude was also used to review each milestone for bugs before release.
+- **Art:** no AI image model. Map and node icons are vanilla Starsector sprites. The Intel icon is
+  drawn by a small Python script (`tools/art/make_intel_icon.py`) that Claude wrote.
+
+How it was made: I designed the mod (the Run, the Node types, the rules and the balance) and
+directed every change. Each milestone was then played and tested in game by me, against a
+checklist, before it was merged. The full source and the design notes are public in this
+repository.
+
+## For developers
+
+Building from source, project layout and release steps: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
+Design and roadmap: [`docs/DESIGN.md`](docs/DESIGN.md), [`docs/ROADMAP.md`](docs/ROADMAP.md).
