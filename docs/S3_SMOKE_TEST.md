@@ -36,5 +36,7 @@ Tip: save before each new Node type so you can retry.
 - [ ] Leaving an Event and coming back shows the same Event (no re-roll).
 
 ## 5. Regression
+- [ ] Win a normal fight where some enemies retreat: choose **Let them go** / Leave instead of
+      pursuing: "The survivors scatter...", full supplies + Reward pick.
 - [ ] Combat, Boss, Shop, Rest, Treasure, DP cap, save/load mid-Run, Abandon as in S2.
 - [ ] Reputation with the factions involved is unchanged after a side battle.

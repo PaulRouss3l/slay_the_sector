@@ -253,7 +253,8 @@ public class NodeDialog implements InteractionDialogPlugin {
                 if (fid.getContext() instanceof FleetEncounterContext) {
                     FleetEncounterContext ctx = (FleetEncounterContext) fid.getContext();
                     engaged = ctx.isEngagedInHostilities();
-                    won = ctx.didPlayerWinEncounterOutright();
+                    // Winning the last battle is enough: survivors that retreated needn't be chased down.
+                    won = ctx.didPlayerWinEncounterOutright() || ctx.didPlayerWinMostRecentBattleOfEncounter();
                     savedShare = savedShare(ctx);
                 }
                 // Measure the enemy before it is removed: what survived, and whether the mark did.
@@ -373,6 +374,9 @@ public class NodeDialog implements InteractionDialogPlugin {
         if (fight == Fight.BOSS) {
             showRunEnd(true);
             return;
+        }
+        if (won && enemyDPAfter > 0f && fight != Fight.AMBUSH && fight != Fight.CONVOY) {
+            text.addPara("The survivors scatter. They're not worth chasing.");
         }
         if (!success && supplies == 0) {
             text.addPara("You withdrew. The beacon is behind you, but there is no reward.");
