@@ -1,10 +1,13 @@
 package com.slaythesector.combat;
 
+import java.util.List;
+
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
@@ -13,6 +16,7 @@ import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers.OfficerQuality;
+import com.fs.starfarer.api.loading.VariantSource;
 import com.slaythesector.run.Ascension;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
@@ -39,7 +43,7 @@ public final class EncounterFactory {
         if (type == NodeType.ELITE) fp *= STSSettings.eliteFPMult();
         FleetParamsV3 params = params(node.getFactionId(), DepthScaling.quality(state, node), fp, 0f,
                 type == NodeType.BOSS || type == NodeType.ELITE ? FleetTypes.PATROL_LARGE : FleetTypes.PATROL_MEDIUM);
-        if (type == NodeType.BOSS) applyBossOfficers(params, state);
+        if (type == NodeType.BOSS) applyBossOfficers(params, state, node.getFactionId());
         String name = type == NodeType.BOSS ? "Apex Fleet" : null;
         CampaignFleetAPI fleet = create(params, node.getFactionId(), name, STSConstants.FACTION_DESCENT, at);
         if (type == NodeType.ELITE) {
@@ -90,8 +94,8 @@ public final class EncounterFactory {
             STSLog.warn("station variant " + variant + " missing; using station1_Standard");
             station = Global.getFactory().createFleetMember(FleetMemberType.SHIP, "station1_Standard");
         }
-        // Never recoverable into the Run fleet.
-        station.getVariant().addTag(Tags.VARIANT_UNBOARDABLE);
+        // Never recoverable into the Run fleet. Tag a copy: the stock variant is shared game-wide.
+        unboardable(station);
         fleet.getFleetData().addFleetMember(station);
         station.getRepairTracker().setCR(station.getRepairTracker().getMaxCR());
         fleet.setName("Battle Station");
@@ -107,8 +111,9 @@ public final class EncounterFactory {
     public static CampaignFleetAPI spawnTrueBoss(SectorEntityToken at) {
         String hull = STSSettings.trueBossHull();
         String variant = null;
-        for (String id : Global.getSettings().getAllVariantIds()) {
-            if (id.startsWith(hull + "_") && !id.endsWith("_Hull")) {
+        List<String> variants = Global.getSettings().getHullIdToVariantListMap().getList(hull);
+        for (String id : variants) {
+            if (!id.endsWith("_Hull")) {
                 variant = id;
                 break;
             }
@@ -119,13 +124,24 @@ public final class EncounterFactory {
         }
         CampaignFleetAPI fleet = FleetFactoryV3.createEmptyFleet(STSConstants.FACTION_DESCENT, FleetTypes.PATROL_SMALL, null);
         FleetMemberAPI ship = Global.getFactory().createFleetMember(FleetMemberType.SHIP, variant);
-        ship.getVariant().addTag(Tags.VARIANT_UNBOARDABLE);
+        unboardable(ship);
         fleet.getFleetData().addFleetMember(ship);
         ship.getRepairTracker().setCR(ship.getRepairTracker().getMaxCR());
         fleet.setName("The " + ship.getHullSpec().getHullName());
         fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
         prepare(fleet, at);
         return fleet;
+    }
+
+    /**
+     * Marks a spawned ship as never recoverable. A member made from a variant id uses the shared
+     * stock variant, so the tag goes on a copy (vanilla TTBlackSite does the same).
+     */
+    private static void unboardable(FleetMemberAPI m) {
+        ShipVariantAPI copy = m.getVariant().clone();
+        copy.setSource(VariantSource.REFIT);
+        copy.addTag(Tags.VARIANT_UNBOARDABLE);
+        m.setVariant(copy, false, false);
     }
 
     private static FleetParamsV3 params(String factionId, float quality, float combatFP, float freighterFP, String type) {
@@ -175,11 +191,17 @@ public final class EncounterFactory {
     /**
      * Boss pilots ({@code sts_bossOfficers}): "none" = no officers or AI cores at all, "gamma" =
      * Gamma cores only on automated ships, anything else = the faction's normal officers/cores.
-     * Ascension Primordial forces "gamma".
+     * Ascension Primordial overrides: pilots for every Boss.
      */
-    private static void applyBossOfficers(FleetParamsV3 params, RunState state) {
-        // Ascension Primordial: Bosses get Gamma cores whatever the setting.
-        String mode = state.getAscension() >= Ascension.PRIMORDIAL ? "gamma" : STSSettings.bossOfficers();
+    private static void applyBossOfficers(FleetParamsV3 params, RunState state, String factionId) {
+        if (state.getAscension() >= Ascension.PRIMORDIAL) {
+            // Ascension Primordial: Bosses get pilots. Gamma cores for the automated Boss factions
+            // (Derelict, Remnant), the faction's own officers for the Act 1 Apex fleet.
+            params.withOfficers = true;
+            if (STSSettings.bossFactions().contains(factionId)) params.aiCores = OfficerQuality.AI_GAMMA;
+            return;
+        }
+        String mode = STSSettings.bossOfficers();
         if ("none".equals(mode)) {
             params.withOfficers = false;
         } else if ("gamma".equals(mode)) {

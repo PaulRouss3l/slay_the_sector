@@ -14,7 +14,8 @@ start fresh. Tip: save before each Boss.
 ## 2. Acts and Bosses
 - [ ] Act 1 Boss: "The Act 1 Boss: a <enemy faction> fleet", strength ~78.
 - [ ] Win it: Boss supplies, then the **Boss reward** choice (no Reward pick):
-  - [ ] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any ship.
+  - [ ] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
+        ship. Press Back instead: "Choose your free S-mod (Boss reward)" stays on the beacon menu until used.
   - [ ] Bigger fleet: beacon text shows the cap 20 higher (`Fleet DP x / 100`).
   - [ ] Remnant warship: Brilliant with a Gamma core captain, **CR normal** (not 0).
 - [ ] Then **Descend to Act 2**: dialog closes, a message, a new Entry Beacon right where you are;
@@ -33,10 +34,14 @@ start fresh. Tip: save before each Boss.
 
 ## 4. Ascension effects (any order, as unlocked)
 - [ ] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.
-- [ ] Alpha: noticeably more Elites. Seraph: Rest repairs only half. Primordial: Boss ships have Gamma cores.
+- [ ] Alpha: noticeably more Elites. Seraph: Rest repairs only **half** of the damage (check a
+      lightly damaged ship isn't fully repaired). Primordial: Boss ships have pilots (Gamma cores on
+      Derelict/Remnant, officers on the Act 1 Apex fleet).
 - [ ] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
 
 ## 5. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
 - [ ] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
 - [ ] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
-- [ ] Losing to it (or abandoning) still ends a **won** Run.
+- [ ] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
+- [ ] After any Run with a station or the Ziggurat, a Ziggurat/station met elsewhere in the campaign
+      is still recoverable as normal (no tag leaked onto the stock variant).

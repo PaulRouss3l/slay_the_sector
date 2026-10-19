@@ -24,7 +24,7 @@ public final class Ascension {
             "-20 supplies on every fight reward.",
             "More Elites on the map.",
             "Rest repairs only half.",
-            "Bosses get Gamma cores.",
+            "Bosses get pilots: Gamma cores, or officers.",
             "Unlocks Act 4 and the true Boss.",
     };
 

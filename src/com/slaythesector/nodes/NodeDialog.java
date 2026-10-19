@@ -61,7 +61,7 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private enum Opt {
         ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
-        BOSS_REFIT, BOSS_DP, BOSS_SHIP, DESCEND, REPAIR_FLEET, SHOP, DOCKYARD, SHOP_DMOD, REST_RESTORE, RESTORE_SHIPS, RESTORE_BACK, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
+        BOSS_REFIT, BOSS_DP, BOSS_SHIP, DESCEND, FREE_SMOD, REPAIR_FLEET, SHOP, DOCKYARD, SHOP_DMOD, REST_RESTORE, RESTORE_SHIPS, RESTORE_BACK, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
     }
 
     /** Option data: set course for a Node. */
@@ -567,6 +567,10 @@ public class NodeDialog implements InteractionDialogPlugin {
         String capWarning = FleetCap.warning(pf, state);
         if (capWarning != null) text.addPara(capWarning, Misc.getNegativeHighlightColor());
         addServiceOption();
+        if (state.isFreeSmodPending()) {
+            options.addOption("Choose your free S-mod (Boss reward)", Opt.FREE_SMOD);
+            if (Upgrades.smodShips(pf).isEmpty()) options.setEnabled(Opt.FREE_SMOD, false);
+        }
         RunNode committed = state.getTargetNode();
         if (committed != null) {
             text.addPara("Course locked: %s.", Misc.getHighlightColor(), NodeText.full(committed));
@@ -645,9 +649,11 @@ public class NodeDialog implements InteractionDialogPlugin {
         }
         RunFleet.addSmodSlot(m);
         node.claim();
+        state.setFreeSmodPending(true);
         text.addPara(shipName(m) + " can now carry one more S-mod.", Misc.getPositiveHighlightColor());
         if (Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty()) {
-            text.addPara("No ship has a hullmod that can be built in, so the free S-mod is lost.");
+            text.addPara("No ship has a hullmod that can be built in yet. The free S-mod waits: refit a ship, then "
+                    + "choose it from the beacon menu.");
             showWaypoint();
             return;
         }
@@ -861,7 +867,8 @@ public class NodeDialog implements InteractionDialogPlugin {
             return;
         }
         Upgrades.buildIn(m, s.modId);
-        node.claim();
+        if (smodFrom == Opt.BOSS_REFIT) state.setFreeSmodPending(false);
+        else node.claim();
         text.addPara(Global.getSettings().getHullModSpec(s.modId).getDisplayName() + " is now built into "
                 + shipName(m) + ".", Misc.getPositiveHighlightColor());
         showWaypoint();
@@ -1078,7 +1085,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                 break;
             case ABANDON:
                 options.clearOptions();
-                text.addPara("Abandon the Run? It counts as a loss.");
+                text.addPara(state.isAct3Won() ? "Leave the Descent now? The Run stays won." : "Abandon the Run? It counts as a loss.");
                 options.addOption("Abandon", Opt.ABANDON_CONFIRM);
                 options.addOption("Back", Opt.BACK);
                 break;
@@ -1158,6 +1165,10 @@ public class NodeDialog implements InteractionDialogPlugin {
             }
             case DESCEND:
                 descend();
+                break;
+            case FREE_SMOD:
+                smodFrom = Opt.BOSS_REFIT;
+                showSmodShips();
                 break;
             case SMOD_BACK:
                 if (smodFrom == Opt.TREASURE) openTreasure();

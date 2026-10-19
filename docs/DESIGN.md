@@ -97,7 +97,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   | 2 | Chronos | −20 Supplies per fight reward (never below 0, with the DP-cap cut) |
   | 3 | Alpha | more Elites |
   | 4 | Seraph | Rest heals only half |
-  | 5 | Primordial | Bosses get Gamma cores |
+  | 5 | Primordial | Bosses get pilots: Gamma cores (Derelict, Remnant) or officers (Apex fleet) |
   | 6 | Omega | unlocks Act 4 and the true Boss |
 
 - **Records** per Archetype: Runs, wins, deepest Depth, highest Ascension won, Omega cleared.

@@ -292,7 +292,9 @@ public class HubDialog implements InteractionDialogPlugin {
                 break;
             case ABANDON:
                 options.clearOptions();
-                text.addPara("Abandon the Run? It counts as a loss.");
+                RunState current = RunManager.get();
+                text.addPara(current != null && current.isAct3Won() ? "Leave the Descent now? The Run stays won."
+                        : "Abandon the Run? It counts as a loss.");
                 options.addOption("Abandon", Opt.ABANDON_CONFIRM);
                 options.addOption("Back", Opt.BACK);
                 break;

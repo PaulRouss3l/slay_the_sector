@@ -28,6 +28,8 @@ public class RunState implements Serializable {
     /** Act 3's Boss beaten: the Run is won whatever happens in Act 4. */
     private boolean act3Won;
     private boolean trueBossWon;
+    /** Boss reward "Refit": the free S-mod not chosen yet (kept until it is). */
+    private boolean freeSmodPending;
     /** Starting bonuses taken for this Run (Meta progress unlocks). */
     private boolean bonusOfficerLevel;
     /** Width of the map grid Node columns refer to; 0 in older maps, whose columns index their row. */
@@ -73,6 +75,8 @@ public class RunState implements Serializable {
     public boolean isTrueBossWon() { return trueBossWon; }
     public void setTrueBossWon() { trueBossWon = true; }
     public boolean isBonusOfficerLevel() { return bonusOfficerLevel; }
+    public boolean isFreeSmodPending() { return freeSmodPending; }
+    public void setFreeSmodPending(boolean pending) { freeSmodPending = pending; }
     public void setBonusOfficerLevel(boolean on) { bonusOfficerLevel = on; }
 
     /** The last Act of this Run: 3, or 4 (the true Boss) at Ascension Omega. */

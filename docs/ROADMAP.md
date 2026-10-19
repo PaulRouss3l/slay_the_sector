@@ -108,6 +108,13 @@ Design settled 2026-10-19 (DESIGN "Acts and Bosses", "Ascension and Meta progres
 - 🟡 Act 4 at Omega: Rest + true Boss (lone Ziggurat, `sts_trueBossHull`).
 - 🟡 Cross-save Meta progress: Records, Ascension reached, starting bonuses; Hub Records page.
 
+Independent review done and its findings fixed: spawned stations and the true Boss tagged the
+shared stock variant (now a copy, also fixing an S3 leak), Primordial now gives every Boss pilots
+(Gamma cores for Derelict/Remnant, officers for the Apex fleet), the Boss-reward free S-mod stays
+claimable from the beacon menu until used, Act 4 texts. Known, low impact: a one-Act Run started
+on an S1-era map continues into Act 2 with its Start beside the player rather than under it;
+`repairFraction` (Seraph Rest) semantics to confirm in game.
+
 ## S5 — Polish and release ⬜
 
 Balance pass, descriptions/flavor, settings exposure, `package_mod.py --strict`, release.

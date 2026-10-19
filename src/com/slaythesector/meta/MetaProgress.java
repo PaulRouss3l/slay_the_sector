@@ -85,6 +85,7 @@ public final class MetaProgress {
     }
 
     /** Archetype ids with at least one Run. */
+    @SuppressWarnings("unchecked")
     public Iterator<String> archetypeIds() {
         JSONObject all = root.optJSONObject("archetypes");
         return all == null ? new JSONObject().keys() : all.keys();
