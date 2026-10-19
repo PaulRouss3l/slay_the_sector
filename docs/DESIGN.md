@@ -147,8 +147,10 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
   set. Each Shop item sells once; the Shop can be visited repeatedly until the player leaves.
 - The Fleet DP cap is checked whenever a course is set or resumed.
 - The node map's course is applied on the dialog's next frame, after the map has closed.
-- Run-fleet credits are handed back to the Home fleet only when positive (Run payroll is never
-  charged to the campaign).
+- Salaries: vanilla charges pay each economy tick for whatever fleet is the player fleet.
+  `RunPayrollListener` adds up the Run fleet's pay minus the Home fleet's during a Run; Run end
+  hands back the Run fleet's credits plus that total, so the campaign's credits come out as if
+  no Run happened (Run pay refunded, Home pay still charged).
 - Officer training gives the officer exactly the XP for its next level; the player picks the
   skill in the vanilla Fleet screen. S-mods use `addPermaMod(id, true)` within
   `Misc.getMaxPermanentMods`.

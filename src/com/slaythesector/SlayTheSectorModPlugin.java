@@ -10,6 +10,7 @@ import com.slaythesector.intel.HubIntel;
 import com.slaythesector.intel.RunIntel;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunPayrollListener;
 import com.slaythesector.run.RunState;
 import com.slaythesector.run.SafetyNetScript;
 import com.slaythesector.util.STSConstants;
@@ -49,6 +50,9 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         sector.registerPlugin(new RunCampaignPlugin());
         if (!sector.hasTransientScript(RunWatchScript.class)) sector.addTransientScript(new RunWatchScript());
         sector.addTransientScript(new SafetyNetScript());
+        if (!sector.getListenerManager().hasListenerOfClass(RunPayrollListener.class)) {
+            sector.getListenerManager().addListener(new RunPayrollListener(), true);
+        }
 
         // Run enemies fly under the Descent so commissions and bounties ignore their kills.
         FactionAPI descent = sector.getFaction(STSConstants.FACTION_DESCENT);

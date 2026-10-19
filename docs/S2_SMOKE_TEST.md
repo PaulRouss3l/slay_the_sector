@@ -38,3 +38,6 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
 ## 6. Regression
 - [ ] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.
 - [ ] No Rest/Shop/Treasure counts toward the Payout (Payout = deepest **fight** won).
+- [ ] Salaries: note your credits before a Run that crosses a month end (buy officers in the
+      Shop). After the Run, credits = before + Payout + colony income − your Home fleet's usual
+      pay; the Run's officers/crew cost you nothing.

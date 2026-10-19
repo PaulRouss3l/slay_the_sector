@@ -37,6 +37,8 @@ public class RunState implements Serializable {
     private float snapMarines;
     private float snapMarineXp;
     private long snapDeferredBonusXp;
+    /** Run-fleet pay minus the Home fleet's pay since the Run started; refunded at the end (RunPayrollListener). */
+    private float payrollRefund;
     /** Player skill id -> level at Run start; skills learned during the Run are removed at the end. */
     private final HashMap<String, Float> snapSkills = new HashMap<String, Float>();
 
@@ -83,6 +85,8 @@ public class RunState implements Serializable {
     public long getSnapDeferredBonusXp() { return snapDeferredBonusXp; }
     public void setSnapDeferredBonusXp(long xp) { snapDeferredBonusXp = xp; }
     public Map<String, Float> getSnapSkills() { return snapSkills; }
+    public float getPayrollRefund() { return payrollRefund; }
+    public void addPayrollRefund(float credits) { payrollRefund += credits; }
 
     public void addNode(RunNode node) {
         nodes.put(node.getId(), node);
