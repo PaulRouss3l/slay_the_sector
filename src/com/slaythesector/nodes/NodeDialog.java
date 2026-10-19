@@ -33,6 +33,7 @@ import com.slaythesector.economy.Shop;
 import com.slaythesector.economy.Treasure;
 import com.slaythesector.economy.Upgrades;
 import com.slaythesector.map.NodeText;
+import com.slaythesector.run.FleetCap;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunFleet;
 import com.slaythesector.run.RunManager;
@@ -140,6 +141,8 @@ public class NodeDialog implements InteractionDialogPlugin {
                 Misc.getHighlightColor(), NodeText.factionName(node), String.valueOf(node.getDepth()),
                 String.valueOf(Math.round(DepthScaling.combatPoints(node.getDepth(), node.getType()))));
         if (boss) text.addPara("There is no retreat from this fight: withdrawing ends the Run.");
+        String capWarning = FleetCap.warning(Global.getSector().getPlayerFleet(), state);
+        if (capWarning != null) text.addPara(capWarning, Misc.getNegativeHighlightColor());
         options.addOption("Engage", Opt.ENGAGE);
         options.addOption("Abandon the Run", Opt.ABANDON);
         addLeave();
@@ -238,9 +241,15 @@ public class NodeDialog implements InteractionDialogPlugin {
             showWaypoint();
             return;
         }
-        int supplies = boss ? STSSettings.rewardSuppliesBoss() : STSSettings.rewardSuppliesCombat();
+        int base = boss ? STSSettings.rewardSuppliesBoss() : STSSettings.rewardSuppliesCombat();
+        int cut = Math.min(base, FleetCap.penalty(pf, state));
+        int supplies = base - cut;
         pf.getCargo().addSupplies(supplies);
         text.addPara("Victory. Salvage crews recover %s supplies.", Misc.getPositiveHighlightColor(), String.valueOf(supplies));
+        if (cut > 0) {
+            text.addPara("%s supplies lost to the oversized fleet (%s DP over the soft cap).", Misc.getNegativeHighlightColor(),
+                    String.valueOf(cut), String.valueOf(FleetCap.over(pf, state)));
+        }
         if (boss) {
             showRunEnd(true);
         } else {
@@ -255,7 +264,7 @@ public class NodeDialog implements InteractionDialogPlugin {
             return;
         }
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Reward: choose one", cards, CardGridDelegate.Mode.SINGLE, 0, "Skip reward",
+                "Reward: choose one   (" + FleetCap.summary(Global.getSector().getPlayerFleet(), state) + ")", cards, CardGridDelegate.Mode.SINGLE, 0, "Skip reward",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -275,21 +284,17 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void showWaypoint() {
         options.clearOptions();
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        int dp = RunFleet.totalDP(pf);
-        int cap = STSSettings.fleetDPCap(state.getAct());
-        text.addPara("Supplies: %s. Ships: %s. Fleet DP: %s / %s.", Misc.getHighlightColor(),
+        text.addPara("Supplies: %s. Ships: %s. %s.", Misc.getHighlightColor(),
                 String.valueOf((int) pf.getCargo().getSupplies()), String.valueOf(pf.getFleetData().getNumMembers()),
-                String.valueOf(dp), String.valueOf(cap));
+                FleetCap.summary(pf, state));
+        String capWarning = FleetCap.warning(pf, state);
+        if (capWarning != null) text.addPara(capWarning, Misc.getNegativeHighlightColor());
         addServiceOption();
         RunNode committed = state.getTargetNode();
         if (committed != null) {
             text.addPara("Course locked: %s.", Misc.getHighlightColor(), NodeText.full(committed));
             options.addOption("Resume course", new Course(committed.getId()));
         } else {
-            if (dp > cap) {
-                text.addPara("The fleet is over the Fleet DP cap. Sell ships (Fleet services) before setting a course.",
-                        Misc.getNegativeHighlightColor());
-            }
             options.addOption("Open the node map (choose your course)", Opt.MAP);
         }
         options.addOption("Fleet services (repair, sell)", Opt.SERVICES);
@@ -300,13 +305,12 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private void openMap() {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        int dp = RunFleet.totalDP(pf);
-        int cap = STSSettings.fleetDPCap(state.getAct());
-        boolean overCap = dp > cap;
-        String note = overCap ? "Course locked: the fleet is at " + dp + " DP, over the Fleet DP cap of " + cap
-                + ". Close the map and sell ships in Fleet services." : null;
+        boolean blocked = FleetCap.blocked(pf, state);
+        String note = blocked
+                ? "Course locked: " + FleetCap.summary(pf, state) + ". Close the map and sell ships in Fleet services."
+                : FleetCap.warning(pf, state);
         dialog.showCustomVisualDialog(NodeMapDelegate.WIDTH, NodeMapDelegate.HEIGHT,
-                new NodeMapDelegate(state, note, !overCap, new NodeMapDelegate.Listener() {
+                new NodeMapDelegate(state, note, !blocked, new NodeMapDelegate.Listener() {
                     @Override
                     public void done(RunNode chosen) {
                         if (chosen != null) pendingCourse = chosen.getId();
@@ -385,7 +389,7 @@ public class NodeDialog implements InteractionDialogPlugin {
         final CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         int supplies = (int) pf.getCargo().getSupplies();
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Shop: spend your supplies", shopCards, CardGridDelegate.Mode.BUDGET, supplies, "Close the shop",
+                "Shop: spend your supplies   (" + FleetCap.summary(pf, state) + ")", shopCards, CardGridDelegate.Mode.BUDGET, supplies, "Close the shop",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -449,7 +453,7 @@ public class NodeDialog implements InteractionDialogPlugin {
             treasureCards = Treasure.offer(state, node, !Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty());
         }
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Treasure: take one prize", treasureCards, CardGridDelegate.Mode.SINGLE, 0, "Not now",
+                "Treasure: take one prize   (" + FleetCap.summary(Global.getSector().getPlayerFleet(), state) + ")", treasureCards, CardGridDelegate.Mode.SINGLE, 0, "Not now",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -570,9 +574,8 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private void setCourse(String nodeId) {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        if (RunFleet.totalDP(pf) > STSSettings.fleetDPCap(state.getAct())) {
-            text.addPara("The fleet is over the Fleet DP cap. Sell ships (Fleet services) first.",
-                    Misc.getNegativeHighlightColor());
+        if (FleetCap.blocked(pf, state)) {
+            text.addPara(FleetCap.warning(pf, state), Misc.getNegativeHighlightColor());
             showWaypoint();
             return;
         }

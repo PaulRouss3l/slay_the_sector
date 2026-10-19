@@ -70,7 +70,7 @@ The player's real campaign fleet, stored safely while a Run is in progress and r
 _Avoid_: Original fleet, stash, main fleet
 
 **Fleet DP cap**:
-The maximum total deployment points the Run fleet may hold; it grows with each Act.
+The Run fleet's total deployment points limit, growing with each Act: above the soft cap every fight reward loses Supplies per DP over; above the hard cap no new course can be set.
 _Avoid_: Fleet limit, deck size
 
 **Archetype**:

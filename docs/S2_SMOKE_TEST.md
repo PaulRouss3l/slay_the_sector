@@ -32,8 +32,12 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
       applied (S-mod goes through the ship/hullmod picker). "Not now" keeps it until you leave.
 
 ## 5. Fleet DP cap
-- [ ] Waypoint shows `Fleet DP: x / 60`. Buy or win ships past 60: the map opens read-only with
-      a note, and "Resume course" refuses too; sell ships in Fleet services, then courses work again.
+- [ ] Beacon text shows `Fleet DP x / 80 (hard cap 110)`; the Reward/Shop/Treasure grid titles too.
+- [ ] Above 80: red warning on the beacon, the encounter and the map ("N DP over the soft cap:
+      every fight reward is cut by 5×N supplies"); courses still work. Win a fight: reward reduced,
+      with a line saying how much.
+- [ ] Above 110: the map opens locked with the reason; "Resume course" refuses too. Sell ships,
+      then courses work again.
 
 ## 6. Regression
 - [ ] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.

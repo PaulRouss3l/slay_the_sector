@@ -89,7 +89,9 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Attrition**: hull/armor damage carries over; CR regenerates for free up to ~70 % after each
   fight, Supplies top it up; crew refilled free after each fight; fuel unlimited. Ships destroyed
   in a fight are lost unless recovered right after (vanilla recovery flow).
-- **Fleet DP cap** grows with Act (e.g. 30 → 60 → 100); above it the player must sell or scrap.
+- **Fleet DP cap** grows with Act: soft cap 80 / 110 / 140. Each DP over the soft cap cuts every
+  fight reward by 5 Supplies; the hard cap (soft + 30) blocks setting a course until ships are sold.
+  Gaining ships is never blocked.
 - **Character skills** of the player carry into the Run (accepted).
 - **Run loss**: fleet wiped (intercepted via `CampaignPlugin.pickRespawnPlugin` 🧪) or no
   deployable ship left. Retreating from a non-Boss fight = that fight lost (no reward), Run goes on.

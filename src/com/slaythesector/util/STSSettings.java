@@ -35,14 +35,18 @@ public final class STSSettings {
     public static float weightCombat() { return f("sts_nodeWeightCombat", 6f); }
     public static float weightShop() { return f("sts_nodeWeightShop", 2f); }
     public static float weightRest() { return f("sts_nodeWeightRest", 1.5f); }
-    /** Fleet DP cap of Act {@code act} (1-based); the last value covers later Acts. */
+    /** Hard cap = soft cap + this; above it no course can be set. */
+    public static int fleetDPHardMargin() { return i("sts_fleetDPHardMargin", 30); }
+    /** Supplies cut from each fight reward per DP over the soft cap. */
+    public static int overCapSuppliesPerDP() { return i("sts_overCapSuppliesPerDP", 5); }
+    /** Soft Fleet DP cap of Act {@code act} (1-based); the last value covers later Acts. */
     public static int fleetDPCap(int act) {
         List<String> caps = list("sts_fleetDPCap");
-        if (caps.isEmpty()) return 60 + 30 * (act - 1);
+        if (caps.isEmpty()) return 80 + 30 * (act - 1);
         try {
             return Integer.parseInt(caps.get(Math.min(act, caps.size()) - 1));
         } catch (NumberFormatException e) {
-            return 60;
+            return 80;
         }
     }
     public static int shopSuppliesPerDP() { return i("sts_shopSuppliesPerDP", 8); }

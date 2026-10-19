@@ -13,12 +13,11 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.map.NodeText;
-import com.slaythesector.run.RunFleet;
+import com.slaythesector.run.FleetCap;
 import com.slaythesector.run.RunManager;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunState;
 import com.slaythesector.ui.NodeMapPanel;
-import com.slaythesector.util.STSSettings;
 
 /**
  * Read-only overview of the active Run: summary in the list, the node map as the large
@@ -68,10 +67,9 @@ public class RunIntel extends BaseIntelPlugin {
                 archetype == null ? state.getArchetypeId() : archetype.getDisplayName(), String.valueOf(state.getAct()));
         info.addPara("Deepest Node won: %s. Supplies: %s.", opad, h,
                 String.valueOf(state.getMaxDepthWon()), String.valueOf((int) pf.getCargo().getSupplies()));
-        int dp = RunFleet.totalDP(pf);
-        int cap = STSSettings.fleetDPCap(state.getAct());
-        info.addPara("Fleet DP: %s / %s.", opad, dp > cap ? Misc.getNegativeHighlightColor() : h,
-                String.valueOf(dp), String.valueOf(cap));
+        info.addPara(FleetCap.summary(pf, state) + ".", opad);
+        String capWarning = FleetCap.warning(pf, state);
+        if (capWarning != null) info.addPara(capWarning, Misc.getNegativeHighlightColor(), opad);
         RunNode next = state.getTargetNode();
         if (next != null) info.addPara("Course locked: %s.", opad, h, NodeText.full(next));
         info.addPara("Courses are chosen on the node map at each beacon.", Misc.getGrayColor(), opad);
