@@ -48,6 +48,8 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
 - [ ] Starting pick: **Random** fills up to 30 DP with random ships; each press rolls again;
       +/- still adjust; Confirm starts the Run.
 - [ ] Combat, Reward pick, retreat, Boss, save/load mid-Run and Abandon still work as in S1.
+- [ ] Boss: strength ~78 in its description; no AI-core officers on its ships (check a ship's
+      captain in the battle screen); winnable with a decent ~70-80 DP fleet.
 - [ ] No Rest/Shop/Treasure counts toward the Payout (Payout = deepest **fight** won).
 - [ ] Salaries: note your credits before a Run that crosses a month end (buy officers in the
       Shop). After the Run, credits = before + Payout + colony income − your Home fleet's usual

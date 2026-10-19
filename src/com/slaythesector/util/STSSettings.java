@@ -19,7 +19,15 @@ public final class STSSettings {
     public static int startingSupplies() { return i("sts_startingSupplies", 150); }
     public static float enemyBaseFP() { return f("sts_enemyBaseFP", 15f); }
     public static float enemyFPPerDepth() { return f("sts_enemyFPPerDepth", 4.5f); }
-    public static float bossFPMult() { return f("sts_bossFPMult", 1.65f); }
+    public static float bossFPMult() { return f("sts_bossFPMult", 1.3f); }
+    /** Boss pilots: "none", "gamma" or "normal" (see EncounterFactory). */
+    public static String bossOfficers() {
+        try {
+            return Global.getSettings().getString("sts_bossOfficers");
+        } catch (Exception e) {
+            return "none";
+        }
+    }
     public static float crRegenFraction() { return f("sts_crRegenFraction", 0.7f); }
     public static float repairCostMult() { return f("sts_repairCostMult", 1f); }
     public static int sellSuppliesPerDP() { return i("sts_sellSuppliesPerDP", 4); }

@@ -61,7 +61,9 @@ reproduced after reload; covered by the pre-fight CR floor).
 Code-complete on branch `s2/map-economy`; in-game checklist: `S2_SMOKE_TEST.md`.
 - 🟡 Act layout generated like Slay the Spire (grid + non-crossing paths, 10 rows + Boss) with its
   placement rules (see DESIGN "Map"); checked offline on 5,000 maps. Enemy strength per Depth
-  4.5 FP (Boss ~99 FP); Reward ships: destroyers from Depth 4, cruisers from Depth 8.
+  4.5 FP; Reward ships: destroyers from Depth 4, cruisers from Depth 8.
+- 🟡 Boss eased after the S2 playtest: no officers or AI cores (`sts_bossOfficers` = none / gamma /
+  normal), `sts_bossFPMult` 1.65 → 1.3 (~78 FP at Depth 11).
 - 🟡 Node map canvas (GL lines + vanilla intel icons), hover info, click + "Set course"; replaces
   the course text options. Read-only copy as the large description of a Run Intel entry.
 - 🟡 Shop: card grid in budget mode priced in Supplies (ships one size above the Reward cap,
