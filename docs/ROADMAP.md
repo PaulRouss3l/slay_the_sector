@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S2** — map and economy Nodes.
+**Current target: S2** — code-complete, awaiting the in-game smoke test (`S2_SMOKE_TEST.md`).
 
 ## Done before the redesign
 
@@ -56,9 +56,18 @@ points in a Run re-earns that XP afterwards; an AI fleet already pursuing the pl
 may target the parked Home fleet (untested). One unexplained 0 % CR at a Boss start (not
 reproduced after reload; covered by the pre-fight CR floor).
 
-## S2 — Map and economy Nodes ⬜
+## S2 — Map and economy Nodes 🟡
 
-Node map canvas + Intel overview, Shop, Rest, Treasure, Fleet DP cap.
+Code-complete on branch `s2/map-economy`; in-game checklist: `S2_SMOKE_TEST.md`.
+- 🟡 Act layout with StS placement rules: rows 1-2 Combat, middle row Treasure, row before the
+  Boss Rest, other rows weighted Combat/Shop/Rest (`sts_nodeWeight*`), ≥ 1 Shop, no Rest in row 3.
+- 🟡 Node map canvas (GL lines + vanilla intel icons), hover info, click + "Set course"; replaces
+  the course text options. Read-only copy as the large description of a Run Intel entry.
+- 🟡 Shop: card grid in budget mode priced in Supplies (ships one size above the Reward cap,
+  weapons, an officer); dockyard repair at half price; stock gone once you leave.
+- 🟡 Rest: one of free full repair / S-mod / officer +1 level (skill picked in the vanilla Fleet screen).
+- 🟡 Treasure: one of a rare (bigger) ship, top-tier weapons, an S-mod.
+- 🟡 Fleet DP cap (`sts_fleetDPCap`, Act 1 = 60): over the cap, no course can be set until ships are sold.
 
 ## S3 — Special fights and Events ⬜
 

@@ -1,6 +1,5 @@
 package com.slaythesector.nodes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,13 +11,13 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode;
 import com.fs.starfarer.api.campaign.CoreInteractionListener;
 import com.fs.starfarer.api.campaign.CoreUITabId;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.OfficerDataAPI;
 import com.fs.starfarer.api.combat.BattleCreationContext;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
@@ -26,9 +25,14 @@ import com.fs.starfarer.api.impl.campaign.FleetEncounterContext;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.BaseFIDDelegate;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.FIDConfig;
+import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.combat.EncounterFactory;
 import com.slaythesector.combat.Rewards;
+import com.slaythesector.economy.Shop;
+import com.slaythesector.economy.Treasure;
+import com.slaythesector.economy.Upgrades;
+import com.slaythesector.map.NodeText;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunFleet;
 import com.slaythesector.run.RunManager;
@@ -36,24 +40,42 @@ import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunState;
 import com.slaythesector.ui.Card;
 import com.slaythesector.ui.CardGridDelegate;
+import com.slaythesector.ui.NodeMapDelegate;
 import com.slaythesector.util.DepthScaling;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSSettings;
 import com.slaythesector.world.RunSystem;
 
 /**
- * Dialog of a Node entity in the Run system. At the target Node: the encounter, fought through
- * the vanilla fleet encounter flow (pattern: vanilla SalvageDefenderInteraction). At the current
- * Node: Fleet services and the choice of the next Node.
+ * Dialog of a Node entity in the Run system. At a target fight Node: the encounter, fought through
+ * the vanilla fleet encounter flow (pattern: vanilla SalvageDefenderInteraction). Arriving at a
+ * Shop, Rest or Treasure Node resolves it and offers its service once. At the current Node: the
+ * service if still unclaimed, Fleet services, and the node map to choose the next Node.
  */
 public class NodeDialog implements InteractionDialogPlugin {
 
-    private enum Opt { ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE }
+    private enum Opt {
+        ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
+        SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK
+    }
 
     /** Option data: set course for a Node. */
     private static class Course {
         final String nodeId;
         Course(String nodeId) { this.nodeId = nodeId; }
+    }
+
+    /** Option data: pick a ship for an S-mod, then (with {@code modId}) the hullmod to build in. */
+    private static class Smod {
+        final String memberId;
+        final String modId;
+        Smod(String memberId, String modId) { this.memberId = memberId; this.modId = modId; }
+    }
+
+    /** Option data: train this officer (+1 level). */
+    private static class Train {
+        final String personId;
+        Train(String personId) { this.personId = personId; }
     }
 
     /** Option data: repair or sell one ship. */
@@ -72,6 +94,11 @@ public class NodeDialog implements InteractionDialogPlugin {
     private boolean runWon;
     /** Set after a won fight; the Reward pick opens on the next frame, outside the loot screen's callback. */
     private boolean pendingReward;
+    /** Shop stock / Treasure prizes, drawn once per visit; the Node is claimed when the player leaves. */
+    private List<Card> shopCards;
+    private List<Card> treasureCards;
+    /** Where the S-mod picker returns on "Back": the Rest menu or the Treasure prizes. */
+    private Opt smodFrom;
 
     @Override
     public void init(InteractionDialogAPI dialog) {
@@ -87,6 +114,10 @@ public class NodeDialog implements InteractionDialogPlugin {
             options.addOption("Leave", Opt.LEAVE);
         } else if (node.getId().equals(state.getTargetNodeId()) && node.getType().isFight()) {
             showEncounter();
+        } else if (node.getId().equals(state.getTargetNodeId())) {
+            // Shop, Rest, Treasure: arriving resolves the Node (never counts as a win for the Payout).
+            state.resolveTarget(false);
+            showArrival();
         } else if (node.getId().equals(state.getCurrentNodeId())) {
             if (node.getType() == NodeType.START) {
                 text.addPara("The entry beacon of the Descent. Every course from here leads down.");
@@ -102,10 +133,9 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private void showEncounter() {
         options.clearOptions();
-        FactionAPI f = Global.getSector().getFaction(node.getFactionId());
         boolean boss = node.getType() == NodeType.BOSS;
         text.addPara((boss ? "The Apex: " : "") + "a %s fleet holds this beacon. Depth %s, estimated strength %s.",
-                Misc.getHighlightColor(), f.getDisplayName(), String.valueOf(node.getDepth()),
+                Misc.getHighlightColor(), NodeText.factionName(node), String.valueOf(node.getDepth()),
                 String.valueOf(Math.round(DepthScaling.combatPoints(node.getDepth(), node.getType()))));
         if (boss) text.addPara("There is no retreat from this fight: withdrawing ends the Run.");
         options.addOption("Engage", Opt.ENGAGE);
@@ -243,24 +273,231 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void showWaypoint() {
         options.clearOptions();
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        text.addPara("Supplies: %s. Ships: %s.", Misc.getHighlightColor(),
-                String.valueOf((int) pf.getCargo().getSupplies()), String.valueOf(pf.getFleetData().getNumMembers()));
+        int dp = RunFleet.totalDP(pf);
+        int cap = STSSettings.fleetDPCap(state.getAct());
+        text.addPara("Supplies: %s. Ships: %s. Fleet DP: %s / %s.", Misc.getHighlightColor(),
+                String.valueOf((int) pf.getCargo().getSupplies()), String.valueOf(pf.getFleetData().getNumMembers()),
+                String.valueOf(dp), String.valueOf(cap));
+        addServiceOption();
         RunNode committed = state.getTargetNode();
         if (committed != null) {
-            text.addPara("Course locked: %s, Depth %s.", Misc.getHighlightColor(),
-                    committed.getType().label() + " — " + factionName(committed), String.valueOf(committed.getDepth()));
+            text.addPara("Course locked: %s.", Misc.getHighlightColor(), NodeText.full(committed));
             options.addOption("Resume course", new Course(committed.getId()));
-        }
-        for (RunNode next : committed != null ? new ArrayList<RunNode>() : state.getChoices()) {
-            String label = next.getType() == NodeType.BOSS
-                    ? "Set course: Boss — " + factionName(next) + " (Depth " + next.getDepth() + ")"
-                    : "Set course: " + next.getType().label() + " — " + factionName(next) + " (Depth " + next.getDepth() + ")";
-            options.addOption(label, new Course(next.getId()));
+        } else {
+            if (dp > cap) {
+                text.addPara("The fleet is over the Fleet DP cap. Sell ships (Fleet services) before setting a course.",
+                        Misc.getNegativeHighlightColor());
+            }
+            options.addOption("Open the node map (choose your course)", Opt.MAP);
         }
         options.addOption("Fleet services (repair, sell)", Opt.SERVICES);
         options.addOption("Refit the Run fleet", Opt.REFIT);
         options.addOption("Abandon the Run", Opt.ABANDON);
         addLeave();
+    }
+
+    private void openMap() {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        boolean overCap = RunFleet.totalDP(pf) > STSSettings.fleetDPCap(state.getAct());
+        String note = overCap ? "Over the Fleet DP cap: sell ships before setting a course." : null;
+        dialog.showCustomVisualDialog(NodeMapDelegate.WIDTH, NodeMapDelegate.HEIGHT,
+                new NodeMapDelegate(state, note, !overCap, new NodeMapDelegate.Listener() {
+                    @Override
+                    public void done(RunNode chosen) {
+                        if (chosen != null) setCourse(chosen.getId());
+                    }
+                }));
+    }
+
+    // ---- Shop, Rest, Treasure ------------------------------------------------------------------
+
+    private void showArrival() {
+        switch (node.getType()) {
+            case SHOP:
+                text.addPara("A trader's hulk drifts by the beacon, lights on. Everything is priced in supplies, "
+                        + "and the trader moves on once you leave.");
+                break;
+            case REST:
+                text.addPara("A quiet beacon. Your crews get a moment to breathe. Choose one thing to do here.");
+                break;
+            case TREASURE:
+                text.addPara("A sealed cache, older than the Descent itself. You may take one prize.");
+                break;
+            default:
+                break;
+        }
+        showWaypoint();
+    }
+
+    /** The current Node's own service, while it hasn't been used. Shop repairs stay available. */
+    private void addServiceOption() {
+        RunNode cur = state.getCurrentNode();
+        if (cur == null || !cur.getId().equals(node.getId())) return;
+        switch (cur.getType()) {
+            case SHOP:
+                if (!cur.isClaimed()) options.addOption("Browse the shop", Opt.SHOP);
+                int cost = dockyardCost();
+                if (cost > 0) {
+                    options.addOption("Dockyard: repair the whole fleet — " + cost + " supplies", Opt.DOCKYARD);
+                    if (cost > Global.getSector().getPlayerFleet().getCargo().getSupplies()) options.setEnabled(Opt.DOCKYARD, false);
+                }
+                break;
+            case REST:
+                if (!cur.isClaimed()) options.addOption("Rest (choose one)", Opt.REST);
+                break;
+            case TREASURE:
+                if (!cur.isClaimed()) options.addOption("Open the cache", Opt.TREASURE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private int dockyardCost() {
+        int total = 0;
+        for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+            total += RunFleet.repairCost(m);
+        }
+        return Math.round(total * STSSettings.shopRepairMult());
+    }
+
+    private void dockyard() {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        int cost = dockyardCost();
+        if (cost > pf.getCargo().getSupplies()) return;
+        pf.getCargo().removeSupplies(cost);
+        for (FleetMemberAPI m : pf.getFleetData().getMembersListCopy()) RunFleet.repair(m);
+        text.addPara("The dockyard crews patch up the fleet for " + cost + " supplies.");
+        showWaypoint();
+    }
+
+    private void openShop() {
+        if (shopCards == null) shopCards = Shop.stock(state, node);
+        final CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        int supplies = (int) pf.getCargo().getSupplies();
+        dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
+                "Shop: spend your supplies", shopCards, CardGridDelegate.Mode.BUDGET, supplies, "Close the shop",
+                new CardGridDelegate.Listener() {
+                    @Override
+                    public void done(List<Card> picked) {
+                        if (!picked.isEmpty()) {
+                            int total = Shop.total(picked);
+                            if (total <= pf.getCargo().getSupplies()) {
+                                pf.getCargo().removeSupplies(total);
+                                text.addPara("Bought for " + total + " supplies: " + Shop.apply(picked, pf) + ".");
+                                node.claim();
+                            }
+                        }
+                        showWaypoint();
+                    }
+                }).withBudgetLabel("Supplies"));
+    }
+
+    private void showRest() {
+        options.clearOptions();
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        options.addOption("Full repair of the fleet (free)", Opt.REST_REPAIR);
+        if (dockyardCost() == 0) options.setEnabled(Opt.REST_REPAIR, false);
+        options.addOption("Build in an S-mod on one ship", Opt.REST_SMOD);
+        if (Upgrades.smodShips(pf).isEmpty()) options.setEnabled(Opt.REST_SMOD, false);
+        options.addOption("Train an officer (+1 level)", Opt.REST_TRAIN);
+        if (Upgrades.trainableOfficers(pf).isEmpty()) options.setEnabled(Opt.REST_TRAIN, false);
+        options.addOption("Back", Opt.BACK);
+        options.setShortcut(Opt.BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+    }
+
+    private void restRepair() {
+        for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) RunFleet.repair(m);
+        node.claim();
+        text.addPara("Every ship is repaired and back to full combat readiness.");
+        showWaypoint();
+    }
+
+    private void showTrainees() {
+        options.clearOptions();
+        for (OfficerDataAPI od : Upgrades.trainableOfficers(Global.getSector().getPlayerFleet())) {
+            options.addOption(od.getPerson().getNameString() + " (level " + od.getPerson().getStats().getLevel() + ")",
+                    new Train(od.getPerson().getId()));
+        }
+        options.addOption("Back", Opt.REST);
+        options.setShortcut(Opt.REST, Keyboard.KEY_ESCAPE, false, false, false, true);
+    }
+
+    private void train(Train t) {
+        for (OfficerDataAPI od : Upgrades.trainableOfficers(Global.getSector().getPlayerFleet())) {
+            if (!od.getPerson().getId().equals(t.personId)) continue;
+            Upgrades.train(od);
+            node.claim();
+            text.addPara(od.getPerson().getNameString() + " is ready to level up: pick the new skill in the Fleet screen.",
+                    Misc.getPositiveHighlightColor());
+            break;
+        }
+        showWaypoint();
+    }
+
+    private void openTreasure() {
+        if (treasureCards == null) {
+            treasureCards = Treasure.offer(state, node, !Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty());
+        }
+        dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
+                "Treasure: take one prize", treasureCards, CardGridDelegate.Mode.SINGLE, 0, "Not now",
+                new CardGridDelegate.Listener() {
+                    @Override
+                    public void done(List<Card> picked) {
+                        if (picked.isEmpty()) {
+                            showWaypoint();
+                            return;
+                        }
+                        Treasure.Prize prize = (Treasure.Prize) picked.get(0).data;
+                        if (prize.kind == Treasure.Kind.SMOD) {
+                            smodFrom = Opt.TREASURE;
+                            showSmodShips();
+                            return;
+                        }
+                        text.addPara(Treasure.apply(prize, Global.getSector().getPlayerFleet()));
+                        node.claim();
+                        showWaypoint();
+                    }
+                }));
+    }
+
+    private void showSmodShips() {
+        options.clearOptions();
+        text.addPara("Choose the ship.");
+        for (FleetMemberAPI m : Upgrades.smodShips(Global.getSector().getPlayerFleet())) {
+            options.addOption(shipName(m), new Smod(m.getId(), null));
+        }
+        options.addOption("Back", Opt.SMOD_BACK);
+        options.setShortcut(Opt.SMOD_BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+    }
+
+    private void smod(Smod s) {
+        FleetMemberAPI m = find(Global.getSector().getPlayerFleet(), s.memberId);
+        if (m == null) {
+            showSmodShips();
+            return;
+        }
+        if (s.modId == null) {
+            options.clearOptions();
+            text.addPara("Choose the hullmod to build into " + shipName(m) + ".");
+            for (HullModSpecAPI spec : Upgrades.smodChoices(m)) {
+                options.addOption(spec.getDisplayName(), new Smod(m.getId(), spec.getId()));
+            }
+            options.addOption("Back", Opt.SMOD_BACK);
+            options.setShortcut(Opt.SMOD_BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+            return;
+        }
+        Upgrades.buildIn(m, s.modId);
+        node.claim();
+        text.addPara(Global.getSettings().getHullModSpec(s.modId).getDisplayName() + " is now built into "
+                + shipName(m) + ".", Misc.getPositiveHighlightColor());
+        showWaypoint();
+    }
+
+    /** Leaving the Node: a Shop or Treasure that was opened is gone (no re-rolling by leaving). */
+    private void leave() {
+        if ((shopCards != null || treasureCards != null) && node != null) node.claim();
+        dialog.dismiss();
     }
 
     private void showServices() {
@@ -327,7 +564,7 @@ public class NodeDialog implements InteractionDialogPlugin {
         if (state.getTargetNodeId() == null) state.setTargetNodeId(nodeId);
         nodeId = state.getTargetNodeId();
         SectorEntityToken target = RunSystem.ensureNodeEntity(state.getNode(nodeId));
-        dialog.dismiss();
+        leave();
         Global.getSector().layInCourseFor(target);
     }
 
@@ -355,6 +592,14 @@ public class NodeDialog implements InteractionDialogPlugin {
         }
         if (data instanceof Service) {
             doService((Service) data);
+            return;
+        }
+        if (data instanceof Smod) {
+            smod((Smod) data);
+            return;
+        }
+        if (data instanceof Train) {
+            train((Train) data);
             return;
         }
         if (!(data instanceof Opt)) return;
@@ -393,7 +638,36 @@ public class NodeDialog implements InteractionDialogPlugin {
                 RunManager.returnToHub();
                 break;
             case LEAVE:
-                dialog.dismiss();
+                leave();
+                break;
+            case MAP:
+                openMap();
+                break;
+            case SHOP:
+                openShop();
+                break;
+            case DOCKYARD:
+                dockyard();
+                break;
+            case REST:
+                showRest();
+                break;
+            case REST_REPAIR:
+                restRepair();
+                break;
+            case REST_SMOD:
+                smodFrom = Opt.REST;
+                showSmodShips();
+                break;
+            case REST_TRAIN:
+                showTrainees();
+                break;
+            case TREASURE:
+                openTreasure();
+                break;
+            case SMOD_BACK:
+                if (smodFrom == Opt.TREASURE) openTreasure();
+                else showRest();
                 break;
         }
     }
@@ -403,11 +677,6 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void addLeave() {
         options.addOption("Leave", Opt.LEAVE);
         options.setShortcut(Opt.LEAVE, Keyboard.KEY_ESCAPE, false, false, false, true);
-    }
-
-    private static String factionName(RunNode n) {
-        FactionAPI f = Global.getSector().getFaction(n.getFactionId());
-        return f == null ? n.getFactionId() : f.getDisplayName();
     }
 
     private static String shipName(FleetMemberAPI m) {

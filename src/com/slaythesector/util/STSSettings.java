@@ -12,7 +12,7 @@ public final class STSSettings {
 
     private STSSettings() {}
 
-    public static int actRows() { return i("sts_actRows", 6); }
+    public static int actRows() { return i("sts_actRows", 7); }
     public static int startingDP() { return i("sts_startingDP", 30); }
     public static int startingSupplies() { return i("sts_startingSupplies", 150); }
     public static float enemyBaseFP() { return f("sts_enemyBaseFP", 15f); }
@@ -31,6 +31,26 @@ public final class STSSettings {
     public static int minKnownShips() { return i("sts_minKnownShips", 8); }
     public static List<String> bossFactions() { return list("sts_bossFactions"); }
     public static List<String> factionBlacklist() { return list("sts_factionBlacklist"); }
+    /** Relative weights of Node types on rows without a fixed type. */
+    public static float weightCombat() { return f("sts_nodeWeightCombat", 6f); }
+    public static float weightShop() { return f("sts_nodeWeightShop", 2f); }
+    public static float weightRest() { return f("sts_nodeWeightRest", 1.5f); }
+    /** Fleet DP cap of Act {@code act} (1-based); the last value covers later Acts. */
+    public static int fleetDPCap(int act) {
+        List<String> caps = list("sts_fleetDPCap");
+        if (caps.isEmpty()) return 60 + 30 * (act - 1);
+        try {
+            return Integer.parseInt(caps.get(Math.min(act, caps.size()) - 1));
+        } catch (NumberFormatException e) {
+            return 60;
+        }
+    }
+    public static int shopSuppliesPerDP() { return i("sts_shopSuppliesPerDP", 8); }
+    public static int shopWeaponBase() { return i("sts_shopWeaponBase", 4); }
+    public static float shopWeaponPerOP() { return f("sts_shopWeaponPerOP", 1.5f); }
+    public static int shopOfficerBase() { return i("sts_shopOfficerBase", 30); }
+    public static int shopOfficerPerLevel() { return i("sts_shopOfficerPerLevel", 10); }
+    public static float shopRepairMult() { return f("sts_shopRepairMult", 0.5f); }
 
     private static int i(String key, int def) {
         try {

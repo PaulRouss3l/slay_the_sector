@@ -47,6 +47,8 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private final String cancelText;
     private final Listener listener;
     private final int[] counts;
+    /** BUDGET mode: what the budget counts, e.g. "Deployment points" or "Supplies". */
+    private String budgetLabel = "Deployment points";
 
     private CustomPanelAPI root;
     private CustomPanelAPI content;
@@ -68,6 +70,11 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         this.cancelText = cancelText;
         this.listener = listener;
         this.counts = new int[cards.size()];
+    }
+
+    public CardGridDelegate withBudgetLabel(String label) {
+        this.budgetLabel = label;
+        return this;
     }
 
     private final CustomUIPanelPlugin plugin = new CustomUIPanelPlugin() {
@@ -179,7 +186,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         int pages = Math.max(1, (cards.size() + perPage - 1) / perPage);
         String pageText = "Page " + (page + 1) + "/" + pages;
         if (mode == Mode.BUDGET) {
-            status.setText("Deployment points: " + used() + " / " + budget + "     " + pageText);
+            status.setText(budgetLabel + ": " + used() + " / " + budget + "     " + pageText);
             confirm.setEnabled(used() > 0);
         } else {
             status.setText(pageText);
@@ -210,7 +217,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         if (mode == Mode.SINGLE) {
             ui.addButton("Pick", "pick:" + i, CARD_W - 20f, 24f, 8f);
         } else {
-            ui.addPara("In fleet: " + counts[i], 4f);
+            ui.addPara("Selected: " + counts[i], 4f);
             ButtonAPI add = ui.addButton("+ Add", "add:" + i, 100f, 24f, 6f);
             add.setEnabled(used() + c.cost <= budget);
             ButtonAPI rem = ui.addButton("- Remove", "rem:" + i, 100f, 24f, 0f);

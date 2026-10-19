@@ -2,6 +2,7 @@ package com.slaythesector.run;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,8 @@ public class RunState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String archetypeId;
+    /** Current Act, 1-based (one Act until S3). 0 in saves from before the field existed. */
+    private int act = 1;
     private final Map<String, RunNode> nodes = new LinkedHashMap<String, RunNode>();
     private final List<String> enemyFactionIds = new ArrayList<String>();
     /** Last Node the player resolved (or START). Its successors are the next choices. */
@@ -42,6 +45,8 @@ public class RunState implements Serializable {
     }
 
     public String getArchetypeId() { return archetypeId; }
+    public int getAct() { return Math.max(1, act); }
+    public Collection<RunNode> getNodes() { return nodes.values(); }
     public List<String> getEnemyFactionIds() { return enemyFactionIds; }
     public String getCurrentNodeId() { return currentNodeId; }
     public void setCurrentNodeId(String id) { this.currentNodeId = id; }

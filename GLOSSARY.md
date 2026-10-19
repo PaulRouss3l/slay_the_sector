@@ -47,6 +47,10 @@ _Avoid_: Fog, lock-in
 A Node with a story choice that may lead to a special fight (battle station, third-party battle, convoy raid) or a setback.
 _Avoid_: Random encounter, question mark
 
+**Shop**:
+A Node where Supplies buy ships, weapons, officers and repairs, once per visit.
+_Avoid_: Store, merchant, market
+
 **Rest**:
 A Node offering one free benefit: full fleet repair, an S-mod, or an officer level.
 _Avoid_: Campfire, camp, repair node

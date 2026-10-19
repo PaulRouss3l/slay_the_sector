@@ -106,7 +106,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 
 ## Code layout
 
-Root package `com.slaythesector` (S1 state; later packages added as their milestones land).
+Root package `com.slaythesector` (S2 state; later packages added as their milestones land).
 
 | Package / class | Responsibility |
 |---|---|
@@ -114,12 +114,13 @@ Root package `com.slaythesector` (S1 state; later packages added as their milest
 | `RunCampaignPlugin` | routes Hub/Node interactions, fleet-wipe intercept (`pickRespawnPlugin`) |
 | `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
 | `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
-| `map/NodeGraphBuilder` | pure-logic Act layout |
-| `intel/HubIntel` | Permanent Important Intel entry locating the Hub |
+| `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
+| `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
 | `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
-| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick → Fleet services → next course |
-| `ui/` | `CardGridDelegate` + `Card` (the shared picker) |
+| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
+| `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
+| `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
 | `util/` | `STSConstants`, `STSSettings` (`sts_*` keys in settings.json), `DepthScaling`, `STSLog` |
 
@@ -138,6 +139,15 @@ Root package `com.slaythesector` (S1 state; later packages added as their milest
   end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+
+**Implementation notes (S2)**
+- Shop, Rest and Treasure resolve on arrival but never count as won (Payout stays on fights).
+  Their service is claimed once (`RunNode.claimed`); an opened Shop or Treasure is claimed when
+  the player leaves, so leaving and returning can't re-roll it.
+- Officer training gives the officer exactly the XP for its next level; the player picks the
+  skill in the vanilla Fleet screen. S-mods use `addPermaMod(id, true)` within
+  `Misc.getMaxPermanentMods`.
+- Ship pools skip automated hulls (they need a skill to crew).
 - Deferred from S1: free starting weapons from the Archetype's known weapons (refit uses what the
   ships carry plus salvage), Fleet DP cap (S2), Meta progress (S4).
 

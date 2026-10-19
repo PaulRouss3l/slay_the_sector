@@ -49,9 +49,9 @@ public final class Rewards {
         List<Card> cards = new ArrayList<Card>();
         HullSize maxSize = DepthScaling.rewardSize(node.getDepth());
 
-        List<FleetMemberAPI> enemyPool = shipPool(node.getFactionId(), maxSize, rng);
+        List<FleetMemberAPI> enemyPool = Archetypes.shipsUpTo(node.getFactionId(), maxSize, rng);
         List<FleetMemberAPI> ownPool = archetypeId == null || archetypeId.equals(node.getFactionId())
-                ? new ArrayList<FleetMemberAPI>() : shipPool(archetypeId, maxSize, rng);
+                ? new ArrayList<FleetMemberAPI>() : Archetypes.shipsUpTo(archetypeId, maxSize, rng);
         List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>(enemyPool);
         pool.addAll(ownPool);
 
@@ -107,19 +107,8 @@ public final class Rewards {
         }
     }
 
-    /** Shuffled ships of a faction, no larger than the Depth allows. */
-    private static List<FleetMemberAPI> shipPool(String factionId, HullSize maxSize, Random rng) {
-        List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>();
-        if (factionId == null || Global.getSector().getFaction(factionId) == null) return pool;
-        for (FleetMemberAPI m : Archetypes.shipPool(factionId, 999f, 40)) {
-            if (m.getHullSpec().getHullSize().ordinal() <= maxSize.ordinal()) pool.add(m);
-        }
-        Collections.shuffle(pool, rng);
-        return pool;
-    }
-
     /** Three weapons taken from the pool ships' loadouts. */
-    private static List<String> weaponBundle(List<FleetMemberAPI> pool, Random rng) {
+    static List<String> weaponBundle(List<FleetMemberAPI> pool, Random rng) {
         List<String> all = new ArrayList<String>();
         for (FleetMemberAPI m : pool) {
             for (String slot : m.getVariant().getNonBuiltInWeaponSlots()) {
@@ -131,7 +120,7 @@ public final class Rewards {
         return new ArrayList<String>(all.subList(0, Math.min(3, all.size())));
     }
 
-    private static String describe(List<String> weaponIds) {
+    public static String describe(List<String> weaponIds) {
         StringBuilder sb = new StringBuilder();
         for (String id : weaponIds) {
             if (sb.length() > 0) sb.append(", ");
