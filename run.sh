@@ -2,10 +2,10 @@
 # Launch Starsector from the install dir with a JDWP debug agent on :5005.
 # Attach the VSCode "Debug Starsector (attach)" config to hit breakpoints in mod code.
 # VM flags are copied from the game's own starsector.sh (Linux), plus the debug agent.
-cd "/home/ubik/Downloads/starsector" || exit 1
+cd "${STARSECTOR_DIR:-/home/ubik/Downloads/starsector}" || exit 1
 
 ./jre_linux/bin/java \
-    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:5005 \
     -Dfile.encoding=UTF-8 \
     -noverify \
     -XX:+UnlockDiagnosticVMOptions \

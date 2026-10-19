@@ -48,10 +48,6 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 
 ## Adjusting paths
 
-All paths assume the install at `/home/ubik/Downloads/starsector`. If it moves, set
-`STARSECTOR_DIR` (or edit its default in `build.sh`), the `cd` in `run.sh`, and the jar globs in
-`.vscode/settings.json`.
-
 `gameVersion` in `mod_info.json` is `0.98a-RC8` (the installed version). If the launcher shows a
 "version mismatch" warning, set it to the exact version printed on the launcher screen.
 
@@ -62,6 +58,8 @@ All paths assume the install at `/home/ubik/Downloads/starsector`. If it moves, 
 3. After an in-game test: `python3 tools/log_scan.py --mod .`.
 
 # MODS SOURCES / EXAMPLES
+
 https://github.com/wispborne/Starsector-IntelliJ-Template
 https://github.com/Lukas22041/SecondInCommand
 https://github.com/Histidine91/Nexerelin
+https://github.com/tracesfx/starsector-modding-skill
