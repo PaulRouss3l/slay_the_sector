@@ -115,6 +115,21 @@ public final class NodeGraphBuilder {
         state.setCurrentNodeId(start.getId());
     }
 
+    /** Act 4 (Ascension Omega): Start, one Rest, then the true Boss, in the middle column. */
+    public static void buildFinal(RunState state, int columns) {
+        int mid = (columns - 1) / 2;
+        RunNode start = new RunNode("n_d0_" + mid, NodeType.START, 0, mid);
+        RunNode rest = new RunNode("n_d1_" + mid, NodeType.REST, 1, mid);
+        RunNode boss = new RunNode("n_d2_" + mid, NodeType.BOSS, 2, mid);
+        start.addSuccessor(rest.getId());
+        rest.addSuccessor(boss.getId());
+        state.addNode(start);
+        state.addNode(rest);
+        state.addNode(boss);
+        state.setGridColumns(columns);
+        state.setCurrentNodeId(start.getId());
+    }
+
     /** Next column for a path at ({@code row}, {@code col}): one of the three nearest, never crossing. */
     private static int step(Map<Integer, Map<Integer, List<Integer>>> edges, int row, int col, int columns, Random rng) {
         List<Integer> options = new ArrayList<Integer>();

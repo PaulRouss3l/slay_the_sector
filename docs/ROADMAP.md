@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S4** — full Run and Meta progress.
+**Current target: S4** — code-complete, awaiting the in-game smoke test (`S4_SMOKE_TEST.md`).
 
 ## Done before the redesign
 
@@ -98,10 +98,22 @@ Elite scored on undeployed ships, a non-station hull at low Depth, layout writte
 battle context). Known: the Event and the sabotage roll can be re-rolled by reloading a save made
 before arriving (save-scumming is accepted).
 
-## S4 — Full Run and Meta progress ⬜
+## S4 — Full Run and Meta progress 🟡
 
-3 Acts with Act transitions, enemy faction draw per Act, Boss pool, cross-save Meta progress,
-Ascension per Archetype, starting bonuses.
+Design settled 2026-10-19 (DESIGN "Acts and Bosses", "Ascension and Meta progress"). Branch `s4/full-run`.
+- 🟡 3 Acts: Act transition after the Boss, fresh map, enemy factions per Act, Act difficulty factor.
+- 🟡 Bosses per Act (Apex / Derelict / Remnant) and the Boss reward choice (S-mod slot + S-mod,
+  +20 DP cap, Remnant warship with an AI core).
+- 🟡 Ascension Gamma → Omega per Archetype, its handicaps and Payout scaling.
+- 🟡 Act 4 at Omega: Rest + true Boss (lone Ziggurat, `sts_trueBossHull`).
+- 🟡 Cross-save Meta progress: Records, Ascension reached, starting bonuses; Hub Records page.
+
+Independent review done and its findings fixed: spawned stations and the true Boss tagged the
+shared stock variant (now a copy, also fixing an S3 leak), Primordial now gives every Boss pilots
+(Gamma cores for Derelict/Remnant, officers for the Apex fleet), the Boss-reward free S-mod stays
+claimable from the beacon menu until used, Act 4 texts. Known, low impact: a one-Act Run started
+on an S1-era map continues into Act 2 with its Start beside the player rather than under it;
+`repairFraction` (Seraph Rest) semantics to confirm in game.
 
 ## S5 — Polish and release ⬜
 

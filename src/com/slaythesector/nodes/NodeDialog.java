@@ -36,6 +36,7 @@ import com.slaythesector.economy.Shop;
 import com.slaythesector.economy.Treasure;
 import com.slaythesector.economy.Upgrades;
 import com.slaythesector.map.NodeText;
+import com.slaythesector.run.Ascension;
 import com.slaythesector.run.FleetCap;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunFleet;
@@ -60,7 +61,7 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private enum Opt {
         ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
-        REPAIR_FLEET, SHOP, DOCKYARD, SHOP_DMOD, REST_RESTORE, RESTORE_SHIPS, RESTORE_BACK, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
+        BOSS_REFIT, BOSS_DP, BOSS_SHIP, DESCEND, FREE_SMOD, REPAIR_FLEET, SHOP, DOCKYARD, SHOP_DMOD, REST_RESTORE, RESTORE_SHIPS, RESTORE_BACK, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
     }
 
     /** Option data: set course for a Node. */
@@ -84,6 +85,12 @@ public class NodeDialog implements InteractionDialogPlugin {
         final String memberId;
         final String modId;
         Restore(String memberId, String modId) { this.memberId = memberId; this.modId = modId; }
+    }
+
+    /** Option data: the ship that gets +1 S-mod slot (Boss reward "Refit"). */
+    private static class Slot {
+        final String memberId;
+        Slot(String memberId) { this.memberId = memberId; }
     }
 
     /** Option data: train this officer (+1 level). */
@@ -110,7 +117,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     private enum Fight { STANDARD, BOSS, ELITE, AMBUSH, STATION, SIDE, CONVOY }
 
     /** Option data: an Event choice. */
-    private enum Ev { ASSAULT, SLIP, INSPECT, IGNORE, SIDE_A, SIDE_B, STAY_OUT, RAID, LET_PASS }
+    private enum Ev { ASSAULT, TRADE, INSPECT, IGNORE, SIDE_A, SIDE_B, STAY_OUT, RAID, LET_PASS }
 
     /**
      * Reward picks still to open after a won fight (a battle station gives several). They open on
@@ -169,12 +176,18 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void showEncounter() {
         options.clearOptions();
         NodeType type = node.getType();
-        float strength = DepthScaling.combatPoints(node.getDepth(), type) * (type == NodeType.ELITE ? STSSettings.eliteFPMult() : 1f);
-        String lead = type == NodeType.BOSS ? "The Apex: a" : type == NodeType.ELITE ? "An elite" : "A";
-        text.addPara(lead + " %s fleet holds this beacon. Depth %s, estimated strength %s.",
-                Misc.getHighlightColor(), NodeText.factionName(node), String.valueOf(node.getDepth()),
-                String.valueOf(Math.round(strength)));
-        if (type == NodeType.BOSS) {
+        float strength = DepthScaling.combatPoints(state, node) * (type == NodeType.ELITE ? STSSettings.eliteFPMult() : 1f);
+        if (type == NodeType.BOSS && state.getAct() >= 4) {
+            text.addPara("The true Boss: a lone, nameless %s waits at the bottom of the Descent. No escort, no "
+                    + "retreat. Beat it for the true victory; lose, and the Run still counts as won.",
+                    Misc.getHighlightColor(), STSSettings.trueBossHull());
+        } else {
+            String lead = type == NodeType.BOSS ? "The Act " + state.getAct() + " Boss: a" : type == NodeType.ELITE ? "An elite" : "A";
+            text.addPara(lead + " %s fleet holds this beacon. Depth %s, estimated strength %s.",
+                    Misc.getHighlightColor(), NodeText.factionName(node), String.valueOf(state.getGlobalDepth(node)),
+                    String.valueOf(Math.round(strength)));
+        }
+        if (type == NodeType.BOSS && state.getAct() < 4) {
             text.addPara("There is no retreat from this fight: withdrawing ends the Run.");
         } else if (type == NodeType.ELITE) {
             text.addPara("It closes in from every side. You can't win this head-on: break out. Escape with at least "
@@ -200,7 +213,7 @@ public class NodeDialog implements InteractionDialogPlugin {
             default:     kind = Fight.STANDARD; break;
         }
         rewardFaction = node.getFactionId();
-        engage(EncounterFactory.spawn(node, entity), null, kind);
+        engage(EncounterFactory.spawn(state, node, entity), null, kind);
     }
 
     /**
@@ -326,7 +339,8 @@ public class NodeDialog implements InteractionDialogPlugin {
         }
         if (!won && fight == Fight.BOSS) {
             state.resolveTarget(false);
-            showRunEnd(false);
+            // Losing the true Boss (Act 4) still ends a won Run: Act 3 was beaten.
+            showRunEnd(state.isAct3Won());
             return;
         }
 
@@ -377,6 +391,12 @@ public class NodeDialog implements InteractionDialogPlugin {
 
         int cut = Math.min(supplies, FleetCap.penalty(pf, state));
         supplies -= cut;
+        if (state.getAscension() >= Ascension.CHRONOS && supplies > 0) {
+            int ascCut = Math.min(supplies, STSSettings.ascensionSupplyCut());
+            supplies -= ascCut;
+            text.addPara("Ascension " + Ascension.name(Ascension.CHRONOS) + ": %s supplies withheld.",
+                    Misc.getNegativeHighlightColor(), String.valueOf(ascCut));
+        }
         if (supplies > 0) {
             pf.getCargo().addSupplies(supplies);
             text.addPara((success ? "Victory. " : "") + "Salvage crews recover %s supplies.",
@@ -387,7 +407,13 @@ public class NodeDialog implements InteractionDialogPlugin {
                     String.valueOf(cut), String.valueOf(FleetCap.over(pf, state)));
         }
         if (fight == Fight.BOSS) {
-            showRunEnd(true);
+            if (state.getAct() >= 4) state.setTrueBossWon();
+            if (state.getAct() == 3) state.setAct3Won();
+            if (state.getAct() >= state.getFinalAct()) {
+                showRunEnd(true);
+            } else {
+                showBossReward();
+            }
             return;
         }
         if (won && enemyDPAfter > 0f && fight != Fight.AMBUSH && fight != Fight.CONVOY) {
@@ -404,7 +430,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private void openRewardPick() {
-        List<Card> cards = Rewards.offer(node.getDepth(), rewardFaction, state.getArchetypeId());
+        List<Card> cards = Rewards.offer(state, node.getDepth(), rewardFaction);
         if (cards.isEmpty()) {
             pendingRewards = 0;
             showWaypoint();
@@ -447,7 +473,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                     + "Taking it would be costly, but its vaults hold the pick of the Descent: %s Reward picks.",
                     Misc.getHighlightColor(), String.valueOf(STSSettings.stationRewardPicks()));
             options.addOption("Assault the station", Ev.ASSAULT);
-            options.addOption("Slip past (no fight, no reward)", Ev.SLIP);
+            options.addOption("Trade with the station (opens a Shop, no fight)", Ev.TRADE);
         } else if (id.equals(Events.SABOTAGE)) {
             int cost = STSSettings.sabotageInspectCost();
             text.addPara("Your engineers report tampering in the supply holds: someone came aboard at the last beacon. "
@@ -484,21 +510,21 @@ public class NodeDialog implements InteractionDialogPlugin {
         switch (ev) {
             case ASSAULT:
                 rewardFaction = state.getEnemyFactionIds().isEmpty() ? state.getArchetypeId() : state.getEnemyFactionIds().get(0);
-                engage(EncounterFactory.spawnStation(node.getDepth(), entity), null, Fight.STATION);
+                engage(EncounterFactory.spawnStation(state, entity), null, Fight.STATION);
                 return;
             case SIDE_A:
             case SIDE_B: {
                 String helped = ev == Ev.SIDE_A ? Events.sideA(id) : Events.sideB(id);
                 String other = ev == Ev.SIDE_A ? Events.sideB(id) : Events.sideA(id);
                 rewardFaction = helped;
-                CampaignFleetAPI ally = EncounterFactory.spawnSide(helped, node.getDepth(), true, entity);
-                CampaignFleetAPI enemy = EncounterFactory.spawnSide(other, node.getDepth(), false, entity);
+                CampaignFleetAPI ally = EncounterFactory.spawnSide(state, helped, node, true, entity);
+                CampaignFleetAPI enemy = EncounterFactory.spawnSide(state, other, node, false, entity);
                 engage(enemy, ally, Fight.SIDE);
                 return;
             }
             case RAID:
                 rewardFaction = Events.convoyFaction(id);
-                engage(EncounterFactory.spawnConvoy(rewardFaction, node.getDepth(), entity), null, Fight.CONVOY);
+                engage(EncounterFactory.spawnConvoy(state, rewardFaction, node, entity), null, Fight.CONVOY);
                 return;
             case INSPECT: {
                 int cost = STSSettings.sabotageInspectCost();
@@ -516,8 +542,11 @@ public class NodeDialog implements InteractionDialogPlugin {
                     text.addPara("Nothing happens. Whoever it was, they were bad at their job.");
                 }
                 break;
-            case SLIP:
-                text.addPara("You give the station a wide berth. It lets you go.");
+            case TRADE:
+                // The Node becomes a Shop (stock, dockyard, closes when the player leaves).
+                node.setEventId(Events.STATION_TRADE);
+                text.addPara("You hail the station instead of arming. Its guns lower, its docks open: the "
+                        + "quartermaster sells everything for supplies, and seals the doors once you leave.");
                 break;
             case STAY_OUT:
                 text.addPara("You leave them to it.");
@@ -541,10 +570,21 @@ public class NodeDialog implements InteractionDialogPlugin {
         String capWarning = FleetCap.warning(pf, state);
         if (capWarning != null) text.addPara(capWarning, Misc.getNegativeHighlightColor());
         addServiceOption();
+        if (state.isFreeSmodPending()) {
+            options.addOption("Choose your free S-mod (Boss reward)", Opt.FREE_SMOD);
+            if (Upgrades.smodShips(pf).isEmpty()) options.setEnabled(Opt.FREE_SMOD, false);
+        }
         RunNode committed = state.getTargetNode();
         if (committed != null) {
             text.addPara("Course locked: %s.", Misc.getHighlightColor(), NodeText.full(committed));
             options.addOption("Resume course", new Course(committed.getId()));
+        } else if (atBeatenBoss()) {
+            if (!state.getCurrentNode().isClaimed()) {
+                showBossReward();
+                return;
+            }
+            options.addOption(state.getAct() + 1 >= 4 ? "Descend to Act 4: the true Boss" : "Descend to Act " + (state.getAct() + 1),
+                    Opt.DESCEND);
         } else {
             options.addOption("Open the node map (choose your course)", Opt.MAP);
         }
@@ -574,6 +614,63 @@ public class NodeDialog implements InteractionDialogPlugin {
                 }));
     }
 
+    // ---- Boss reward and Act transition -------------------------------------------------------
+
+    /** Standing at this Act's Boss beacon after beating it (and not in the last Act). */
+    private boolean atBeatenBoss() {
+        RunNode cur = state.getCurrentNode();
+        return cur != null && cur.getType() == NodeType.BOSS && cur.isWon() && cur.getId().equals(node.getId())
+                && state.getAct() < state.getFinalAct();
+    }
+
+    private void showBossReward() {
+        options.clearOptions();
+        int act = state.getAct();
+        String ship = act >= 3 ? "Nova (40 DP, Alpha core)" : act == 2 ? "Apex (30 DP, Beta core)" : "Brilliant (25 DP, Gamma core)";
+        text.addPara("The Boss is down. Its wreck holds one prize worth taking down with you. Choose one:");
+        options.addOption("Refit: +1 S-mod slot on one ship, and a free S-mod on any ship", Opt.BOSS_REFIT);
+        options.addOption("Bigger fleet: +" + STSSettings.bossRewardDP() + " Fleet DP cap for the rest of the Run", Opt.BOSS_DP);
+        options.addOption("Remnant warship: " + ship, Opt.BOSS_SHIP);
+        addLeave();
+    }
+
+    private void showSlotShips() {
+        options.clearOptions();
+        text.addPara("Which ship gets the extra S-mod slot?");
+        for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+            options.addOption(shipName(m), new Slot(m.getId()));
+        }
+        options.addOption("Back", Opt.BACK);
+        options.setShortcut(Opt.BACK, Keyboard.KEY_ESCAPE, false, false, false, true);
+    }
+
+    private void addSlot(Slot s) {
+        FleetMemberAPI m = find(Global.getSector().getPlayerFleet(), s.memberId);
+        if (m == null) {
+            showSlotShips();
+            return;
+        }
+        RunFleet.addSmodSlot(m);
+        node.claim();
+        state.setFreeSmodPending(true);
+        text.addPara(shipName(m) + " can now carry one more S-mod.", Misc.getPositiveHighlightColor());
+        if (Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty()) {
+            text.addPara("No ship has a hullmod that can be built in yet. The free S-mod waits: refit a ship, then "
+                    + "choose it from the beacon menu.");
+            showWaypoint();
+            return;
+        }
+        smodFrom = Opt.BOSS_REFIT;
+        showSmodShips();
+    }
+
+    private void descend() {
+        dialog.dismiss();
+        RunManager.nextAct(state);
+        Global.getSector().getCampaignUI().addMessage("Act " + state.getAct() + ": the Descent goes deeper. "
+                + "A new Entry Beacon waits right here.", Misc.getHighlightColor());
+    }
+
     // ---- Shop, Rest, Treasure ------------------------------------------------------------------
 
     private void showArrival() {
@@ -598,7 +695,8 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void addServiceOption() {
         RunNode cur = state.getCurrentNode();
         if (cur == null || !cur.getId().equals(node.getId())) return;
-        switch (cur.getType()) {
+        boolean stationShop = cur.getType() == NodeType.EVENT && Events.STATION_TRADE.equals(cur.getEventId());
+        switch (stationShop ? NodeType.SHOP : cur.getType()) {
             case SHOP:
                 if (!cur.isClaimed()) options.addOption("Browse the shop", Opt.SHOP);
                 int cost = dockyardCost();
@@ -681,9 +779,14 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private void restRepair() {
-        for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) RunFleet.repair(m);
+        boolean half = state.getAscension() >= Ascension.SERAPH;
+        for (FleetMemberAPI m : Global.getSector().getPlayerFleet().getFleetData().getMembersListCopy()) {
+            if (half) RunFleet.repairPartial(m, STSSettings.ascensionRestFraction());
+            else RunFleet.repair(m);
+        }
         node.claim();
-        text.addPara("Every ship is repaired and back to full combat readiness.");
+        text.addPara(half ? "Ascension " + Ascension.name(Ascension.SERAPH) + ": the crews patch up half the damage."
+                : "Every ship is repaired and back to full combat readiness.");
         showWaypoint();
     }
 
@@ -768,7 +871,8 @@ public class NodeDialog implements InteractionDialogPlugin {
             return;
         }
         Upgrades.buildIn(m, s.modId);
-        node.claim();
+        if (smodFrom == Opt.BOSS_REFIT) state.setFreeSmodPending(false);
+        else node.claim();
         text.addPara(Global.getSettings().getHullModSpec(s.modId).getDisplayName() + " is now built into "
                 + shipName(m) + ".", Misc.getPositiveHighlightColor());
         showWaypoint();
@@ -916,8 +1020,11 @@ public class NodeDialog implements InteractionDialogPlugin {
         runWon = won;
         options.clearOptions();
         int payout = RunManager.payout(state, won);
-        if (won) {
-            text.addPara("The Apex fleet breaks apart. The Run is won.", Misc.getPositiveHighlightColor());
+        if (won && state.isTrueBossWon()) {
+            text.addPara("The " + STSSettings.trueBossHull() + " goes dark. Nothing waits below. True victory.",
+                    Misc.getPositiveHighlightColor());
+        } else if (won) {
+            text.addPara("The Run is won (Ascension %s).", Misc.getPositiveHighlightColor(), Ascension.name(state.getAscension()));
         } else {
             text.addPara("The Run is lost.", Misc.getNegativeHighlightColor());
         }
@@ -942,6 +1049,10 @@ public class NodeDialog implements InteractionDialogPlugin {
         }
         if (data instanceof Restore) {
             restore((Restore) data);
+            return;
+        }
+        if (data instanceof Slot) {
+            addSlot((Slot) data);
             return;
         }
         if (data instanceof Smod) {
@@ -978,12 +1089,13 @@ public class NodeDialog implements InteractionDialogPlugin {
                 break;
             case ABANDON:
                 options.clearOptions();
-                text.addPara("Abandon the Run? It counts as a loss.");
+                text.addPara(state.isAct3Won() ? "Leave the Descent now? The Run stays won." : "Abandon the Run? It counts as a loss.");
                 options.addOption("Abandon", Opt.ABANDON_CONFIRM);
                 options.addOption("Back", Opt.BACK);
                 break;
             case ABANDON_CONFIRM:
-                showRunEnd(false);
+                // Abandoning Act 4 keeps the win earned in Act 3.
+                showRunEnd(state.isAct3Won());
                 break;
             case END_RUN:
                 RunManager.end(runWon);
@@ -1037,8 +1149,34 @@ public class NodeDialog implements InteractionDialogPlugin {
             case SMOD_SHIPS:
                 showSmodShips();
                 break;
+            case BOSS_REFIT:
+                showSlotShips();
+                break;
+            case BOSS_DP:
+                state.addSoftCapBonus(STSSettings.bossRewardDP());
+                node.claim();
+                text.addPara("The Fleet DP cap rises by %s for the rest of the Run.", Misc.getPositiveHighlightColor(),
+                        String.valueOf(STSSettings.bossRewardDP()));
+                showWaypoint();
+                break;
+            case BOSS_SHIP: {
+                FleetMemberAPI ship = RunFleet.addRemnantShip(Global.getSector().getPlayerFleet(), state.getAct());
+                node.claim();
+                text.addPara(ship.getHullSpec().getHullName() + " joins the Run fleet, its AI core already at the helm.",
+                        Misc.getPositiveHighlightColor());
+                showWaypoint();
+                break;
+            }
+            case DESCEND:
+                descend();
+                break;
+            case FREE_SMOD:
+                smodFrom = Opt.BOSS_REFIT;
+                showSmodShips();
+                break;
             case SMOD_BACK:
                 if (smodFrom == Opt.TREASURE) openTreasure();
+                else if (smodFrom == Opt.BOSS_REFIT) showWaypoint();
                 else showRest();
                 break;
         }

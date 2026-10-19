@@ -63,6 +63,39 @@ public final class STSSettings {
     public static float convoyRewardFraction() { return f("sts_convoyRewardFraction", 0.5f); }
     public static float sideAllyFPMult() { return f("sts_sideAllyFPMult", 0.8f); }
     /** Hard cap = soft cap + this; above it no course can be set. */
+    /** Enemy strength factor of Act {@code act} (1-based); the last value covers later Acts. */
+    public static float actFactor(int act) {
+        List<String> f = list("sts_actFactor");
+        if (f.isEmpty()) return act == 1 ? 1f : act == 2 ? 1.6f : 2.2f;
+        try {
+            return Float.parseFloat(f.get(Math.min(act, f.size()) - 1));
+        } catch (NumberFormatException e) {
+            return 1f;
+        }
+    }
+    /** Boss faction of Act {@code act}; empty = one of the Act's own enemy factions. */
+    public static String actBossFaction(int act) {
+        List<String> f = list("sts_actBossFactions");
+        if (act < 1 || act > f.size()) return "";
+        return f.get(act - 1);
+    }
+    /** Lone ship of the true Boss (Act 4): a hull id; its first non-empty variant is used. */
+    public static String trueBossHull() {
+        try {
+            return Global.getSettings().getString("sts_trueBossHull");
+        } catch (Exception e) {
+            return "ziggurat";
+        }
+    }
+    public static int trueBossPayout() { return i("sts_trueBossPayout", 100000); }
+    public static int ascensionPayout() { return i("sts_ascensionPayout", 50000); }
+    public static float ascensionEnemyMult() { return f("sts_ascensionEnemyMult", 0.15f); }
+    public static int ascensionSupplyCut() { return i("sts_ascensionSupplyCut", 20); }
+    public static float ascensionEliteWeight() { return f("sts_ascensionEliteWeight", 1f); }
+    public static float ascensionRestFraction() { return f("sts_ascensionRestFraction", 0.5f); }
+    public static int bossRewardDP() { return i("sts_bossRewardDP", 20); }
+    public static int bonusStartDP() { return i("sts_bonusStartDP", 5); }
+    public static int bonusStartSupplies() { return i("sts_bonusStartSupplies", 50); }
     public static int fleetDPHardMargin() { return i("sts_fleetDPHardMargin", 30); }
     /** Supplies cut from each fight reward per DP over the soft cap. */
     public static int overCapSuppliesPerDP() { return i("sts_overCapSuppliesPerDP", 5); }

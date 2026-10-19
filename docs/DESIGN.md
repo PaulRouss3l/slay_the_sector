@@ -58,14 +58,53 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   while they break a rule: no Rest or Elite before row 4, no Ambush before row 3, no Rest on row
   9, no Elite→Elite / Shop→Shop / Rest→Rest, Nodes reached from one parent differ (Combat may
   repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
-  the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
+  the Run (at Ascension Omega, Act 4 follows). All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
   `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
-- Each Act draws 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes name their
-  faction. Bosses come from the Boss pool (Remnant, Omega, Derelict) or the strongest eligible
-  faction.
-- Difficulty follows a fixed curve by Depth (not the player's fleet strength); Ascension adds to
-  it later.
+- Each Act draws its own 2-3 enemy factions (eligible list, minus the Archetype); Combat Nodes
+  name their faction.
+
+## Acts and Bosses (S4)
+
+- **Act transition**: Boss won → Boss reward (below) → "Descend to Act N+1": a fresh map in the
+  same Descent system (old beacons cleared); the fleet carries over as it is (damage, Supplies).
+  Winning Act 3's Boss wins the Run.
+- **Bosses**: Act 1 = an "Apex" fleet of one of the Act's enemy factions; Act 2 = Derelict;
+  Act 3 = Remnant. Pilots per `sts_bossOfficers` (default none). Omega is never an Act Boss.
+- **Act 4 (Ascension Omega only)**: Start → one Rest Node → the **true Boss**: a lone **Ziggurat**
+  (`sts_trueBossHull`), no escort, no core, no retreat. Winning it is the true victory (+100,000
+  Payout, "Omega cleared" in the Records); losing it still pays like an Act 3 win.
+- **Difficulty**: enemy strength = (15 + 4.5 × row within the Act) × Act factor (1.0 / 1.6 / 2.2),
+  Bosses ×1.3 (~78 / 125 / 172), never the player's fleet strength. Reward ship sizes and officer
+  levels step up per Act. Ascension adds on top.
+- **Boss reward** (choose one, plus the Boss supplies; replaces the Reward pick):
+  - *Refit*: +1 S-mod slot on one ship of the player's choice, and a free S-mod on any ship.
+  - *Bigger fleet*: +20 Fleet DP soft cap for the rest of the Run (the hard cap moves with it).
+  - *Remnant warship*: Act 1 Brilliant (25 DP, Gamma core), Act 2 Apex (30 DP, Beta core), Act 3
+    Nova (40 DP, Alpha core); tagged `TAG_AUTOMATED_NO_PENALTY` (no Automated Ships skill needed).
+
+## Ascension and Meta progress (S4)
+
+- **Ascension** per Archetype, chosen at Run start; winning at the highest reached level unlocks
+  the next. Levels are named after AI cores (vanilla + RAT), ordered by their officer level; each
+  stacks onto the ones below and adds +50,000 to the Payout (a loss Payout scales by the same
+  factor: (1 + level) ×):
+
+  | Level | Name | Adds |
+  |---|---|---|
+  | 0 | Gamma | nothing (base) |
+  | 1 | Beta | +15 % enemy strength |
+  | 2 | Chronos | −20 Supplies per fight reward (never below 0, with the DP-cap cut) |
+  | 3 | Alpha | more Elites |
+  | 4 | Seraph | Rest heals only half |
+  | 5 | Primordial | Bosses get pilots: Gamma cores (Derelict, Remnant) or officers (Apex fleet) |
+  | 6 | Omega | unlocks Act 4 and the true Boss |
+
+- **Records** per Archetype: Runs, wins, deepest Depth, highest Ascension won, Omega cleared.
+- **Starting bonuses** (toggled at the Starting pick once unlocked): +5 starting DP (first win),
+  +1 starting officer level (reach Act 3), +50 starting Supplies (win with 3 Archetypes).
+- **Where it shows**: a Hub "Records" page (per-Archetype table, unlocked bonuses); the Archetype
+  list shows each faction's best Ascension; the Run Intel entry shows Act and Ascension.
 
 ## Node types
 
@@ -75,7 +114,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 | Elite (Escape) | encircled by a stronger fleet, player `FleetGoal.ESCAPE`; win = reach the edge with ≥ N% of DP; reward scales with ships saved |
 | Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
 | Boss | no retreat, fight to the last, enemy deploys all; pilots per `sts_bossOfficers` (default none: no officers or AI cores); strength ×`sts_bossFPMult` (1.3); Reward pick + bonus S-mod; retreat = Run lost |
-| Event | text choice: battle station (fight or flee free; win = 3 Reward picks), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
+| Event | text choice: battle station (fight it, win = 3 Reward picks; or trade with it: the Node becomes a Shop), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
 | Shop | buy ships, weapons, officers, repairs and D-mod removal (one per job, 15 + 1/DP supplies) with Supplies |
 | Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level / remove all D-mods from one ship |
 | Treasure | choose 1 rare prize: bigger ship, top-tier weapons, S-mod, or full restoration (all D-mods off one ship), scaled by Depth |
@@ -108,26 +147,28 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Run state** → sector memory `$sts_run_state`: plain `Serializable` POJOs holding ids, plus the
   detached Home fleet and cargo. Aliased in `configureXStream`.
 - **Meta progress** → cross-save JSON in `saves/common/` (`writeJSONToCommon`), never in the
-  save. v1 content: Ascension per Archetype + small permanent starting bonuses.
-- **Payout**: 0 credits for a loss before Node 3, linear with Depth after (e.g. Depth 3 = 5k up to
-  the final Boss = 25k), 50k for a win. Values in `settings.json`.
+  save: Records, Ascension reached per Archetype, unlocked starting bonuses.
+- **Payout**: 0 credits for a loss before Depth 3, linear with Depth across the whole Run after
+  (up to 25k at the Act 3 Boss), 50k for a win; × (1 + Ascension level); +100k for beating the
+  true Boss. Values in `settings.json`.
 
 ## Code layout
 
-Root package `com.slaythesector` (S2 state; later packages added as their milestones land).
+Root package `com.slaythesector` (S4 state).
 
 | Package / class | Responsibility |
 |---|---|
 | `SlayTheSectorModPlugin` | lifecycle, XStream aliases, registers transient hooks, places the Hub |
 | `RunCampaignPlugin` | routes Hub/Node interactions, fleet-wipe intercept (`pickRespawnPlugin`) |
 | `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
-| `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
+| `run/` | `RunState`/`RunNode`/`NodeType` (saved), `Ascension` (level names/effects), `FleetCap`, `RunManager` (start/next Act/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
 | `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
 | `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
 | `combat/` | `EncounterFactory` (all Run fleets), `RunBattleCreationPlugin` + `MarkedTargetPlugin` (escape/pursuit setups, Ambush mark), `Rewards` (Reward pick), `RunRespawnDialog` |
 | `nodes/NodeDialog`, `nodes/Events` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
 | `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
+| `meta/MetaProgress` | cross-save Records, Ascension reached, starting bonuses (`saves/common/slay_the_sector_meta.json`) |
 | `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
 | `util/` | `STSConstants`, `STSSettings` (`sts_*` keys in settings.json), `DepthScaling`, `STSLog` |
@@ -148,6 +189,16 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
 
+**Implementation notes (S4)**
+- Acts are stacked by global Depth (`RunState.depthOffset`): each new Act's map is laid out below
+  the previous one, so its Start beacon appears where the Boss was; "Descend" only rebuilds the
+  map (no jump, no relocation).
+- Boss reward "Refit" adds a variant tag `sts_smod_slot_N`; the hidden `sts_run_logistics` hullmod
+  turns each into +1 `Stats.MAX_PERMANENT_HULLMODS_MOD`. The Remnant warship carries
+  `Tags.TAG_AUTOMATED_NO_PENALTY` and an AI-core captain.
+- The Run counts as won once Act 3's Boss falls (`act3Won`): losing, abandoning or being wiped in
+  Act 4 still ends a won Run.
+
 **Implementation notes (S3)**
 - Escape and pursuit fights: the enemy fleet carries `$sts_battle` (`escape` / `pursuit`);
   `RunCampaignPlugin.pickBattleCreationPlugin` returns `RunBattleCreationPlugin`, which rebuilds the
@@ -167,7 +218,8 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 - Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in
   combat and names it. Mark destroyed = Supplies + Reward pick, else 15 supplies.
 - Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla tier-1 station
-  hull by Depth, unboardable, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
+  hull by Act, unboardable; win = 3 Reward picks; or trade: `eventId` becomes `station-trade` and the
+  Node works as a Shop), sabotage (inspect for 15 supplies or 50 % risk of
   −20 %), side battle (`createBattle(ally, enemy)` before the encounter so vanilla's join-an-ongoing-
   battle flow puts the player with the `sts_ally` side; reward from the helped faction; the joined battle is finished before despawn), convoy raid
   (fleeing freighters; 3 supplies per DP destroyed, Reward pick at ≥ 50 %). Event fights score as won

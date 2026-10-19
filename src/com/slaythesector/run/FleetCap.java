@@ -12,7 +12,7 @@ public final class FleetCap {
     private FleetCap() {}
 
     public static int soft(RunState state) {
-        return STSSettings.fleetDPCap(state.getAct());
+        return STSSettings.fleetDPCap(state.getAct()) + state.getSoftCapBonus();
     }
 
     public static int hard(RunState state) {

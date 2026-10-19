@@ -3,7 +3,9 @@ package com.slaythesector.map;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.slaythesector.run.NodeType;
+import com.slaythesector.run.RunManager;
 import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunState;
 import com.slaythesector.util.DepthScaling;
 import com.slaythesector.util.STSSettings;
 
@@ -20,14 +22,17 @@ public final class NodeText {
 
     /** "Combat: Hegemony", "Shop", ... (no em dash: the UI fonts lack it). */
     public static String title(RunNode n) {
-        return n.getType().isFight() ? n.getType().label() + ": " + factionName(n) : n.getType().label();
+        if (n.getType().isFight() && n.getFactionId() != null) return n.getType().label() + ": " + factionName(n);
+        return n.getType() == NodeType.BOSS ? "True Boss" : n.getType().label();
     }
 
-    /** Title plus Depth and, for fights, the estimated enemy strength. */
+    /** Title plus Depth (across the Run) and, for fights, the estimated enemy strength. */
     public static String full(RunNode n) {
-        String s = title(n) + " (Depth " + n.getDepth();
-        if (n.getType().isFight()) {
-            float fp = DepthScaling.combatPoints(n.getDepth(), n.getType());
+        RunState state = RunManager.get();
+        if (state == null) return title(n);
+        String s = title(n) + " (Depth " + state.getGlobalDepth(n);
+        if (n.getType().isFight() && n.getFactionId() != null) {
+            float fp = DepthScaling.combatPoints(state, n);
             if (n.getType() == NodeType.ELITE) fp *= STSSettings.eliteFPMult();
             s += ", strength " + Math.round(fp);
         }
@@ -39,7 +44,7 @@ public final class NodeText {
         switch (type) {
             case START:    return "Where the Descent begins.";
             case COMBAT:   return "A standard fight. Win for Supplies and a Reward pick.";
-            case BOSS:     return "The Apex. No retreat. Win it to win the Run.";
+            case BOSS:     return "The Act's Boss. No retreat. Beat it to go deeper, or to win the Run.";
             case SHOP:     return "Buy ships, weapons, officers and cheap repairs with Supplies.";
             case REST:     return "Choose one: free full repair, an S-mod, or an officer level.";
             case TREASURE: return "Choose one rare prize: a ship above your Depth, rare weapons, or an S-mod.";

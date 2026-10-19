@@ -20,11 +20,11 @@ The contained star system where every Run takes place; a place name, never a syn
 _Avoid_: Run system, depths, abyss
 
 **Act**:
-One third of a Run: its own map of Nodes ending in a Boss.
+One stage of a Run: its own map of Nodes ending in a Boss. A Run has three, plus a short fourth at Ascension Omega.
 _Avoid_: Floor, chapter, sector
 
 **Ascension**:
-An optional difficulty level unlocked per Archetype by winning Runs.
+A difficulty level per Archetype, unlocked by winning Runs, named after AI cores from Gamma (base) to Omega.
 _Avoid_: Difficulty, heat, tier
 
 **Node**:
@@ -98,6 +98,14 @@ The Run's only currency and repair resource, kept apart from the player's campai
 _Avoid_: Gold, run credits, money
 
 ### Persistence
+
+**Boss reward**:
+The choice after beating an Act's Boss: an S-mod slot and an S-mod, a bigger Fleet DP cap, or a Remnant warship.
+_Avoid_: Boss loot, relic
+
+**True Boss**:
+The lone unique ship at the end of Act 4, reached only at Ascension Omega.
+_Avoid_: Final boss, secret boss
 
 **Meta progress**:
 Progress that survives every Run (wins, best Depth, unlocks).

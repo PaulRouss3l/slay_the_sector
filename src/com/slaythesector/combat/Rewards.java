@@ -13,7 +13,7 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.events.OfficerManagerEvent;
 import com.slaythesector.run.Archetypes;
 import com.slaythesector.run.RunFleet;
-import com.slaythesector.run.RunNode;
+import com.slaythesector.run.RunState;
 import com.slaythesector.ui.Card;
 import com.slaythesector.util.DepthScaling;
 
@@ -43,16 +43,12 @@ public final class Rewards {
      * One ship of the defeated faction and one of the Run's Archetype (either pool covers for the
      * other when empty), plus an officer or a weapon bundle.
      */
-    public static List<Card> offer(RunNode node, String archetypeId) {
-        return offer(node.getDepth(), node.getFactionId(), archetypeId);
-    }
-
-    /** As {@link #offer(RunNode, String)}, for a fight whose ships come from {@code factionId} at {@code depth}. */
-    public static List<Card> offer(int depth, String factionId, String archetypeId) {
+    public static List<Card> offer(RunState state, int row, String factionId) {
+        String archetypeId = state.getArchetypeId();
         // Not security-sensitive: reward variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         List<Card> cards = new ArrayList<Card>();
-        HullSize maxSize = DepthScaling.rewardSize(depth);
+        HullSize maxSize = DepthScaling.rewardSize(state, row);
 
         List<FleetMemberAPI> enemyPool = Archetypes.shipsUpTo(factionId, maxSize, rng);
         List<FleetMemberAPI> ownPool = archetypeId == null || archetypeId.equals(factionId)
@@ -84,7 +80,7 @@ public final class Rewards {
 
         List<String> weapons = weaponBundle(pool, rng);
         if (rng.nextBoolean() || weapons.isEmpty()) {
-            int level = DepthScaling.officerLevel(depth);
+            int level = DepthScaling.officerLevel(state, row);
             cards.add(new Card(new Reward(Kind.OFFICER, null, level, null), "Officer",
                     "A level " + level + " officer joins the Run fleet.", null, 0));
         } else {
