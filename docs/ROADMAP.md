@@ -5,13 +5,13 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 **Keep this file current**: when a feature lands, tick it and update the milestone status line.
 
-Status legend: ⬜ todo · 🟡 code-complete, needs in-game test · ✅ verified in game.
+Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
 **Current target: Spike.**
 
 ## Done before the redesign
 
-- ✅ **Tooling + release pipeline**: `starsector-modding` skill adopted; build/validate/log-scan/
+- 🟡 **Tooling + release pipeline** (PR #1): `starsector-modding` skill adopted; build/validate/log-scan/
   package vendored in `tools/`; Version Checker file + CHANGELOG.
 - 🗑️ **M0-M5 (old designs)**: isolated-system teleport, then dialog-only Run. Superseded; see
   `DESIGN.md` "History" and `adr/0001-run-in-contained-system.md`.
