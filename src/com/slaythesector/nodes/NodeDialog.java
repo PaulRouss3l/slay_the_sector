@@ -217,7 +217,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     private void openRewardPick() {
-        List<Card> cards = Rewards.offer(node);
+        List<Card> cards = Rewards.offer(node, state.getArchetypeId());
         if (cards.isEmpty()) {
             showWaypoint();
             return;

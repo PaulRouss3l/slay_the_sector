@@ -32,7 +32,8 @@ start with `[SlayTheSector]`. Tunables are in `data/config/settings.json` (`sts_
 - [x] At the beacon: description (faction, Depth, strength) → **Engage** → vanilla battle.
 - [x] Depth 1 is winnable with 30 DP (tune `sts_enemyBaseFP` / `sts_enemyFPPerDepth` if not).
 - [x] After a win: vanilla loot/recovery screens (salvage goes to Run cargo, no credits),
-      then "Victory … 30 supplies", then the **Reward pick** grid: 2 ships + officer or weapons.
+      then "Victory … 30 supplies", then the **Reward pick** grid: 2 ships (one of the defeated
+      faction, one of your Archetype, faction on the card) + officer or weapons.
       Pick one / Skip; it's applied.
 - [x] Back at the Node: Supplies + ship count, next courses (Depth 2), Fleet services, Refit.
 - [x] CR after the fight is at least ~70 %; hull damage stays.

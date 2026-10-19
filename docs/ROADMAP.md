@@ -53,7 +53,8 @@ Smoke-test feedback, fixed (re-test pending): Hub Intel entry (Important, Show o
 course); Hub keeps the Spike's upright sprite and an orbit clear of planets; Node beacons get a
 sprite; over-capacity Supply drain removed (no salvaged fuel, fuel/crew capped, +300 cargo per ship); CR
 floor (`sts_crRegenFraction`) also applied right before each fight, since CR can drop between
-fights (out-of-supplies decay, refit away from a spaceport).
+fights (out-of-supplies decay, refit away from a spaceport). Reward pick offers one ship of the
+defeated faction and one of the Archetype (faction shown on the card).
 
 ## S2 — Map and economy Nodes ⬜
 

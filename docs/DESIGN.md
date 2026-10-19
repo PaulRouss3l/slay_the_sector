@@ -81,7 +81,8 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   Boss-pool factions are never Archetypes.
 - **Starting pick**: Archetype's known ships (stock variants), hard 30 DP cap, then free refit
   with the Archetype's known weapons; 1 starting officer.
-- **Reward pick**: 1 of 3 among ship (faction just fought) / officer / weapon bundle. Never an
+- **Reward pick**: 1 of 3 among two ships (one of the faction just fought, one of the Archetype) /
+  officer or weapon bundle. Never an
   S-mod; S-mods come only from Rest, Treasure and as a Boss bonus.
 - **Supplies**: the only currency. Earned from fights (Combat < Elite < Boss), Events, selling
   ships. Spent on repairs and Shops.

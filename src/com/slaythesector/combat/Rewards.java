@@ -39,22 +39,42 @@ public final class Rewards {
         }
     }
 
-    /** Two ships of the defeated faction plus an officer or a weapon bundle. */
-    public static List<Card> offer(RunNode node) {
+    /**
+     * One ship of the defeated faction and one of the Run's Archetype (either pool covers for the
+     * other when empty), plus an officer or a weapon bundle.
+     */
+    public static List<Card> offer(RunNode node, String archetypeId) {
         // Not security-sensitive: reward variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         List<Card> cards = new ArrayList<Card>();
         HullSize maxSize = DepthScaling.rewardSize(node.getDepth());
 
-        List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>();
-        for (FleetMemberAPI m : Archetypes.shipPool(node.getFactionId(), 999f, 40)) {
-            if (m.getHullSpec().getHullSize().ordinal() <= maxSize.ordinal()) pool.add(m);
+        List<FleetMemberAPI> enemyPool = shipPool(node.getFactionId(), maxSize, rng);
+        List<FleetMemberAPI> ownPool = archetypeId == null || archetypeId.equals(node.getFactionId())
+                ? new ArrayList<FleetMemberAPI>() : shipPool(archetypeId, maxSize, rng);
+        List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>(enemyPool);
+        pool.addAll(ownPool);
+
+        List<FleetMemberAPI> picks = new ArrayList<FleetMemberAPI>();
+        List<String> pickFactions = new ArrayList<String>();
+        if (!enemyPool.isEmpty()) {
+            picks.add(enemyPool.remove(0));
+            pickFactions.add(node.getFactionId());
         }
-        Collections.shuffle(pool, rng);
-        for (int i = 0; i < 2 && i < pool.size(); i++) {
-            FleetMemberAPI m = pool.get(i);
+        if (!ownPool.isEmpty()) {
+            picks.add(ownPool.remove(0));
+            pickFactions.add(archetypeId);
+        }
+        while (picks.size() < 2 && !(enemyPool.isEmpty() && ownPool.isEmpty())) {
+            boolean fromEnemy = !enemyPool.isEmpty();
+            picks.add((fromEnemy ? enemyPool : ownPool).remove(0));
+            pickFactions.add(fromEnemy ? node.getFactionId() : archetypeId);
+        }
+        for (int i = 0; i < picks.size(); i++) {
+            FleetMemberAPI m = picks.get(i);
+            String faction = Global.getSector().getFaction(pickFactions.get(i)).getDisplayName();
             cards.add(new Card(new Reward(Kind.SHIP, m, 0, null), m.getHullSpec().getHullName(),
-                    m.getVariant().getDisplayName() + " · " + (int) m.getDeploymentPointsCost() + " DP", m, 0));
+                    faction + " · " + m.getVariant().getDisplayName() + " · " + (int) m.getDeploymentPointsCost() + " DP", m, 0));
         }
 
         List<String> weapons = weaponBundle(pool, rng);
@@ -85,6 +105,17 @@ public final class Rewards {
             default:
                 return "";
         }
+    }
+
+    /** Shuffled ships of a faction, no larger than the Depth allows. */
+    private static List<FleetMemberAPI> shipPool(String factionId, HullSize maxSize, Random rng) {
+        List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>();
+        if (factionId == null || Global.getSector().getFaction(factionId) == null) return pool;
+        for (FleetMemberAPI m : Archetypes.shipPool(factionId, 999f, 40)) {
+            if (m.getHullSpec().getHullSize().ordinal() <= maxSize.ordinal()) pool.add(m);
+        }
+        Collections.shuffle(pool, rng);
+        return pool;
     }
 
     /** Three weapons taken from the pool ships' loadouts. */
