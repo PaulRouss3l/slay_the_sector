@@ -67,14 +67,17 @@ Thanks to the people whose work and open source code taught me how Starsector mo
 whose mods I love playing:
 
 - **wispborne**, for the Starsector IntelliJ Template this project started from, and for
-  everything they do for the modding community.
+  everything they do for the modding community. I learned to make my first mod with their tutorials.
 - **Lukas22041**, for Second In Command and Random Assortment of Things, the inspiration for this
-  mod and a great example of what a Starsector mod can be.
-- **Histidine91**, for Nexerelin, a reference for nearly every campaign question.
+  mod and a great example of what a Starsector mod can be. I never play Starsector without Lukas's
+  mods.
+- **Histidine91**, for Nexerelin, a reference for nearly every campaign question. Histidine showed
+  me how deep modding can go, and I've spent many evenings reading Nexerelin's code to learn how the
+  game loop works.
 - **tracesfx**, for the starsector-modding skill: the build, validation and log tools, and the API
-  notes this project relies on.
+  notes this project relies on. This toolkit made developing this mod much more efficient.
 
-And to Alex and the Fractal Softworks team for Starsector.
+And to Alex and the Fractal Softworks team for Starsector <3.
 
 ## AI use disclaimer
 
@@ -82,10 +85,9 @@ Some or all assets and code in this mod were created using AI tools:
 
 - **Code:** Claude Opus 5.5 (Anthropic), through Claude Code. It wrote most of the Java code, the
   build and test tooling configuration, and the design and API documentation.
-- **Text:** in-game text, this README and the changelog were drafted with Claude and edited by me.
-- **Code review:** Claude was also used to review each milestone for bugs before release.
-- **Art:** no AI image model. Map and node icons are vanilla Starsector sprites. The Intel icon is
-  drawn by a small Python script (`tools/art/make_intel_icon.py`) that Claude wrote.
+- **Code review:** Claude was also used to review each milestone for bugs before release. No line of
+  code reaches a release without a human review.
+- **Art:** no AI image model. Map and node icons are vanilla Starsector sprites.
 
 How it was made: I designed the mod (the Run, the Node types, the rules and the balance) and
 directed every change. Each milestone was then played and tested in game by me, against a
