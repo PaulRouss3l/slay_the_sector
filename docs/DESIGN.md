@@ -157,8 +157,11 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 - Elite: enemy ×`sts_eliteFPMult` (1.5); a win is beating it, or bringing out ≥ `sts_eliteEscapeFraction`
   (60 %) of the **deployed** DP, measured against at least half the fleet (reserves don't count as
   saved); supplies 60 × share saved + a Reward pick.
-- A fight is won when the player won its last battle (`didPlayerWinMostRecentBattleOfEncounter`):
-  retreated survivors need not be chased. Elite, Ambush and convoy score themselves.
+- Straight fights end on the first won battle: `RunEncounterDialog` (a `FleetInteractionDialogPluginImpl`
+  subclass used only for Run fights) counts enemy ships still on the field as lost before vanilla
+  scores the battle, so it is a total victory (loot/recovery, no re-engagement, no Leave-less menu
+  after "Claim victory"). Not for Elite, Ambush, convoy (escape/pursuit score what got away).
+  `didPlayerWinMostRecentBattleOfEncounter` still counts as a win as a fallback.
 - Pursuits: vanilla scores "the enemy got away" as a player win, so Ambush and convoy ignore it:
   only the mark (Ambush) or the share destroyed (convoy) decides.
 - Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in

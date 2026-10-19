@@ -47,8 +47,9 @@ first item of section 6 and section 7 (added after that test), and the reputatio
       -> D-mod -> paid, removed. Works after buying too; gone when you leave the beacon.
 
 ## 6. Regression
-- [ ] Win a normal fight where some enemies retreat: choose **Let them go** / Leave instead of
-      pursuing: "The survivors scatter...", full supplies + Reward pick.
+- [ ] Win a normal fight where some enemies retreat, or use **Claim victory**: no Re-engage prompt;
+      straight to the loot/recovery screen (survivors' hulls count as wrecks), then Continue ->
+      supplies + Reward pick. Elite/Ambush/convoy still behave as escapes/pursuits.
 - [x] Combat, Boss (now beaten: Payout 50,000, Home fleet back), Shop, Rest, Treasure, DP cap,
       save/load mid-Run, Abandon as in S2.
 - [ ] Reputation with the factions involved is unchanged after a side battle.

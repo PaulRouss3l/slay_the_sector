@@ -30,6 +30,7 @@ import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.FIDCo
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.combat.EncounterFactory;
+import com.slaythesector.combat.RunEncounterDialog;
 import com.slaythesector.combat.Rewards;
 import com.slaythesector.economy.Shop;
 import com.slaythesector.economy.Treasure;
@@ -237,7 +238,9 @@ public class NodeDialog implements InteractionDialogPlugin {
         config.afterFirstTimeEngageOptionText = "Re-engage";
         config.noSalvageLeaveOptionText = "Continue";
 
-        final FleetInteractionDialogPluginImpl fid = new FleetInteractionDialogPluginImpl(config);
+        // Straight fights end on the first won battle (no re-engaging survivors); escapes and pursuits score what got away.
+        boolean finishOff = kind != Fight.ELITE && kind != Fight.AMBUSH && kind != Fight.CONVOY;
+        final FleetInteractionDialogPluginImpl fid = new RunEncounterDialog(config, finishOff);
         config.delegate = new BaseFIDDelegate() {
             @Override
             public void battleContextCreated(InteractionDialogAPI d, BattleCreationContext bcc) {
