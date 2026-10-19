@@ -1,6 +1,6 @@
 # API_NOTES — Starsector 0.98a API facts
 
-Verified against `/home/ubik/Downloads/starsector/starfarer.api.jar` (v0.98a-RC5). The official
+Verified against `/home/ubik/Downloads/starsector/starfarer.api.jar` (v0.98a-RC5; install is now RC8). The official
 Javadoc is paywalled; use the mirror `https://jaghaimo.github.io/starsector-api/`. API source is
 also bundled at `<install>/starsector-core/starfarer.api.zip`.
 
@@ -29,18 +29,45 @@ also bundled at `<install>/starsector-core/starfarer.api.zip`.
 | Intel | extend `BaseIntelPlugin`; `Global.getSector().getIntelManager().addIntel(plugin)` |
 | EveryFrameScript | iface `isDone() / runWhilePaused() / advance(float)`; register `Global.getSector().addScript(...)` |
 
+## Imported from the starsector-modding skill (curated for a dialog-only mod)
+
+Source: `~/.claude/skills/starsector-modding/references/{api-notes,pitfalls}.md` @ `ee66319`.
+Ship/weapon/sprite/balance material is left there; read it if run rewards ever add custom hulls.
+
+**Rule zero: never write an API call from memory.** Check it first:
+`python3 ~/.claude/skills/starsector-modding/scripts/api_lookup.py class|method|const|uses|grep|rulecmd|javap ...`
+(searches the API + vanilla impl source in `starfarer.api.zip`; `--libs` adds MagicLib/LunaLib/...).
+
+| Concern | Fact |
+|---|---|
+| Toolchain | Game JRE is Java 17 → `javac --release 17`. Never compile against the obfuscated jars. Script classloader rejects `java.io.File`/streams and reflection: use `Global.getSettings().loadJSON/loadCSV/readTextFileFromCommon`. Loggers must be `static`. |
+| Lifecycle order (new game) | `onNewGame` → `onNewGameAfterProcGen` → `onNewGameAfterEconomyLoad` → `onEnabled` → `onNewGameAfterTimePass` → `onGameLoad`. `onGameLoad` also runs on every load. |
+| Save compatibility | Everything reachable from the sector (memory, persistent data, intel, `addScript` scripts, permanent listeners) is XStream-serialized. Removing/renaming/moving such a class breaks saves (`CannotResolveClassException`). Register short aliases in `configureXStream(x)` (`x.alias("STS_RunState", RunState.class)`) **before first release**; never rename saved classes after. Per-session things: `addTransientScript`, re-added in `onGameLoad`; caches in `transient` fields. |
+| Static fields | Never hold game objects in static fields: they survive loading another save and leak it. |
+| FireAll vs FireBest | `FireAll` collects **all** matching rules' options, sorts by order, clears the panel only if there are options, then runs every match's script/text. `FireBest` applies only the single best-scoring match. So our `PopulateOptions` entry sits alongside Jangala's vanilla options (by design: order 99). |
+| Option handlers | Every option id needs a `DialogOptionSelected` rule with `$option == id`, or it is a dead button — **unless** a Java `InteractionDialogPlugin` owns `optionSelected` (our `RunDialogPlugin`). Prefer **object** option data (enums) over strings in Java-owned menus. |
+| Dialog hijack pattern | Vanilla `PaginatedOptions`: save `dialog.getPlugin()`, `dialog.setPlugin(this)`, handle `optionSelected` yourself. Leave with `dialog.setPlugin(original); FireAll.fire(null, dialog, memoryMap, "PopulateOptions")` to return to the market menu, or dismiss. |
+| Rule ids | Global namespace: prefix every rule id (`sts_`). Condition line suffix `score:N` raises FireBest score. |
+| Fleets | `FleetFactoryV3.createFleet(...)` can return **null or an empty fleet**: check before `startBattle`. |
+| MemFlags | Look up every flag's vanilla use (`api_lookup.py const MemFlags X` / `uses X`) before setting; give each a removal point (`Misc.setFlagWithReason`). |
+| Set-piece battles | `FleetInteractionDialogPluginImpl.FIDConfigGen` under `MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN` (value misspelt `"$fidConifgGen"`: use the constant). `pullInAllies/Enemies/Stations = false` keeps Jangala's station and nearby fleets out. `BattleCreationContext` cannot restrict player deployment — remove members from the fleet instead (we do: mothball bay). |
+| Fleet callbacks | Never `removeEventListener` / `despawn()` inside `reportBattleOccurred` / `reportFleetDespawnedToListener` (`ConcurrentModificationException` → `Fatal: null`). Queue it, act next tick. |
+| Intel | `addIntel` only — the intel manager already advances it; also adding it via `addScript` makes it tick twice. `endImmediately()` to finish. |
+| Testing | No headless runner. After a session: `python3 tools/log_scan.py --mod .`. Dev mode via the `devmode` console command. Smoke-test checklist template: `~/.claude/skills/starsector-modding/templates/SMOKE_TEST.md`. |
+
 ## Must re-verify before coding
 
-Grep with `javap` (`JAR=/home/ubik/Downloads/starsector/starfarer.api.jar`):
+Use `api_lookup.py` (above) or `javap` (`JAR=/home/ubik/Downloads/starsector/starfarer.api.jar`).
+Items marked *(obsolete)* only mattered for the superseded system/teleport design:
 
-- `setContainingLocation` on fleet — `javap -cp $JAR com.fs.starfarer.api.campaign.SectorEntityToken | grep -i ContainingLocation` (confirm whether needed in addition to `setCurrentLocation`).
+- *(obsolete)* `setContainingLocation` on fleet — `javap -cp $JAR com.fs.starfarer.api.campaign.SectorEntityToken | grep -i ContainingLocation` (confirm whether needed in addition to `setCurrentLocation`).
 - `BattleCreationContext` extra setters (`setEnemyDeployAll`, `setAllowRetreat`) — `javap -cp $JAR com.fs.starfarer.api.combat.BattleCreationContext`.
 - `FleetParamsV3` ctor overload + arg order — `javap -cp $JAR com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3`.
 - `FleetTypes` / `Factions` constant ids — `javap -cp $JAR -constants com.fs.starfarer.api.impl.campaign.ids.FleetTypes` (and `.Factions`).
-- `"stable_location"` has an interaction dialog (so `OpenInteractionDialog` fires) — check `<install>/starsector-core/data/config/custom_entities.json`.
+- *(obsolete)* `"stable_location"` has an interaction dialog (so `OpenInteractionDialog` fires) — check `<install>/starsector-core/data/config/custom_entities.json`.
 - Mod `settings.json` merge **appends** (not replaces) `ruleCommandPackages` — check another mod's `settings.json` in `mods/`.
 - `EngagementResultAPI.didPlayerWin()` — `javap -cp $JAR com.fs.starfarer.api.combat.EngagementResultAPI | grep -i didPlayer`.
-- `removeStarSystemNextFrame` timing — move the player to the hub **before** scheduling removal.
+- *(obsolete)* `removeStarSystemNextFrame` timing — move the player to the hub **before** scheduling removal.
 
 Keep `RunState` / `MetaProgress` as plain `Serializable` POJOs storing **ids** only (resolve tokens
 lazily) to avoid XStream save issues.

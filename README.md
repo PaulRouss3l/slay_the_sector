@@ -31,7 +31,9 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 | `mod_info.json` | Mod metadata; `modPlugin` points at the entry class |
 | `src/com/slaythesector/` | Java sources |
 | `jars/SlayTheSector.jar` | Build output (referenced by `mod_info.json`) |
-| `build.sh` | Compile `src/` against the game jars → `jars/SlayTheSector.jar` |
+| `build.sh` | Compile `src/` → `jars/SlayTheSector.jar`, then validate (`--strict` for releases) |
+| `tools/` | Build/validate/log-scan/package scripts vendored from the starsector-modding skill (`tools/UPSTREAM.md`) |
+| `slay_the_sector.version` | Version Checker file (hosted raw from GitHub `main`) |
 | `run.sh` | Launch the game from the install dir with a debug agent on `:5005` |
 | `.vscode/settings.json` | Wires game jars for IntelliSense (API autocomplete + javadoc) |
 | `.vscode/tasks.json` | "Build mod" and "Run Starsector" tasks |
@@ -39,20 +41,25 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 
 ## Workflow
 
-- **Build only:** `Ctrl+Shift+B`, or `./build.sh`.
+- **Build only:** `Ctrl+Shift+B`, or `./build.sh` (needs `python3` + JDK 17).
 - **Run with debugging:** Run panel → **Debug Starsector** (F5). Builds, launches
   the game, attaches to `:5005`. Set breakpoints in `src/` and they hit.
 - **Run without debugging:** `./run.sh`.
 
 ## Adjusting paths
 
-All paths assume the install at `/home/ubik/Downloads/starsector`. If it moves, edit
-the `STARSECTOR` var in `build.sh`, the `cd` in `run.sh`, and the jar globs in
+All paths assume the install at `/home/ubik/Downloads/starsector`. If it moves, set
+`STARSECTOR_DIR` (or edit its default in `build.sh`), the `cd` in `run.sh`, and the jar globs in
 `.vscode/settings.json`.
 
-`gameVersion` in `mod_info.json` is set to `0.98a-RC5`. If the launcher shows a
-"version mismatch" warning, set it to the exact version printed on the launcher
-screen — the warning is cosmetic, not fatal.
+`gameVersion` in `mod_info.json` is `0.98a-RC8` (the installed version). If the launcher shows a
+"version mismatch" warning, set it to the exact version printed on the launcher screen.
+
+## Release
+
+1. Bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`.
+2. `./build.sh --strict`, then `python3 tools/package_mod.py --strict` → `dist/`.
+3. After an in-game test: `python3 tools/log_scan.py --mod .`.
 
 # MODS SOURCES / EXAMPLES
 https://github.com/wispborne/Starsector-IntelliJ-Template

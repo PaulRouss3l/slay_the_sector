@@ -1,0 +1,9 @@
+{
+    "prefix": "sts_",
+    "optional_mods": [],
+    "literal_whitelist": [],
+    "allow_overrides": [],
+    "ignore": [
+        "mod id 'slay_the_sector' is also used by .*/mods/slay-the-sector \\(the launcher"
+    ]
+}
