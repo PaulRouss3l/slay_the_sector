@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.slaythesector.intel.HubIntel;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunState;
@@ -33,6 +34,7 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         x.alias("STS_RunState", RunState.class);
         x.alias("STS_RunNode", RunNode.class);
         x.alias("STS_NodeType", NodeType.class);
+        x.alias("STS_HubIntel", HubIntel.class);
     }
 
     @Override

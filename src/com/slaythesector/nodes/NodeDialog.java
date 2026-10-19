@@ -152,8 +152,10 @@ public class NodeDialog implements InteractionDialogPlugin {
 
             @Override
             public void postPlayerSalvageGeneration(InteractionDialogAPI d, FleetEncounterContext ctx, CargoAPI salvage) {
-                // Supplies come only from designed rewards; salvaged weapons and the rest stay.
+                // Supplies come only from designed rewards; fuel is not a Run resource (it is
+                // refilled free) and would only push the fleet over capacity. Weapons and the rest stay.
                 salvage.removeSupplies(salvage.getSupplies());
+                salvage.removeFuel(salvage.getFuel());
             }
 
             @Override

@@ -17,7 +17,7 @@ proven by the Spike milestone before content is built on them.
 
 | # | Step | Screen | Built with |
 |---|---|---|---|
-| 1 | Entry | Hub station dialog: Start Run / Meta progress / Restore Home fleet | interaction dialog |
+| 1 | Entry | Hub Intel entry (Important; Show on map, Lay in course) → Hub station dialog: Start Run / Meta progress / Restore Home fleet | `BaseIntelPlugin` + interaction dialog |
 | 2 | Setup | Archetype list → Starting pick grid (30 DP cap) → free refit | dialog options → card grid → vanilla Refit (`CoreUITradeMode.NONE`) |
 | 3 | Map | Node map canvas; read-only copy in the Intel tab | `showCustomVisualDialog` 🧪 + `IntelInfoPlugin.createLargeDescription` |
 | 4 | Choose Node | click on the map → fly to the Node entity in the Run system | canvas → campaign map |
@@ -114,6 +114,7 @@ Root package `com.slaythesector` (S1 state; later packages added as their milest
 | `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
 | `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
 | `map/NodeGraphBuilder` | pure-logic Act layout |
+| `intel/HubIntel` | Permanent Important Intel entry locating the Hub |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
 | `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
 | `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick → Fleet services → next course |

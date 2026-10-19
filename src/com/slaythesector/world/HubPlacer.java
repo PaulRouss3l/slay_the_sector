@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.util.Misc;
+import com.slaythesector.intel.HubIntel;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
 
@@ -25,7 +28,10 @@ public final class HubPlacer {
 
     public static SectorEntityToken ensureHub() {
         SectorEntityToken hub = getHub();
-        if (hub != null) return hub;
+        if (hub != null) {
+            HubIntel.ensure();
+            return hub;
+        }
 
         StarSystemAPI sys = pickSystem();
         if (sys == null) {
@@ -35,9 +41,30 @@ public final class HubPlacer {
         SectorEntityToken focus = sys.getStar() != null ? sys.getStar() : sys.getCenter();
         hub = sys.addCustomEntity(STSConstants.HUB_ID, "Descent Relay", STSConstants.HUB_ENTITY_TYPE, Factions.NEUTRAL);
         hub.addTag(STSConstants.TAG_HUB);
-        hub.setCircularOrbitPointingDown(focus, 45f, 2600f, 160f);
+        // Plain orbit (not pointing down) keeps the station sprite upright, as in the Spike.
+        hub.setCircularOrbit(focus, 45f, freeOrbitRadius(sys, focus), 160f);
         STSLog.info("Hub placed in " + sys.getName());
+        HubIntel.ensure();
         return hub;
+    }
+
+    /** First orbit radius from 2600 that keeps clear of every planet's orbit. */
+    private static float freeOrbitRadius(StarSystemAPI sys, SectorEntityToken focus) {
+        float radius = 2600f;
+        boolean clear = false;
+        while (!clear && radius < 20000f) {
+            clear = true;
+            for (PlanetAPI p : sys.getPlanets()) {
+                if (p == focus) continue;
+                float d = Misc.getDistance(p.getLocation(), focus.getLocation());
+                if (Math.abs(d - radius) < p.getRadius() + 400f) {
+                    clear = false;
+                    radius += 300f;
+                    break;
+                }
+            }
+        }
+        return radius;
     }
 
     /** The system whose non-hidden markets have the largest total size. */

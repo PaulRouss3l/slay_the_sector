@@ -21,6 +21,7 @@ public final class STSSettings {
     public static float crRegenFraction() { return f("sts_crRegenFraction", 0.7f); }
     public static float repairCostMult() { return f("sts_repairCostMult", 1f); }
     public static int sellSuppliesPerDP() { return i("sts_sellSuppliesPerDP", 4); }
+    public static float cargoPerShip() { return f("sts_cargoPerShip", 300f); }
     public static int rewardSuppliesCombat() { return i("sts_rewardSuppliesCombat", 30); }
     public static int rewardSuppliesBoss() { return i("sts_rewardSuppliesBoss", 80); }
     public static int payoutMinDepth() { return i("sts_payoutMinDepth", 3); }

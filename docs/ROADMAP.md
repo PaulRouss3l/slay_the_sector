@@ -36,7 +36,7 @@ Carried into S1:
 
 Code-complete on branch `s1/one-act`; in-game checklist: `S1_SMOKE_TEST.md`. Independent review
 done and its findings fixed (campaign leaks, Payout exploit).
-- 🟡 Hub station (idempotent placement, no market), Hub dialog, Archetype list (runtime faction filter).
+- 🟡 Hub station (idempotent placement, no market), Hub Intel entry, Hub dialog, Archetype list (runtime faction filter).
 - 🟡 Starting pick (card grid, 30 DP), free refit (weapon stock deferred).
 - 🟡 Run system with Node entities, course choice as dialog options (map canvas in S2), Path lock.
 - 🟡 Combat and Boss Nodes via the vanilla fleet encounter flow.
@@ -47,7 +47,11 @@ done and its findings fixed (campaign leaks, Payout exploit).
 Known, not fixed (review, low impact): debris/wrecks inside a Run still yield supplies via
 scavenging; core's `xpAtLastStoryPointGain` has no API, so a max-level player who earns story
 points in a Run re-earns that XP afterwards; an AI fleet already pursuing the player at the Hub
-may target the parked Home fleet (untested); the Hub's fixed 2600-unit orbit may overlap a planet.
+may target the parked Home fleet (untested).
+
+Smoke-test feedback, fixed (re-test pending): Hub Intel entry (Important, Show on map, Lay in
+course); Hub keeps the Spike's upright sprite and an orbit clear of planets; Node beacons get a
+sprite; over-capacity Supply drain removed (no salvaged fuel, fuel/crew capped, +300 cargo per ship).
 
 ## S2 — Map and economy Nodes ⬜
 

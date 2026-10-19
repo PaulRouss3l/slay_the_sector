@@ -84,11 +84,25 @@ public final class RunFleet {
         CargoAPI cargo = fleet.getCargo();
         fleet.getFleetData().setSyncNeeded();
         fleet.getFleetData().syncIfNeeded();
-        int wantCrew = (int) Math.ceil(fleet.getFleetData().getMinCrew() * 1.25f) + 10;
+        int maxCrew = (int) cargo.getMaxPersonnel();
+        int wantCrew = Math.min((int) Math.ceil(fleet.getFleetData().getMinCrew() * 1.25f) + 10, maxCrew);
         int crew = cargo.getCrew();
         if (crew < wantCrew) cargo.addCrew(wantCrew - crew);
         float fuelSpace = cargo.getMaxFuel() - cargo.getFuel();
         if (fuelSpace > 0) cargo.addFuel(fuelSpace);
+        trimOverCapacity(fleet);
+    }
+
+    /**
+     * Drops fuel and crew above capacity: neither is a Run resource, and going over capacity
+     * would cost Supplies while flying.
+     */
+    public static void trimOverCapacity(CampaignFleetAPI fleet) {
+        CargoAPI cargo = fleet.getCargo();
+        float extraFuel = cargo.getFuel() - cargo.getMaxFuel();
+        if (extraFuel > 0) cargo.removeFuel(extraFuel);
+        int extraCrew = cargo.getCrew() - Math.max((int) cargo.getMaxPersonnel(), (int) Math.ceil(fleet.getFleetData().getMinCrew()));
+        if (extraCrew > 0) cargo.removeCrew(extraCrew);
     }
 
     /** Built-in hidden hullmod: no monthly supply use and no passive repair/CR recovery. */

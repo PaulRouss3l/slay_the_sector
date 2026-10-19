@@ -12,7 +12,8 @@ import com.slaythesector.run.RunManager;
 
 /**
  * While the player is in the Run system (transient): keeps transverse jump on cooldown, and puts
- * the logistics hullmod on ships that joined outside a fight (e.g. recovered from a wreck).
+ * the logistics hullmod on ships that joined outside a fight (e.g. recovered from a wreck), and
+ * drops fuel and crew above capacity.
  */
 public class RunWatchScript implements EveryFrameScript {
 
@@ -41,6 +42,7 @@ public class RunWatchScript implements EveryFrameScript {
             for (FleetMemberAPI m : pf.getFleetData().getMembersListCopy()) {
                 RunFleet.ensureLogistics(m);
             }
+            RunFleet.trimOverCapacity(pf);
         }
     }
 }

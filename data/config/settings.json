@@ -8,6 +8,7 @@
 	"sts_crRegenFraction": 0.7,
 	"sts_repairCostMult": 1.0,
 	"sts_sellSuppliesPerDP": 4,
+	"sts_cargoPerShip": 300,
 	"sts_rewardSuppliesCombat": 30,
 	"sts_rewardSuppliesBoss": 80,
 	"sts_payoutMinDepth": 3,
