@@ -114,7 +114,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 | Elite (Escape) | encircled by a stronger fleet, player `FleetGoal.ESCAPE`; win = reach the edge with ≥ N% of DP; reward scales with ships saved |
 | Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
 | Boss | no retreat, fight to the last, enemy deploys all; pilots per `sts_bossOfficers` (default none: no officers or AI cores); strength ×`sts_bossFPMult` (1.3); Reward pick + bonus S-mod; retreat = Run lost |
-| Event | text choice: battle station (fight or flee free; win = 3 Reward picks), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
+| Event | text choice: battle station (fight it, win = 3 Reward picks; or trade with it: the Node becomes a Shop), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
 | Shop | buy ships, weapons, officers, repairs and D-mod removal (one per job, 15 + 1/DP supplies) with Supplies |
 | Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level / remove all D-mods from one ship |
 | Treasure | choose 1 rare prize: bigger ship, top-tier weapons, S-mod, or full restoration (all D-mods off one ship), scaled by Depth |
@@ -218,7 +218,8 @@ Root package `com.slaythesector` (S4 state).
 - Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in
   combat and names it. Mark destroyed = Supplies + Reward pick, else 15 supplies.
 - Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla tier-1 station
-  hull by Depth, unboardable, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
+  hull by Act, unboardable; win = 3 Reward picks; or trade: `eventId` becomes `station-trade` and the
+  Node works as a Shop), sabotage (inspect for 15 supplies or 50 % risk of
   −20 %), side battle (`createBattle(ally, enemy)` before the encounter so vanilla's join-an-ongoing-
   battle flow puts the player with the `sts_ally` side; reward from the helped faction; the joined battle is finished before despawn), convoy raid
   (fleeing freighters; 3 supplies per DP destroyed, Reward pick at ≥ 50 %). Event fights score as won

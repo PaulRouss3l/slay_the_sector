@@ -117,7 +117,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     private enum Fight { STANDARD, BOSS, ELITE, AMBUSH, STATION, SIDE, CONVOY }
 
     /** Option data: an Event choice. */
-    private enum Ev { ASSAULT, SLIP, INSPECT, IGNORE, SIDE_A, SIDE_B, STAY_OUT, RAID, LET_PASS }
+    private enum Ev { ASSAULT, TRADE, INSPECT, IGNORE, SIDE_A, SIDE_B, STAY_OUT, RAID, LET_PASS }
 
     /**
      * Reward picks still to open after a won fight (a battle station gives several). They open on
@@ -473,7 +473,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                     + "Taking it would be costly, but its vaults hold the pick of the Descent: %s Reward picks.",
                     Misc.getHighlightColor(), String.valueOf(STSSettings.stationRewardPicks()));
             options.addOption("Assault the station", Ev.ASSAULT);
-            options.addOption("Slip past (no fight, no reward)", Ev.SLIP);
+            options.addOption("Trade with the station (opens a Shop, no fight)", Ev.TRADE);
         } else if (id.equals(Events.SABOTAGE)) {
             int cost = STSSettings.sabotageInspectCost();
             text.addPara("Your engineers report tampering in the supply holds: someone came aboard at the last beacon. "
@@ -542,8 +542,11 @@ public class NodeDialog implements InteractionDialogPlugin {
                     text.addPara("Nothing happens. Whoever it was, they were bad at their job.");
                 }
                 break;
-            case SLIP:
-                text.addPara("You give the station a wide berth. It lets you go.");
+            case TRADE:
+                // The Node becomes a Shop (stock, dockyard, closes when the player leaves).
+                node.setEventId(Events.STATION_TRADE);
+                text.addPara("You hail the station instead of arming. Its guns lower, its docks open: the "
+                        + "quartermaster sells everything for supplies, and seals the doors once you leave.");
                 break;
             case STAY_OUT:
                 text.addPara("You leave them to it.");
@@ -692,7 +695,8 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void addServiceOption() {
         RunNode cur = state.getCurrentNode();
         if (cur == null || !cur.getId().equals(node.getId())) return;
-        switch (cur.getType()) {
+        boolean stationShop = cur.getType() == NodeType.EVENT && Events.STATION_TRADE.equals(cur.getEventId());
+        switch (stationShop ? NodeType.SHOP : cur.getType()) {
             case SHOP:
                 if (!cur.isClaimed()) options.addOption("Browse the shop", Opt.SHOP);
                 int cost = dockyardCost();

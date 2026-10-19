@@ -19,6 +19,8 @@ final class Events {
     private Events() {}
 
     static final String STATION = "station";
+    /** A battle station the player chose to trade with: the Node then works as a Shop. */
+    static final String STATION_TRADE = "station-trade";
     static final String SABOTAGE = "sabotage";
     static final String SIDE = "side";
     static final String CONVOY = "convoy";

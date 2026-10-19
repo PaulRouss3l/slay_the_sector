@@ -39,7 +39,11 @@ start fresh. Tip: save before each Boss.
       Derelict/Remnant, officers on the Act 1 Apex fleet).
 - [ ] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
 
-## 5. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
+## 5. Battle station Event
+- [ ] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
+      repair and D-mod removal); the stock closes when you leave the beacon. Assault still works.
+
+## 6. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
 - [ ] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
 - [ ] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
 - [ ] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
