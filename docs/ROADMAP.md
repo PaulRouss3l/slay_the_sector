@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S3** — tested in game; three late additions still to test (see below).
+**Current target: S4** — full Run and Meta progress.
 
 ## Done before the redesign
 
@@ -89,8 +89,9 @@ was beaten (Payout 50,000); log shows both `battle setup: escape` and `pursuit`,
 - ✅ Escape/pursuit battle setups via our `BattleCreationPlugin` (rebuilt context goals).
 - ✅ Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
 - ✅ Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
-- 🟡 Not yet tested: winning a fight without chasing retreated survivors; beacon menu "Repair the
-  fleet" + "Refit" label; D-mod removal (Rest, Treasure, Shop dockyard).
+- ✅ Beacon menu "Repair the fleet" + "Refit" label; D-mod removal (Rest, Treasure, Shop dockyard).
+- 🟡 Not yet tested: a won straight battle as a total victory (`RunEncounterDialog`, no re-engaging
+  survivors / after "Claim victory"); reputation unchanged after a side battle.
 
 Independent review done and its findings fixed (pursuit "win" counted the mark/convoy as taken,
 Elite scored on undeployed ships, a non-station hull at low Depth, layout written to a copy of the

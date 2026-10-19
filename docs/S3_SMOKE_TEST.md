@@ -40,10 +40,10 @@ first item of section 6 and section 7 (added after that test), and the reputatio
 - [x] Leaving an Event and coming back shows the same Event (no re-roll).
 
 ## 5. D-mod removal
-- [ ] **Rest**: "Restore a ship (remove all its D-mods)" (greyed when no ship has D-mods) -> pick a
+- [x] **Rest**: "Restore a ship (remove all its D-mods)" (greyed when no ship has D-mods) -> pick a
       ship -> all D-mods gone, a "(D)" hull becomes the clean hull. Back returns to the Rest menu.
-- [ ] **Treasure**: a "Restoration" prize appears when a ship has D-mods; taking it runs the same picker.
-- [ ] **Shop**: "Dockyard: remove a D-mod" -> ship (price per D-mod shown, greyed if unaffordable)
+- [x] **Treasure**: a "Restoration" prize appears when a ship has D-mods; taking it runs the same picker.
+- [x] **Shop**: "Dockyard: remove a D-mod" -> ship (price per D-mod shown, greyed if unaffordable)
       -> D-mod -> paid, removed. Works after buying too; gone when you leave the beacon.
 
 ## 6. Regression
@@ -55,7 +55,7 @@ first item of section 6 and section 7 (added after that test), and the reputatio
 - [ ] Reputation with the factions involved is unchanged after a side battle.
 
 ## 7. Beacon menu
-- [ ] "Refit the Run fleet" now reads **Refit**.
-- [ ] **Repair the fleet (N supplies)** appears when a ship needs repair (hidden otherwise, greyed
+- [x] "Refit the Run fleet" now reads **Refit**.
+- [x] **Repair the fleet (N supplies)** appears when a ship needs repair (hidden otherwise, greyed
       if you can't pay); one click repairs every ship (hull + CR) and stays on the beacon menu. Same
       cost as "Repair all" in Fleet services.
