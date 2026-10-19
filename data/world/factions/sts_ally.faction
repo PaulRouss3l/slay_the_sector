@@ -1,0 +1,21 @@
+{
+	"id":"sts_ally",
+	"color":[90,200,140,255],
+	"baseUIColor":[110,220,160,255],
+	"displayName":"Allied Echo",
+	"displayNameWithArticle":"an Allied Echo",
+	"logo":"graphics/factions/neutral.png",
+	"crest":"graphics/factions/crest_neutral.png",
+	"showInIntelTab":false,
+	"names":{},
+	"portraits":{},
+	"music":{
+		"theme":"music_none",
+		"market_neutral":"music_none",
+		"market_hostile":"music_none",
+		"market_friendly":"music_none",
+		"encounter_neutral":"music_pirates_encounter_neutral",
+		"encounter_hostile":"music_none",
+		"encounter_friendly":"music_pirates_encounter_neutral"
+	}
+}

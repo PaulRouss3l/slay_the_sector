@@ -5,6 +5,8 @@ import com.fs.starfarer.api.campaign.BaseCampaignPlugin;
 import com.fs.starfarer.api.campaign.CampaignPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.BattleCreationPlugin;
+import com.slaythesector.combat.RunBattleCreationPlugin;
 import com.slaythesector.combat.RunRespawnDialog;
 import com.slaythesector.hub.HubDialog;
 import com.slaythesector.nodes.NodeDialog;
@@ -12,7 +14,10 @@ import com.slaythesector.run.HomeFleet;
 import com.slaythesector.run.RunManager;
 import com.slaythesector.util.STSConstants;
 
-/** Routes Hub and Node interactions to our dialogs, and intercepts a fleet wipe during a Run. Transient. */
+/**
+ * Routes Hub and Node interactions to our dialogs, picks the battle setup for Run fleets tagged
+ * for an escape or pursuit fight, and intercepts a fleet wipe during a Run. Transient.
+ */
 public class RunCampaignPlugin extends BaseCampaignPlugin {
 
     @Override
@@ -33,6 +38,14 @@ public class RunCampaignPlugin extends BaseCampaignPlugin {
         }
         if (target.hasTag(STSConstants.TAG_NODE)) {
             return new PluginPick<InteractionDialogPlugin>(new NodeDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+        }
+        return null;
+    }
+
+    @Override
+    public PluginPick<BattleCreationPlugin> pickBattleCreationPlugin(SectorEntityToken opponent) {
+        if (opponent != null && opponent.getMemoryWithoutUpdate().contains(STSConstants.MEM_BATTLE)) {
+            return new PluginPick<BattleCreationPlugin>(new RunBattleCreationPlugin(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
         }
         return null;
     }

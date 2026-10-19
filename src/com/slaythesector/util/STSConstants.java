@@ -14,6 +14,16 @@ public final class STSConstants {
     /** The detached Home fleet (CampaignFleetAPI) while a Run fleet is out. */
     public static final String MEM_HOME_FLEET = "$sts_home_fleet";
 
+    // --- Enemy fleet memory (transient: the fleet lives only while its fight is open) ---
+    /** Battle setup for {@code RunBattleCreationPlugin}: {@link #BATTLE_ESCAPE} or {@link #BATTLE_PURSUIT}. */
+    public static final String MEM_BATTLE = "$sts_battle";
+    /** The player must escape (Elite). */
+    public static final String BATTLE_ESCAPE = "escape";
+    /** The enemy flees (Ambush, convoy raid). */
+    public static final String BATTLE_PURSUIT = "pursuit";
+    /** Fleet member id of the Ambush's marked target. */
+    public static final String MEM_TARGET = "$sts_target";
+
     // --- Entity memory / tags ---
     /** Entity memory key holding a Node entity's node id. */
     public static final String MEM_NODE_ID = "$sts_node_id";
@@ -33,6 +43,8 @@ public final class STSConstants {
     // --- Factions ---
     /** Mod faction Run enemies fly under, so campaign systems ignore Run kills. */
     public static final String FACTION_DESCENT = "sts_descent";
+    /** Mod faction of allied fleets in a side battle: friendly to the player, hostile to the Descent. */
+    public static final String FACTION_ALLY = "sts_ally";
 
     // --- Plugin ids ---
     public static final String CAMPAIGN_PLUGIN_ID = "sts_campaign_plugin";

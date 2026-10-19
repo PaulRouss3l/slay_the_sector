@@ -1,16 +1,20 @@
 package com.slaythesector.run;
 
-/** Kind of a Node. Elite, Ambush and Event arrive in S3. */
+/** Kind of a Node. New constants go at the end: saves store enum names, but keep the order stable. */
 public enum NodeType {
     START,
     COMBAT,
     BOSS,
     SHOP,
     REST,
-    TREASURE;
+    TREASURE,
+    ELITE,
+    AMBUSH,
+    EVENT;
 
+    /** Nodes whose arrival is a fight (an Event may or may not lead to one). */
     public boolean isFight() {
-        return this == COMBAT || this == BOSS;
+        return this == COMBAT || this == BOSS || this == ELITE || this == AMBUSH;
     }
 
     public String label() {
@@ -21,6 +25,9 @@ public enum NodeType {
             case SHOP:     return "Shop";
             case REST:     return "Rest";
             case TREASURE: return "Treasure";
+            case ELITE:    return "Elite";
+            case AMBUSH:   return "Ambush";
+            case EVENT:    return "Event";
             default:       return name();
         }
     }

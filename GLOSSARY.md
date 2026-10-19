@@ -43,6 +43,14 @@ _Avoid_: Floor, level, layer
 The rule that only the current Node's successors are offered, and choosing one forfeits the others.
 _Avoid_: Fog, lock-in
 
+**Elite**:
+A Node where a stronger fleet surrounds the Run fleet; winning means breaking out with most of the fleet.
+_Avoid_: Miniboss, hard fight
+
+**Ambush**:
+A Node where the enemy flees and one of its ships is marked; destroying the mark is the win.
+_Avoid_: Chase, hunt
+
 **Event**:
 A Node with a story choice that may lead to a special fight (battle station, third-party battle, convoy raid) or a setback.
 _Avoid_: Random encounter, question mark

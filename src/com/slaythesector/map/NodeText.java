@@ -40,6 +40,9 @@ public final class NodeText {
             case SHOP:     return "Buy ships, weapons, officers and cheap repairs with Supplies.";
             case REST:     return "Choose one: free full repair, an S-mod, or an officer level.";
             case TREASURE: return "Choose one rare prize: a ship above your Depth, rare weapons, or an S-mod.";
+            case ELITE:    return "A stronger fleet surrounds you: break out with most of your fleet for a bigger reward.";
+            case AMBUSH:   return "The enemy flees: destroy its marked flagship for a Reward pick.";
+            case EVENT:    return "Something unexpected: a battle station, sabotage, a side battle or a convoy.";
             default:       return "";
         }
     }

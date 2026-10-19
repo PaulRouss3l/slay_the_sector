@@ -43,7 +43,8 @@ public final class RunManager {
         state.getEnemyFactionIds().addAll(drawEnemyFactions(archetypeId, rng));
         NodeGraphBuilder.build(state, STSSettings.actRows(), STSSettings.mapColumns(), STSSettings.mapPaths(),
                 state.getEnemyFactionIds(), bossFaction(rng),
-                new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest()),
+                new NodeGraphBuilder.Weights(STSSettings.weightCombat(), STSSettings.weightShop(), STSSettings.weightRest(),
+                        STSSettings.weightElite(), STSSettings.weightAmbush(), STSSettings.weightEvent()),
                 rng.nextLong());
         snapshot(state);
         if (!HomeFleet.stash(RunFleet.create(picks))) return null;

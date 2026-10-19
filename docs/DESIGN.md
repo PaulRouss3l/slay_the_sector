@@ -54,9 +54,10 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - 3 Acts × 10 rows + Boss, generated like Slay the Spire: on a 5-column grid, 4 paths climb row
   by row to one of the 3 nearest cells, never crossing (the first two start apart); only touched
   cells become Nodes. Rows 1-2 Combat, row 5 Treasure, row 10 Rest (then the Boss). Other Nodes
-  are drawn by weight (Combat 7, Shop 1.5, Rest 1.5; Elite/Event in S3) and re-drawn while they
-  break a rule: no Rest before row 4 or on row 9, no Shop→Shop or Rest→Rest, Nodes reached from
-  one parent differ (Combat may repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
+  are drawn by weight (Combat 5, Event 2, Shop 1.5, Rest 1.5, Elite 1, Ambush 1) and re-drawn
+  while they break a rule: no Rest or Elite before row 4, no Ambush before row 3, no Rest on row
+  9, no Elite→Elite / Shop→Shop / Rest→Rest, Nodes reached from one parent differ (Combat may
+  repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
   the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
   `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
@@ -124,8 +125,8 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 | `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
 | `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
-| `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
-| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
+| `combat/` | `EncounterFactory` (all Run fleets), `RunBattleCreationPlugin` + `MarkedTargetPlugin` (escape/pursuit setups, Ambush mark), `Rewards` (Reward pick), `RunRespawnDialog` |
+| `nodes/NodeDialog`, `nodes/Events` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
 | `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
 | `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
@@ -146,6 +147,21 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
   end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+
+**Implementation notes (S3)**
+- Escape and pursuit fights: the enemy fleet carries `$sts_battle` (`escape` / `pursuit`);
+  `RunCampaignPlugin.pickBattleCreationPlugin` returns `RunBattleCreationPlugin`, which rebuilds the
+  `BattleCreationContext` with the goals (they have no setters) and hands it to the vanilla setup.
+- Elite: enemy ×`sts_eliteFPMult` (1.5); a win is beating it, or keeping ≥ `sts_eliteEscapeFraction`
+  (60 %) of the fleet's DP; supplies 60 × share saved + a Reward pick.
+- Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in
+  combat and names it. Mark destroyed = Supplies + Reward pick, else 15 supplies.
+- Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla station hull
+  by Depth, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
+  −20 %), side battle (`createBattle(ally, enemy)` before the encounter so vanilla's join-an-ongoing-
+  battle flow puts the player with the `sts_ally` side; reward from the helped faction), convoy raid
+  (fleeing freighters; 3 supplies per DP destroyed, Reward pick at ≥ 50 %). Event fights score as won
+  only on success; declining resolves the Node with nothing.
 
 **Implementation notes (S2)**
 - Shop, Rest and Treasure resolve on arrival but never count as won (Payout stays on fights).

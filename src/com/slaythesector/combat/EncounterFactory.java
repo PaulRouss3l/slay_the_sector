@@ -5,6 +5,7 @@ import org.lwjgl.util.vector.Vector2f;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -18,31 +19,99 @@ import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
 import com.slaythesector.util.STSSettings;
 
-/** Builds the enemy fleet for a fight Node, placed on the Node entity. */
+/**
+ * Builds the fleets of a fight, placed on the Node entity. Ships and fits come from the generated
+ * faction; the flag then becomes {@code sts_descent} (enemies) or {@code sts_ally} (allies) so
+ * commissions, bounties and reputation ignore Run fights.
+ */
 public final class EncounterFactory {
 
     private EncounterFactory() {}
 
+    /** The fight of a Combat, Elite, Ambush or Boss Node. */
     public static CampaignFleetAPI spawn(RunNode node, SectorEntityToken at) {
-        float fp = DepthScaling.combatPoints(node.getDepth(), node.getType());
-        FleetParamsV3 params = new FleetParamsV3(new Vector2f(0f, 0f), node.getFactionId(),
-                DepthScaling.quality(node.getDepth()),
-                node.getType() == NodeType.BOSS ? FleetTypes.PATROL_LARGE : FleetTypes.PATROL_MEDIUM,
-                fp, 0f, 0f, 0f, 0f, 0f, 0f);
+        NodeType type = node.getType();
+        float fp = DepthScaling.combatPoints(node.getDepth(), type);
+        if (type == NodeType.ELITE) fp *= STSSettings.eliteFPMult();
+        FleetParamsV3 params = params(node.getFactionId(), node.getDepth(), fp, 0f,
+                type == NodeType.BOSS || type == NodeType.ELITE ? FleetTypes.PATROL_LARGE : FleetTypes.PATROL_MEDIUM);
+        if (type == NodeType.BOSS) applyBossOfficers(params);
+        String name = type == NodeType.BOSS ? "Apex Fleet" : null;
+        CampaignFleetAPI fleet = create(params, node.getFactionId(), name, STSConstants.FACTION_DESCENT, at);
+        if (type == NodeType.ELITE) {
+            fleet.getMemoryWithoutUpdate().set(STSConstants.MEM_BATTLE, STSConstants.BATTLE_ESCAPE);
+        } else if (type == NodeType.AMBUSH) {
+            fleet.getMemoryWithoutUpdate().set(STSConstants.MEM_BATTLE, STSConstants.BATTLE_PURSUIT);
+            FleetMemberAPI target = largest(fleet);
+            if (target != null) fleet.getMemoryWithoutUpdate().set(STSConstants.MEM_TARGET, target.getId());
+        }
+        return fleet;
+    }
+
+    /** Event "convoy raid": freighters with a light escort, fleeing. */
+    public static CampaignFleetAPI spawnConvoy(String factionId, int depth, SectorEntityToken at) {
+        float fp = DepthScaling.combatPoints(depth, NodeType.COMBAT);
+        FleetParamsV3 params = params(factionId, depth, fp * 0.4f, fp, FleetTypes.TRADE);
+        CampaignFleetAPI fleet = create(params, factionId, factionName(factionId) + " Convoy", STSConstants.FACTION_DESCENT, at);
+        fleet.getMemoryWithoutUpdate().set(STSConstants.MEM_BATTLE, STSConstants.BATTLE_PURSUIT);
+        return fleet;
+    }
+
+    /** Event "side battle": one side, as an enemy ({@code ally} false) or an ally of the player. */
+    public static CampaignFleetAPI spawnSide(String factionId, int depth, boolean ally, SectorEntityToken at) {
+        float fp = DepthScaling.combatPoints(depth, NodeType.COMBAT) * (ally ? STSSettings.sideAllyFPMult() : 1f);
+        FleetParamsV3 params = params(factionId, depth, fp, 0f, FleetTypes.PATROL_MEDIUM);
+        String flag = ally ? STSConstants.FACTION_ALLY : STSConstants.FACTION_DESCENT;
+        CampaignFleetAPI fleet = create(params, factionId, factionName(factionId) + " Fleet", flag, at);
+        if (ally) {
+            fleet.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE);
+            fleet.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE);
+            fleet.setLocation(at.getLocation().x + 150f, at.getLocation().y);
+        }
+        return fleet;
+    }
+
+    /** Event "battle station": a lone orbital station, larger deeper in the Act. */
+    public static CampaignFleetAPI spawnStation(int depth, SectorEntityToken at) {
+        String variant = depth >= 7 ? "station2_midline_Standard" : depth >= 4 ? "station1_midline_Standard" : "station_small_Standard";
+        CampaignFleetAPI fleet = FleetFactoryV3.createEmptyFleet(STSConstants.FACTION_DESCENT, FleetTypes.BATTLESTATION, null);
+        FleetMemberAPI station;
+        try {
+            station = Global.getFactory().createFleetMember(FleetMemberType.SHIP, variant);
+        } catch (RuntimeException e) {
+            STSLog.warn("station variant " + variant + " missing; using station1_Standard");
+            station = Global.getFactory().createFleetMember(FleetMemberType.SHIP, "station1_Standard");
+        }
+        fleet.getFleetData().addFleetMember(station);
+        station.getRepairTracker().setCR(station.getRepairTracker().getMaxCR());
+        fleet.setName("Battle Station");
+        fleet.setStationMode(true);
+        prepare(fleet, at);
+        return fleet;
+    }
+
+    private static FleetParamsV3 params(String factionId, int depth, float combatFP, float freighterFP, String type) {
+        FleetParamsV3 params = new FleetParamsV3(new Vector2f(0f, 0f), factionId, DepthScaling.quality(depth),
+                type, combatFP, freighterFP, 0f, 0f, 0f, 0f, 0f);
         // Same difficulty whatever the state of the Sector's markets.
         params.ignoreMarketFleetSizeMult = true;
-        if (node.getType() == NodeType.BOSS) applyBossOfficers(params);
+        return params;
+    }
+
+    private static CampaignFleetAPI create(FleetParamsV3 params, String factionId, String name, String flag, SectorEntityToken at) {
         CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
         if (fleet == null || fleet.getFleetData().getNumMembers() == 0) {
-            STSLog.warn("createFleet gave no ships for " + node.getFactionId() + "; using a fallback fleet");
-            fleet = FleetFactoryV3.createEmptyFleet(node.getFactionId(), FleetTypes.PATROL_SMALL, null);
+            STSLog.warn("createFleet gave no ships for " + factionId + "; using a fallback fleet");
+            fleet = FleetFactoryV3.createEmptyFleet(factionId, FleetTypes.PATROL_SMALL, null);
             fleet.getFleetData().addFleetMember(Global.getFactory().createFleetMember(FleetMemberType.SHIP, "hound_Standard"));
         }
-        fleet.setName(node.getType() == NodeType.BOSS ? "Apex Fleet" : fleet.getFaction().getDisplayName() + " Fleet");
-        // Ships and fits stay the generated faction's; the flag changes so commissions/bounties ignore the kill.
-        if (Global.getSector().getFaction(STSConstants.FACTION_DESCENT) != null) {
-            fleet.setFaction(STSConstants.FACTION_DESCENT, false);
-        }
+        fleet.setName(name != null ? name : fleet.getFaction().getDisplayName() + " Fleet");
+        if (Global.getSector().getFaction(flag) != null) fleet.setFaction(flag, false);
+        prepare(fleet, at);
+        return fleet;
+    }
+
+    private static void prepare(CampaignFleetAPI fleet, SectorEntityToken at) {
         fleet.setNoAutoDespawn(true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, true);
@@ -50,7 +119,19 @@ public final class EncounterFactory {
         at.getContainingLocation().addEntity(fleet);
         fleet.setLocation(at.getLocation().x, at.getLocation().y);
         fleet.setDoNotAdvanceAI(true);
-        return fleet;
+    }
+
+    private static String factionName(String factionId) {
+        return Global.getSector().getFaction(factionId) == null ? factionId : Global.getSector().getFaction(factionId).getDisplayName();
+    }
+
+    private static FleetMemberAPI largest(CampaignFleetAPI fleet) {
+        FleetMemberAPI best = null;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            if (m.isFighterWing()) continue;
+            if (best == null || m.getDeploymentPointsCost() > best.getDeploymentPointsCost()) best = m;
+        }
+        return best;
     }
 
     /**
@@ -72,5 +153,22 @@ public final class EncounterFactory {
         if (fleet.getContainingLocation().getFleets().contains(fleet)) {
             fleet.getContainingLocation().removeEntity(fleet);
         }
+    }
+
+    /** Total deployment points of a fleet (used to score escapes and raids). */
+    public static float dp(CampaignFleetAPI fleet) {
+        float dp = 0f;
+        if (fleet == null) return dp;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) dp += m.getDeploymentPointsCost();
+        return dp;
+    }
+
+    /** Whether the member with {@code memberId} is still in the fleet (not destroyed or captured). */
+    public static boolean has(CampaignFleetAPI fleet, String memberId) {
+        if (fleet == null || memberId == null) return false;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            if (m.getId().equals(memberId)) return true;
+        }
+        return false;
     }
 }

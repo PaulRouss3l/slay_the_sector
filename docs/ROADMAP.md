@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S3** — special fights and Events.
+**Current target: S3** — code-complete, awaiting the in-game smoke test (`S3_SMOKE_TEST.md`).
 
 ## Done before the redesign
 
@@ -80,10 +80,14 @@ purchases, wasted officer training, payroll charged to the Home fleet, GL state,
 inside the map's dismissal). Salaries made exact: Run-fleet pay is refunded and the Home fleet's
 normal pay still charged at Run end (`RunPayrollListener`).
 
-## S3 — Special fights and Events ⬜
+## S3 — Special fights and Events 🟡
 
-Elite (Escape), Ambush (marked target, enemy flees), Events: battle station, sabotage, side
-battle with allies, convoy raid.
+Code-complete on branch `s3/special-fights`; in-game checklist: `S3_SMOKE_TEST.md`.
+- 🟡 Map: Elite, Ambush and Event Node types with weights and placement rules (checked offline on
+  5,000 maps), icons and legend.
+- 🟡 Escape/pursuit battle setups via our `BattleCreationPlugin` (rebuilt context goals).
+- 🟡 Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
+- 🟡 Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
 
 ## S4 — Full Run and Meta progress ⬜
 
