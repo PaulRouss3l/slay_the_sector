@@ -40,7 +40,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private static final int ROWS = 2;
     private static final float CARD_W = 236f;
     private static final float CARD_H = 250f;
-    private static final float HEADER_H = 90f;
+    private static final float HEADER_H = 110f;
 
     private final String title;
     private final List<Card> cards;
@@ -53,6 +53,9 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     private String budgetLabel = "Deployment points";
     /** BUDGET mode: show a "Random" button that fills the budget with random cards. */
     private boolean randomButton;
+    /** Optional line under the title (e.g. the Fleet DP reminder), and its colour. */
+    private String headerNote;
+    private Color headerNoteColor;
 
     private CustomPanelAPI root;
     private CustomPanelAPI content;
@@ -78,6 +81,12 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
 
     public CardGridDelegate withBudgetLabel(String label) {
         this.budgetLabel = label;
+        return this;
+    }
+
+    public CardGridDelegate withNote(String note, Color color) {
+        this.headerNote = note;
+        this.headerNoteColor = color;
         return this;
     }
 
@@ -129,7 +138,8 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
 
         TooltipMakerAPI header = panel.createUIElement(WIDTH - 20f, HEADER_H, false);
         header.addTitle(title);
-        status = header.addPara("", 6f);
+        if (headerNote != null) header.addPara(headerNote, headerNoteColor, 4f);
+        status = header.addPara("", 4f);
         ButtonAPI prev = header.addButton("< Prev", "prev", 90f, 24f, 8f);
         ButtonAPI next = header.addButton("Next >", "next", 90f, 24f, 0f);
         next.getPosition().rightOfTop(prev, 8f);
@@ -250,6 +260,7 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         }
         ui.addPara(c.title, Misc.getHighlightColor(), 6f);
         ui.addPara(c.subtitle, 3f);
+        if (c.note != null) ui.addPara(c.note, c.noteColor, 3f);
         if (mode == Mode.SINGLE) {
             ui.addButton("Pick", "pick:" + i, CARD_W - 20f, 24f, 8f);
         } else {

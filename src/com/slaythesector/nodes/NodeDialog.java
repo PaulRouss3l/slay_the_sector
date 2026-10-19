@@ -1,5 +1,6 @@
 package com.slaythesector.nodes;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Map;
 
@@ -264,7 +265,7 @@ public class NodeDialog implements InteractionDialogPlugin {
             return;
         }
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Reward: choose one   (" + FleetCap.summary(Global.getSector().getPlayerFleet(), state) + ")", cards, CardGridDelegate.Mode.SINGLE, 0, "Skip reward",
+                "Reward: choose one", withDP(cards), CardGridDelegate.Mode.SINGLE, 0, "Skip reward",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -276,7 +277,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                         }
                         showWaypoint();
                     }
-                }));
+                }).withNote(dpNote(), dpNoteColor()));
     }
 
     // ---- Waypoint: services + next course ------------------------------------------------------
@@ -389,7 +390,7 @@ public class NodeDialog implements InteractionDialogPlugin {
         final CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         int supplies = (int) pf.getCargo().getSupplies();
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Shop: spend your supplies   (" + FleetCap.summary(pf, state) + ")", shopCards, CardGridDelegate.Mode.BUDGET, supplies, "Close the shop",
+                "Shop: spend your supplies", withDP(shopCards), CardGridDelegate.Mode.BUDGET, supplies, "Close the shop",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -403,7 +404,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                         }
                         showWaypoint();
                     }
-                }).withBudgetLabel("Supplies"));
+                }).withBudgetLabel("Supplies").withNote(dpNote(), dpNoteColor()));
     }
 
     private void showRest() {
@@ -453,7 +454,7 @@ public class NodeDialog implements InteractionDialogPlugin {
             treasureCards = Treasure.offer(state, node, !Upgrades.smodShips(Global.getSector().getPlayerFleet()).isEmpty());
         }
         dialog.showCustomVisualDialog(CardGridDelegate.WIDTH, CardGridDelegate.HEIGHT, new CardGridDelegate(
-                "Treasure: take one prize   (" + FleetCap.summary(Global.getSector().getPlayerFleet(), state) + ")", treasureCards, CardGridDelegate.Mode.SINGLE, 0, "Not now",
+                "Treasure: take one prize", withDP(treasureCards), CardGridDelegate.Mode.SINGLE, 0, "Not now",
                 new CardGridDelegate.Listener() {
                     @Override
                     public void done(List<Card> picked) {
@@ -471,7 +472,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                         node.claim();
                         showWaypoint();
                     }
-                }));
+                }).withNote(dpNote(), dpNoteColor()));
     }
 
     private void showSmodShips() {
@@ -700,6 +701,30 @@ public class NodeDialog implements InteractionDialogPlugin {
     }
 
     // ---- Helpers --------------------------------------------------------------------------------
+
+    /** Fleet DP reminder for the card grids that can add ships. */
+    private String dpNote() {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        return FleetCap.summary(pf, state) + ". Each DP over " + FleetCap.soft(state) + " cuts every fight reward by "
+                + STSSettings.overCapSuppliesPerDP() + " supplies; above " + FleetCap.hard(state) + " you can't set a course.";
+    }
+
+    private Color dpNoteColor() {
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        return FleetCap.over(pf, state) > 0 ? Misc.getNegativeHighlightColor() : Misc.getHighlightColor();
+    }
+
+    /** Adds "Fleet DP after: x / soft" to each ship card, red when taking it passes the soft cap. */
+    private List<Card> withDP(List<Card> cards) {
+        int dp = RunFleet.totalDP(Global.getSector().getPlayerFleet());
+        int soft = FleetCap.soft(state);
+        for (Card c : cards) {
+            if (c.preview == null) continue;
+            int after = dp + Math.round(c.preview.getDeploymentPointsCost());
+            c.withNote("Fleet DP after: " + after + " / " + soft, after > soft ? Misc.getNegativeHighlightColor() : Misc.getGrayColor());
+        }
+        return cards;
+    }
 
     private void addLeave() {
         options.addOption("Leave", Opt.LEAVE);

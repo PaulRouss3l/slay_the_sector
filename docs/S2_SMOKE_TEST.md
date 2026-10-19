@@ -35,7 +35,9 @@ Tunables: `data/config/settings.json` (`sts_nodeWeight*`, `sts_fleetDPCap`, `sts
       applied (S-mod goes through the ship/hullmod picker). "Not now" keeps it until you leave.
 
 ## 5. Fleet DP cap
-- [ ] Beacon text shows `Fleet DP x / 80 (hard cap 110)`; the Reward/Shop/Treasure grid titles too.
+- [ ] Beacon text shows `Fleet DP x / 80 (hard cap 110)`. Reward/Shop/Treasure grids show the same
+      line plus the penalty rule under their title, and each ship card "Fleet DP after: y / 80"
+      (red past 80).
 - [ ] Above 80: red warning on the beacon, the encounter and the map ("N DP over the soft cap:
       every fight reward is cut by 5×N supplies"); courses still work. Win a fight: reward reduced,
       with a line saying how much.
