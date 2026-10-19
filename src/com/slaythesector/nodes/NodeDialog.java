@@ -59,7 +59,7 @@ public class NodeDialog implements InteractionDialogPlugin {
 
     private enum Opt {
         ENGAGE, SERVICES, REPAIR_ALL, REFIT, BACK, ABANDON, ABANDON_CONFIRM, END_RUN, LEAVE, MAP,
-        SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
+        REPAIR_FLEET, SHOP, DOCKYARD, REST, REST_REPAIR, REST_SMOD, REST_TRAIN, TREASURE, SMOD_BACK, SMOD_SHIPS
     }
 
     /** Option data: set course for a Node. */
@@ -533,8 +533,13 @@ public class NodeDialog implements InteractionDialogPlugin {
         } else {
             options.addOption("Open the node map (choose your course)", Opt.MAP);
         }
+        int repair = repairAllCost();
+        if (repair > 0) {
+            options.addOption("Repair the fleet (" + repair + " supplies)", Opt.REPAIR_FLEET);
+            if (repair > pf.getCargo().getSupplies()) options.setEnabled(Opt.REPAIR_FLEET, false);
+        }
         options.addOption("Fleet services (repair, sell)", Opt.SERVICES);
-        options.addOption("Refit the Run fleet", Opt.REFIT);
+        options.addOption("Refit", Opt.REFIT);
         options.addOption("Abandon the Run", Opt.ABANDON);
         addLeave();
     }
@@ -797,15 +802,16 @@ public class NodeDialog implements InteractionDialogPlugin {
         showServices();
     }
 
-    private void repairAll() {
+    /** Repairs every ship; returns to Fleet services or, from the beacon menu, to the beacon menu. */
+    private void repairAll(boolean fromServices) {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
-        int total = 0;
-        for (FleetMemberAPI m : pf.getFleetData().getMembersListCopy()) total += RunFleet.repairCost(m);
+        int total = repairAllCost();
         if (total > pf.getCargo().getSupplies()) return;
         pf.getCargo().removeSupplies(total);
         for (FleetMemberAPI m : pf.getFleetData().getMembersListCopy()) RunFleet.repair(m);
         text.addPara("Fleet repaired for " + total + " supplies.");
-        showServices();
+        if (fromServices) showServices();
+        else showWaypoint();
     }
 
     private void setCourse(String nodeId) {
@@ -875,7 +881,10 @@ public class NodeDialog implements InteractionDialogPlugin {
                 showServices();
                 break;
             case REPAIR_ALL:
-                repairAll();
+                repairAll(true);
+                break;
+            case REPAIR_FLEET:
+                repairAll(false);
                 break;
             case REFIT:
                 dialog.getVisualPanel().showCore(CoreUITabId.REFIT, entity, CoreUITradeMode.NONE,
