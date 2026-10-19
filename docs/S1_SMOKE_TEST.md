@@ -51,8 +51,8 @@ start with `[SlayTheSector]`. Tunables are in `data/config/settings.json` (`sts_
 
 ## 7. Boss and win
 - [x] Reach the Boss (Depth 7, Remnant). Its description warns there is no retreat.
-- [ ] Every fight (Boss included) starts with each ship at ≥ ~70 % CR, even after a refit.
-- [ ] Win → "The Run is won", Payout 50,000 → **Return to the Hub** → jump to the relay,
+- [x] Every fight (Boss included) starts with each ship at ≥ ~70 % CR, even after a refit.
+- [~] (not verified: Boss not beaten; the loss path worked) Win → "The Run is won", Payout 50,000 → **Return to the Hub** → jump to the relay,
       **Home fleet back** (ships, officers, cargo) + 50,000 credits. Run fleet gone.
 
 ## 8. Loss paths (any order, new Runs)

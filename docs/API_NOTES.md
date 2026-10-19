@@ -67,6 +67,18 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Fleet wipe | `pickRespawnPlugin` at `MOD_SPECIFIC` replaces the vanilla defeat flow; restoring + transition from it works. |
 | Canvas | `showCustomVisualDialog` + GL `render` + `processInput` (`isLMBDownEvent`, `isMouseMoveEvent`, Esc) works inside an interaction dialog. |
 
+## Verified in game (S1, 2026-10-19, RC8)
+
+| Concern | Fact |
+|---|---|
+| FID handoff | `FIDConfig.dismissOnLeave=false` + `delegate.notifyLeave` → `dialog.setPlugin(self)`; `FleetEncounterContext.isEngagedInHostilities()` / `didPlayerWinEncounterOutright()` tell retreat from win. Vanilla loot/recovery screens run first. |
+| Salvage edit | `postPlayerSalvageGeneration(dialog, ctx, salvage)`: `salvage.removeSupplies/removeFuel` strips them before the loot screen. |
+| Over capacity | Costs supplies daily even with `SuppliesPerMonth ×0`: settings `suppliesPer{Cargo,Fuel,Personnel}UnitOverCapacity` 0.1/unit/day (cap 50/day each). Per-ship `stats.getCargoMod().modifyFlat` in a hullmod adds cargo. |
+| Refit CR cost | Refitting away from a spaceport costs CR (`crLossMultForRefit*`, hullmods ×4). |
+| Intel | `BaseIntelPlugin` with `setImportant(true)` shows in Important; `getMapLocation` + `IntelUIAPI.showOnMap(token)`; `Global.getSector().layInCourseFor(token)`; icon via a `graphics.intel` key in our `settings.json`. |
+| Custom entity | `"baseId"` inherits another entity's fields. Our beacon (sprite, `useLightColor:false`, no `baseId`) renders in the no-star Run system; `setCircularOrbitPointingDown` spins the sprite, `setCircularOrbit` does not. |
+| Cards | `CardGridDelegate` (rebuild in the delegate's `advance`, not in the click) works for Starting and Reward picks. |
+
 ## Redesign research (2026-10, from source reading — not yet run in game)
 
 | Concern | Fact |
