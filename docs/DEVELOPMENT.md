@@ -53,9 +53,16 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 
 ## Release
 
-1. Bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`, and point
-   `directDownloadURL` in `slay_the_sector.version` at the new release asset
-   (`releases/download/vX.Y.Z/slay-the-sector-X.Y.Z.zip`). Version Checker, TriOS and the README's
-   TriOS badge all read that file from `main`, so they follow the newest release once it is merged.
-2. `./build.sh --strict`, then `python3 tools/package_mod.py --strict` → `dist/`.
-3. After an in-game test: `python3 tools/log_scan.py --mod .`.
+Built locally on purpose: compiling needs the game's own jars, which can't go to a public CI.
+
+1. On a branch: bump the version in `mod_info.json`, `slay_the_sector.version` and `CHANGELOG.md`
+   (a `## X.Y.Z` section), and point `directDownloadURL` in `slay_the_sector.version` at
+   `releases/download/vX.Y.Z/slay-the-sector-X.Y.Z.zip`. Version Checker, TriOS and the README's
+   TriOS badge read that file from `main`, so they follow the newest release once it is merged.
+2. Check without publishing: `./release.sh X.Y.Z --dry-run` (any branch).
+3. Merge to `main`, pull, then `./release.sh X.Y.Z` (add `--prerelease` for a beta). It refuses
+   unless it is on `main`, clean and in sync with origin, the tag is new and every version matches;
+   then it runs the strict build and package, tags `vX.Y.Z`, pushes the tag and creates the GitHub
+   release with the zip and this version's CHANGELOG section as notes. Set `STS_GH_USER` to pick
+   the gh account.
+4. After an in-game test: `python3 tools/log_scan.py --mod .`.

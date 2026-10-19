@@ -13,8 +13,9 @@ style of *Slay the Spire*. **Java only** (no Kotlin). Domain terms: `GLOSSARY.md
   validator. Must report **0 errors** after every change. `./build.sh --strict` before a release.
 - Run (debug, attach on `:5005`): `./run.sh`. In VSCode: F5 "Debug Starsector".
 - After an in-game test: `python3 tools/log_scan.py --mod .` triages `starsector.log`.
-- Release: bump version in `mod_info.json` + `slay_the_sector.version` + `CHANGELOG.md`, then
-  `python3 tools/package_mod.py --strict` → `dist/`.
+- Release: bump the version (`mod_info.json`, `slay_the_sector.version` incl. `directDownloadURL`,
+  `CHANGELOG.md`), merge to `main`, then `./release.sh X.Y.Z [--prerelease]` (`--dry-run` first).
+  Steps: `docs/DEVELOPMENT.md`.
 - Game install: `/home/ubik/Downloads/starsector` (override with `STARSECTOR_DIR`). The repo is
   symlinked into `<install>/mods/slay-the-sector` (see README).
 - Entry class: `com.slaythesector.SlayTheSectorModPlugin` (per `mod_info.json`).
