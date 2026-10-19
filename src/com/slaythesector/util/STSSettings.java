@@ -42,9 +42,26 @@ public final class STSSettings {
     public static List<String> bossFactions() { return list("sts_bossFactions"); }
     public static List<String> factionBlacklist() { return list("sts_factionBlacklist"); }
     /** Relative weights of Node types on rows without a fixed type. */
-    public static float weightCombat() { return f("sts_nodeWeightCombat", 7f); }
+    public static float weightCombat() { return f("sts_nodeWeightCombat", 5f); }
     public static float weightShop() { return f("sts_nodeWeightShop", 1.5f); }
     public static float weightRest() { return f("sts_nodeWeightRest", 1.5f); }
+    public static float weightElite() { return f("sts_nodeWeightElite", 1f); }
+    public static float weightAmbush() { return f("sts_nodeWeightAmbush", 1f); }
+    public static float weightEvent() { return f("sts_nodeWeightEvent", 2f); }
+    /** Elite: enemy strength × this; escaping with at least this share of the fleet's DP is a win. */
+    public static float eliteFPMult() { return f("sts_eliteFPMult", 1.5f); }
+    public static float eliteEscapeFraction() { return f("sts_eliteEscapeFraction", 0.6f); }
+    public static int rewardSuppliesElite() { return i("sts_rewardSuppliesElite", 60); }
+    /** Ambush: supplies when the marked target escapes (no Reward pick). */
+    public static int ambushEscapedSupplies() { return i("sts_ambushEscapedSupplies", 15); }
+    public static int sabotageInspectCost() { return i("sts_sabotageInspectCost", 15); }
+    public static float sabotageChance() { return f("sts_sabotageChance", 0.5f); }
+    public static float sabotageLoss() { return f("sts_sabotageLoss", 0.2f); }
+    public static int stationRewardPicks() { return i("sts_stationRewardPicks", 3); }
+    public static float convoySuppliesPerDP() { return f("sts_convoySuppliesPerDP", 3f); }
+    /** Convoy raid: destroying at least this share of the convoy's DP also gives a Reward pick. */
+    public static float convoyRewardFraction() { return f("sts_convoyRewardFraction", 0.5f); }
+    public static float sideAllyFPMult() { return f("sts_sideAllyFPMult", 0.8f); }
     /** Hard cap = soft cap + this; above it no course can be set. */
     public static int fleetDPHardMargin() { return i("sts_fleetDPHardMargin", 30); }
     /** Supplies cut from each fight reward per DP over the soft cap. */
@@ -65,6 +82,9 @@ public final class STSSettings {
     public static int shopOfficerBase() { return i("sts_shopOfficerBase", 30); }
     public static int shopOfficerPerLevel() { return i("sts_shopOfficerPerLevel", 10); }
     public static float shopRepairMult() { return f("sts_shopRepairMult", 0.5f); }
+    /** Shop price to remove one D-mod: base + per DP of the ship. */
+    public static float shopDModBase() { return f("sts_shopDModBase", 15f); }
+    public static float shopDModPerDP() { return f("sts_shopDModPerDP", 1f); }
 
     private static int i(String key, int def) {
         try {

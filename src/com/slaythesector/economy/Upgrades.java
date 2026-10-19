@@ -9,13 +9,19 @@ import com.fs.starfarer.api.characters.OfficerDataAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.DModManager;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.skills.FieldRepairsScript;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.plugins.OfficerLevelupPlugin;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSConstants;
+import com.slaythesector.util.STSSettings;
 
-/** The two Run upgrades that are never Reward picks: S-mods (Rest, Treasure) and officer levels (Rest). */
+/**
+ * Run upgrades that are never Reward picks: S-mods and D-mod removal (Rest, Treasure, Shop) and
+ * officer levels (Rest).
+ */
 public final class Upgrades {
 
     private Upgrades() {}
@@ -48,6 +54,41 @@ public final class Upgrades {
     public static void buildIn(FleetMemberAPI m, String modId) {
         m.getVariant().addPermaMod(modId, true);
         m.updateStats();
+    }
+
+    /** Ships carrying at least one D-mod. */
+    public static List<FleetMemberAPI> dmodShips(CampaignFleetAPI fleet) {
+        List<FleetMemberAPI> out = new ArrayList<FleetMemberAPI>();
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            if (!dmods(m).isEmpty()) out.add(m);
+        }
+        return out;
+    }
+
+    public static List<HullModSpecAPI> dmods(FleetMemberAPI m) {
+        List<HullModSpecAPI> out = new ArrayList<HullModSpecAPI>();
+        for (String id : m.getVariant().getHullMods()) {
+            HullModSpecAPI spec = Global.getSettings().getHullModSpec(id);
+            if (spec != null && spec.hasTag(Tags.HULLMOD_DMOD)) out.add(spec);
+        }
+        return out;
+    }
+
+    /** Removes one D-mod the vanilla way; the last one gone turns a "(D)" hull back into the clean hull. */
+    public static void removeDMod(FleetMemberAPI m, String modId) {
+        ShipVariantAPI v = m.getVariant();
+        DModManager.removeDMod(v, modId);
+        if (DModManager.getNumDMods(v) == 0) FieldRepairsScript.restoreToNonDHull(v);
+        m.updateStats();
+    }
+
+    public static void removeAllDMods(FleetMemberAPI m) {
+        for (HullModSpecAPI spec : dmods(m)) removeDMod(m, spec.getId());
+    }
+
+    /** Shop price to remove one D-mod from {@code m}. */
+    public static int dmodPrice(FleetMemberAPI m) {
+        return Math.round(STSSettings.shopDModBase() + m.getDeploymentPointsCost() * STSSettings.shopDModPerDP());
     }
 
     /** Run officers (never the player) below their max level, with no level-up already waiting. */

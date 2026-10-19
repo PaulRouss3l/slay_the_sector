@@ -21,9 +21,23 @@
 	"sts_minKnownShips": 8,
 	"sts_bossFactions": ["remnant"],
 	"sts_factionBlacklist": [],
-	"sts_nodeWeightCombat": 7,
+	"sts_nodeWeightCombat": 5,
 	"sts_nodeWeightShop": 1.5,
 	"sts_nodeWeightRest": 1.5,
+	"sts_nodeWeightElite": 1,
+	"sts_nodeWeightAmbush": 1,
+	"sts_nodeWeightEvent": 2,
+	"sts_eliteFPMult": 1.5,
+	"sts_eliteEscapeFraction": 0.6,
+	"sts_rewardSuppliesElite": 60,
+	"sts_ambushEscapedSupplies": 15,
+	"sts_sabotageInspectCost": 15,
+	"sts_sabotageChance": 0.5,
+	"sts_sabotageLoss": 0.2,
+	"sts_stationRewardPicks": 3,
+	"sts_convoySuppliesPerDP": 3,
+	"sts_convoyRewardFraction": 0.5,
+	"sts_sideAllyFPMult": 0.8,
 	"sts_fleetDPCap": ["80", "110", "140"],
 	"sts_fleetDPHardMargin": 30,
 	"sts_overCapSuppliesPerDP": 5,
@@ -33,6 +47,8 @@
 	"sts_shopOfficerBase": 30,
 	"sts_shopOfficerPerLevel": 10,
 	"sts_shopRepairMult": 0.5,
+	"sts_shopDModBase": 15,
+	"sts_shopDModPerDP": 1,
 	"graphics": {
 		"intel": {
 			"sts_hub": "graphics/icons/intel/sts_descent.png"
@@ -43,7 +59,10 @@
 			"BOSS": "graphics/icons/intel/log_red_diamond.png",
 			"SHOP": "graphics/icons/intel/gain_credits.png",
 			"REST": "graphics/icons/station_habitat.png",
-			"TREASURE": "graphics/icons/intel/log_treasure.png"
+			"TREASURE": "graphics/icons/intel/log_treasure.png",
+			"ELITE": "graphics/icons/intel/log_red_diamond_hollow.png",
+			"AMBUSH": "graphics/icons/intel/log_orange_triangle.png",
+			"EVENT": "graphics/icons/intel/investigation.png"
 		}
 	}
 }

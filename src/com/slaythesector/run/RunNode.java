@@ -24,6 +24,8 @@ public class RunNode implements Serializable {
     private boolean won;
     /** Shop/Rest/Treasure: the service was used (one visit per Node). */
     private boolean claimed;
+    /** Event Nodes: which Event, drawn on first arrival so reloading can't re-roll it. */
+    private String eventId;
 
     public RunNode(String id, NodeType type, int depth, int column) {
         this.id = id;
@@ -43,6 +45,8 @@ public class RunNode implements Serializable {
     public boolean isWon() { return won; }
     public boolean isClaimed() { return claimed; }
     public void claim() { claimed = true; }
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
     public void addSuccessor(String nodeId) {
         if (!successorIds.contains(nodeId)) successorIds.add(nodeId);

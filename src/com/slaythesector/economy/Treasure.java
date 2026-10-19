@@ -16,14 +16,15 @@ import com.slaythesector.ui.Card;
 import com.slaythesector.util.DepthScaling;
 
 /**
- * A Treasure Node's three prizes (choose one): a ship one size above the usual Reward, a bundle
- * of top-tier weapons, or an S-mod (the caller runs the S-mod picker).
+ * A Treasure Node's prizes (choose one): a ship one size above the usual Reward, a bundle of
+ * top-tier weapons, an S-mod, or a full restoration (no D-mods) of one ship; the caller runs the
+ * ship pickers for the last two.
  */
 public final class Treasure {
 
     private Treasure() {}
 
-    public enum Kind { SHIP, WEAPONS, SMOD }
+    public enum Kind { SHIP, WEAPONS, SMOD, RESTORE }
 
     public static class Prize {
         public final Kind kind;
@@ -37,7 +38,7 @@ public final class Treasure {
         }
     }
 
-    public static List<Card> offer(RunState state, RunNode node, boolean smodPossible) {
+    public static List<Card> offer(RunState state, RunNode node, boolean smodPossible, boolean restorePossible) {
         // Not security-sensitive: prize variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         List<Card> cards = new ArrayList<Card>();
@@ -59,6 +60,10 @@ public final class Treasure {
         if (smodPossible) {
             cards.add(new Card(new Prize(Kind.SMOD, null, null), "S-mod",
                     "Build one installed hullmod into a ship of your choice.", null, 0));
+        }
+        if (restorePossible) {
+            cards.add(new Card(new Prize(Kind.RESTORE, null, null), "Restoration",
+                    "Remove every D-mod from a ship of your choice.", null, 0));
         }
         return cards;
     }

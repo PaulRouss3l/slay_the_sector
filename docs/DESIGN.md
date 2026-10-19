@@ -54,9 +54,10 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - 3 Acts × 10 rows + Boss, generated like Slay the Spire: on a 5-column grid, 4 paths climb row
   by row to one of the 3 nearest cells, never crossing (the first two start apart); only touched
   cells become Nodes. Rows 1-2 Combat, row 5 Treasure, row 10 Rest (then the Boss). Other Nodes
-  are drawn by weight (Combat 7, Shop 1.5, Rest 1.5; Elite/Event in S3) and re-drawn while they
-  break a rule: no Rest before row 4 or on row 9, no Shop→Shop or Rest→Rest, Nodes reached from
-  one parent differ (Combat may repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
+  are drawn by weight (Combat 5, Event 2, Shop 1.5, Rest 1.5, Elite 1, Ambush 1) and re-drawn
+  while they break a rule: no Rest or Elite before row 4, no Ambush before row 3, no Rest on row
+  9, no Elite→Elite / Shop→Shop / Rest→Rest, Nodes reached from one parent differ (Combat may
+  repeat as the fallback); ≥ 1 Shop per Act. Winning Act 3 wins
   the Run. All counts in `settings.json` (`sts_actRows`, `sts_mapColumns`, `sts_mapPaths`,
   `sts_nodeWeight*`).
 - Path lock: only successors of the current Node are selectable.
@@ -75,9 +76,9 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 | Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
 | Boss | no retreat, fight to the last, enemy deploys all; pilots per `sts_bossOfficers` (default none: no officers or AI cores); strength ×`sts_bossFPMult` (1.3); Reward pick + bonus S-mod; retreat = Run lost |
 | Event | text choice: battle station (fight or flee free; win = 3 Reward picks), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
-| Shop | buy ships, weapons, officers, repairs with Supplies |
-| Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level |
-| Treasure | choose 1 of 3 rare items (`rare_bp` hulls/weapons, Boss-pool ships, S-mod), scaled by Depth |
+| Shop | buy ships, weapons, officers, repairs and D-mod removal (one per job, 15 + 1/DP supplies) with Supplies |
+| Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level / remove all D-mods from one ship |
+| Treasure | choose 1 rare prize: bigger ship, top-tier weapons, S-mod, or full restoration (all D-mods off one ship), scaled by Depth |
 
 ## Fleet, resources and rules
 
@@ -124,8 +125,8 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
 | `map/NodeGraphBuilder`, `map/NodeText` | pure-logic Act layout with Node-type placement rules; Node descriptions |
 | `intel/HubIntel`, `intel/RunIntel` | Important Intel entry locating the Hub; Run overview with the read-only node map (hidden outside a Run) |
 | `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
-| `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
-| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
+| `combat/` | `EncounterFactory` (all Run fleets), `RunBattleCreationPlugin` + `MarkedTargetPlugin` (escape/pursuit setups, Ambush mark), `Rewards` (Reward pick), `RunRespawnDialog` |
+| `nodes/NodeDialog`, `nodes/Events` | encounter → vanilla fleet encounter handoff → Reward pick; Shop/Rest/Treasure services; Fleet services; node map → next course |
 | `ui/` | `CardGridDelegate` + `Card` (the shared picker), `NodeMapPanel` (GL map) + `NodeMapDelegate` (course picker) |
 | `economy/` | `Shop` (stock, prices), `Treasure` (prizes), `Upgrades` (S-mods, officer training) |
 | `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
@@ -146,6 +147,31 @@ Root package `com.slaythesector` (S2 state; later packages added as their milest
   end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
   fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
 - Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+
+**Implementation notes (S3)**
+- Escape and pursuit fights: the enemy fleet carries `$sts_battle` (`escape` / `pursuit`);
+  `RunCampaignPlugin.pickBattleCreationPlugin` returns `RunBattleCreationPlugin`, which rebuilds the
+  `BattleCreationContext` with the goals (they have no setters) and hands it to the vanilla setup.
+  Combat runs on the original context, so the layout the setup computed is copied back. A fleeing
+  enemy deploys everything (reserves would count as escaped).
+- Elite: enemy ×`sts_eliteFPMult` (1.5); a win is beating it, or bringing out ≥ `sts_eliteEscapeFraction`
+  (60 %) of the **deployed** DP, measured against at least half the fleet (reserves don't count as
+  saved); supplies 60 × share saved + a Reward pick.
+- Straight fights end on the first won battle: `RunEncounterDialog` (a `FleetInteractionDialogPluginImpl`
+  subclass used only for Run fights) counts enemy ships still on the field as lost before vanilla
+  scores the battle, so it is a total victory (loot/recovery, no re-engagement, no Leave-less menu
+  after "Claim victory"). Not for Elite, Ambush, convoy (escape/pursuit score what got away).
+  `didPlayerWinMostRecentBattleOfEncounter` still counts as a win as a fallback.
+- Pursuits: vanilla scores "the enemy got away" as a player win, so Ambush and convoy ignore it:
+  only the mark (Ambush) or the share destroyed (convoy) decides.
+- Ambush: the enemy's largest ship is marked (`$sts_target`); `MarkedTargetPlugin` rings it in
+  combat and names it. Mark destroyed = Supplies + Reward pick, else 15 supplies.
+- Events (drawn on first arrival, kept in `RunNode.eventId`): battle station (vanilla tier-1 station
+  hull by Depth, unboardable, flee for free, win = 3 Reward picks), sabotage (inspect for 15 supplies or 50 % risk of
+  −20 %), side battle (`createBattle(ally, enemy)` before the encounter so vanilla's join-an-ongoing-
+  battle flow puts the player with the `sts_ally` side; reward from the helped faction; the joined battle is finished before despawn), convoy raid
+  (fleeing freighters; 3 supplies per DP destroyed, Reward pick at ≥ 50 %). Event fights score as won
+  only on success; declining resolves the Node with nothing.
 
 **Implementation notes (S2)**
 - Shop, Rest and Treasure resolve on arrival but never count as won (Payout stays on fights).

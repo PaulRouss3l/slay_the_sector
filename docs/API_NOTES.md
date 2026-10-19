@@ -90,6 +90,14 @@ Ship/weapon/sprite/balance material is left there; read it if run rewards ever a
 | Officer training | `OfficerDataAPI.addXP(xpForNextLevel - xp)` gives a pending level-up; the player picks the skill in the vanilla Fleet screen. |
 | Boss pilots | `FleetParamsV3.withOfficers=false` (no officers/cores) or `aiCores = OfficerQuality.AI_GAMMA`. |
 
+## Verified in game (S3, 2026-10-19, RC8)
+
+| Concern | Fact |
+|---|---|
+| Escape / pursuit fights | `pickBattleCreationPlugin(opponent)` gets the encounter's other fleet; a `BattleCreationPluginImpl` subclass that builds a new `BattleCreationContext(player, goal, other, goal)` and calls `super.initBattle` with it yields a real escape (player `ESCAPE`) or pursuit (enemy `ESCAPE`) battle through the vanilla encounter. Copy the computed layout back to the original context: combat runs on that one. |
+| Pursuit scoring | Vanilla counts "the enemy got away" (`ESCAPE_ENEMY_SUCCESS`) as a player win: score pursuits yourself. |
+| Retreated survivors | A won battle with retreated enemies is `BATTLE_PLAYER_WIN`: `didPlayerWinEncounterOutright()` is false, `didPlayerWinMostRecentBattleOfEncounter()` is true. |
+
 ## UI text
 
 The game's UI fonts have no em dash, middle dot or multiplication sign: "—", "·" and "×" render

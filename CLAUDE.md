@@ -58,6 +58,10 @@ S1 (one Act, Combat + Boss, text course choice); later milestones add to it.
 - **When a feature is done, update `docs/ROADMAP.md`** in the same change: tick the item
   (⬜ → 🟡 code-complete, ✅ verified in game) and the "Current target" line.
 - New domain terms go in `GLOSSARY.md`; hard-to-reverse design choices get an ADR in `docs/adr/`.
+- **Logging** (`STSLog`, ships to players' `starsector.log`): log events, never loops. Info lines for
+  rare milestones only (Run start/end, jumps, special battle setups); `warn` for real anomalies.
+  Nothing in `advance()`, rendering or per-tick code. Verbose tracing, if ever needed, goes behind
+  an `sts_debugLog` setting that defaults to off.
 
 ## Pointers
 

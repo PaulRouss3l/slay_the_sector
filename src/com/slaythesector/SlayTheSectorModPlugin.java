@@ -57,6 +57,11 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         // Run enemies fly under the Descent so commissions and bounties ignore their kills.
         FactionAPI descent = sector.getFaction(STSConstants.FACTION_DESCENT);
         if (descent != null) descent.setRelationship(Factions.PLAYER, RepLevel.VENGEFUL);
+        FactionAPI ally = sector.getFaction(STSConstants.FACTION_ALLY);
+        if (ally != null) {
+            ally.setRelationship(Factions.PLAYER, RepLevel.COOPERATIVE);
+            ally.setRelationship(STSConstants.FACTION_DESCENT, RepLevel.VENGEFUL);
+        }
 
         HubPlacer.ensureHub();
         RunIntel.ensure();

@@ -44,13 +44,18 @@ public final class Rewards {
      * other when empty), plus an officer or a weapon bundle.
      */
     public static List<Card> offer(RunNode node, String archetypeId) {
+        return offer(node.getDepth(), node.getFactionId(), archetypeId);
+    }
+
+    /** As {@link #offer(RunNode, String)}, for a fight whose ships come from {@code factionId} at {@code depth}. */
+    public static List<Card> offer(int depth, String factionId, String archetypeId) {
         // Not security-sensitive: reward variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
         List<Card> cards = new ArrayList<Card>();
-        HullSize maxSize = DepthScaling.rewardSize(node.getDepth());
+        HullSize maxSize = DepthScaling.rewardSize(depth);
 
-        List<FleetMemberAPI> enemyPool = Archetypes.shipsUpTo(node.getFactionId(), maxSize, rng);
-        List<FleetMemberAPI> ownPool = archetypeId == null || archetypeId.equals(node.getFactionId())
+        List<FleetMemberAPI> enemyPool = Archetypes.shipsUpTo(factionId, maxSize, rng);
+        List<FleetMemberAPI> ownPool = archetypeId == null || archetypeId.equals(factionId)
                 ? new ArrayList<FleetMemberAPI>() : Archetypes.shipsUpTo(archetypeId, maxSize, rng);
         List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>(enemyPool);
         pool.addAll(ownPool);
@@ -59,7 +64,7 @@ public final class Rewards {
         List<String> pickFactions = new ArrayList<String>();
         if (!enemyPool.isEmpty()) {
             picks.add(enemyPool.remove(0));
-            pickFactions.add(node.getFactionId());
+            pickFactions.add(factionId);
         }
         if (!ownPool.isEmpty()) {
             picks.add(ownPool.remove(0));
@@ -68,7 +73,7 @@ public final class Rewards {
         while (picks.size() < 2 && !(enemyPool.isEmpty() && ownPool.isEmpty())) {
             boolean fromEnemy = !enemyPool.isEmpty();
             picks.add((fromEnemy ? enemyPool : ownPool).remove(0));
-            pickFactions.add(fromEnemy ? node.getFactionId() : archetypeId);
+            pickFactions.add(fromEnemy ? factionId : archetypeId);
         }
         for (int i = 0; i < picks.size(); i++) {
             FleetMemberAPI m = picks.get(i);
@@ -79,7 +84,7 @@ public final class Rewards {
 
         List<String> weapons = weaponBundle(pool, rng);
         if (rng.nextBoolean() || weapons.isEmpty()) {
-            int level = DepthScaling.officerLevel(node.getDepth());
+            int level = DepthScaling.officerLevel(depth);
             cards.add(new Card(new Reward(Kind.OFFICER, null, level, null), "Officer",
                     "A level " + level + " officer joins the Run fleet.", null, 0));
         } else {

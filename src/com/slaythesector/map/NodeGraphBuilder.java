@@ -20,28 +20,32 @@ import com.slaythesector.run.RunState;
  * Nodes. START links to every row-1 Node, every top-row Node links to the BOSS.
  * <p>
  * <b>Types</b>: rows 1-2 Combat, the middle row Treasure, the top row Rest. Other Nodes are drawn
- * by weight (Combat, Shop, Rest) and re-drawn while they break a rule: no Rest before row 4 or on
- * the row under the Rest row; a Shop or Rest never follows a Node of the same type; Nodes reached
- * from the same parent all differ. At least one Shop per Act.
+ * by weight (Combat, Elite, Ambush, Event, Shop, Rest) and re-drawn while they break a rule: no
+ * Rest or Elite before row 4, no Ambush before row 3, no Rest on the row under the Rest row; an
+ * Elite, Shop or Rest never follows a Node of the same type; Nodes reached from the same parent
+ * all differ. At least one Shop per Act.
  */
 public final class NodeGraphBuilder {
 
     private NodeGraphBuilder() {}
 
-    /** First row where a drawn Rest may appear. */
+    /** First rows where a drawn Rest / Elite / Ambush may appear. */
     private static final int FIRST_REST_ROW = 4;
+    private static final int FIRST_ELITE_ROW = 4;
+    private static final int FIRST_AMBUSH_ROW = 3;
     private static final int MAX_DRAWS = 30;
 
     /** Relative weights of the Node types drawn on rows without a fixed type. */
     public static class Weights {
-        final float combat;
-        final float shop;
-        final float rest;
+        final Map<NodeType, Float> byType = new LinkedHashMap<NodeType, Float>();
 
-        public Weights(float combat, float shop, float rest) {
-            this.combat = combat;
-            this.shop = shop;
-            this.rest = rest;
+        public Weights(float combat, float shop, float rest, float elite, float ambush, float event) {
+            byType.put(NodeType.COMBAT, combat);
+            byType.put(NodeType.SHOP, shop);
+            byType.put(NodeType.REST, rest);
+            byType.put(NodeType.ELITE, elite);
+            byType.put(NodeType.AMBUSH, ambush);
+            byType.put(NodeType.EVENT, event);
         }
     }
 
@@ -168,17 +172,23 @@ public final class NodeGraphBuilder {
     }
 
     private static NodeType draw(Weights w, Random rng) {
-        float roll = rng.nextFloat() * (w.combat + w.shop + w.rest);
-        if (roll < w.combat) return NodeType.COMBAT;
-        if (roll < w.combat + w.shop) return NodeType.SHOP;
-        return NodeType.REST;
+        float total = 0f;
+        for (float v : w.byType.values()) total += Math.max(0f, v);
+        float roll = rng.nextFloat() * total;
+        for (Map.Entry<NodeType, Float> e : w.byType.entrySet()) {
+            roll -= Math.max(0f, e.getValue());
+            if (roll < 0f) return e.getKey();
+        }
+        return NodeType.COMBAT;
     }
 
     private static boolean allowed(NodeType t, int row, int rows, List<RunNode> parents, Map<String, NodeType> types) {
         if (t == NodeType.REST && (row < FIRST_REST_ROW || row == rows - 1)) return false;
+        if (t == NodeType.ELITE && row < FIRST_ELITE_ROW) return false;
+        if (t == NodeType.AMBUSH && row < FIRST_AMBUSH_ROW) return false;
         for (RunNode p : parents) {
-            // A Shop or Rest never follows the same type.
-            if ((t == NodeType.SHOP || t == NodeType.REST) && p.getType() == t) return false;
+            // An Elite, Shop or Rest never follows the same type.
+            if ((t == NodeType.ELITE || t == NodeType.SHOP || t == NodeType.REST) && p.getType() == t) return false;
         }
         // Siblings differ: the Nodes reachable from one parent are distinct choices. Children are
         // linked to their parents as they are created, so the siblings typed so far are known.
@@ -190,7 +200,7 @@ public final class NodeGraphBuilder {
         return true;
     }
 
-    /** At least one Shop per Act: turns a drawn Combat Node whose parents aren't Shops into one. */
+    /** At least one Shop per Act: turns a drawn Combat Node into one (none exists, so no Shop->Shop). */
     private static void ensureShop(Map<String, RunNode> byCell, int rows, Random rng) {
         List<RunNode> candidates = new ArrayList<RunNode>();
         for (RunNode n : byCell.values()) {

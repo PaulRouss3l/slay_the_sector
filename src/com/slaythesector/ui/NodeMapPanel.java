@@ -268,6 +268,9 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
         LEGEND_TEXT.put(NodeType.SHOP, "Buy with Supplies");
         LEGEND_TEXT.put(NodeType.REST, "Repair, S-mod or train");
         LEGEND_TEXT.put(NodeType.TREASURE, "One rare prize");
+        LEGEND_TEXT.put(NodeType.ELITE, "Stronger fleet, escape it");
+        LEGEND_TEXT.put(NodeType.AMBUSH, "Enemy flees, kill the mark");
+        LEGEND_TEXT.put(NodeType.EVENT, "Unknown: a choice");
     }
 
     /** Whether the Node can be chosen as the next course. */
