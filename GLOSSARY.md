@@ -15,6 +15,10 @@ _Avoid_: Descent, dive, run system, expedition
 The mod's own station in the normal sector where a Run is started and where the player returns when it ends.
 _Avoid_: Base, home system, Hub station
 
+**The Descent**:
+The contained star system where every Run takes place; a place name, never a synonym for Run.
+_Avoid_: Run system, depths, abyss
+
 **Act**:
 One third of a Run: its own map of Nodes ending in a Boss.
 _Avoid_: Floor, chapter, sector

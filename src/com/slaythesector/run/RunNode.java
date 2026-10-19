@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One node in a run's graph. Plain Serializable POJO; stores ids and a fixed
- * position (no SectorEntityToken references) to stay XStream-safe. The matching
- * world entity is created by {@link com.slaythesector.gen.NodeEntityFactory} and
- * resolved lazily via the entity memory key {@code $sts_node_id}.
+ * One Node of a Run's map. Plain Serializable POJO holding ids only; its world entity is
+ * found by scanning for entity memory {@code $sts_node_id}.
  */
 public class RunNode implements Serializable {
 
@@ -17,34 +15,37 @@ public class RunNode implements Serializable {
     private final String id;
     private final NodeType type;
     private final int depth;
+    /** Position in its row, used for map layout. */
+    private final int column;
     private final List<String> successorIds = new ArrayList<String>();
-    private final float x;
-    private final float y;
-    private boolean cleared;
-    /** For combat nodes: the faction the player fights (and whose ships drop as reward). */
+    /** Enemy faction for fight Nodes. */
     private String factionId;
+    private boolean resolved;
+    private boolean won;
 
-    public RunNode(String id, NodeType type, int depth, float x, float y) {
+    public RunNode(String id, NodeType type, int depth, int column) {
         this.id = id;
         this.type = type;
         this.depth = depth;
-        this.x = x;
-        this.y = y;
+        this.column = column;
     }
 
     public String getId() { return id; }
     public NodeType getType() { return type; }
     public int getDepth() { return depth; }
+    public int getColumn() { return column; }
     public List<String> getSuccessorIds() { return successorIds; }
-    public float getX() { return x; }
-    public float getY() { return y; }
-    public boolean isCleared() { return cleared; }
-    public void setCleared(boolean cleared) { this.cleared = cleared; }
-
     public String getFactionId() { return factionId; }
     public void setFactionId(String factionId) { this.factionId = factionId; }
+    public boolean isResolved() { return resolved; }
+    public boolean isWon() { return won; }
 
     public void addSuccessor(String nodeId) {
-        successorIds.add(nodeId);
+        if (!successorIds.contains(nodeId)) successorIds.add(nodeId);
+    }
+
+    public void resolve(boolean won) {
+        this.resolved = true;
+        this.won = won;
     }
 }

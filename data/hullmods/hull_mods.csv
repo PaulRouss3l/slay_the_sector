@@ -1,0 +1,2 @@
+name,id,tier,rarity,tech/manufacturer,tags,uiTags,base value,unlocked,hidden,hiddenEverywhere,cost_frigate,cost_dest,cost_cruiser,cost_capital,script,desc,short,sModDesc,sprite
+Run Logistics,sts_run_logistics,,,,"no_drop, no_drop_salvage",,,,TRUE,TRUE,0,0,0,0,com.slaythesector.hullmods.RunLogistics,Run fleet ship: no monthly supply use and no passive repair. Repairs cost Supplies at each Node.,Hidden. Run fleet logistics.,,graphics/hullmods/hardened_shields.png

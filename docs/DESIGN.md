@@ -103,23 +103,41 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Payout**: 0 credits for a loss before Node 3, linear with Depth after (e.g. Depth 3 = 5k up to
   the final Boss = 25k), 50k for a win. Values in `settings.json`.
 
-## Code layout (planned)
+## Code layout
 
-Root package `com.slaythesector`. Kept from the old code (rewritten as needed): `NodeGraphBuilder`,
-`DepthScaling`, `STSConstants`, `STSLog`, the Run-state accessor pattern. Deleted: the
-dialog-only Run (`RunDialogPlugin`, mothball swap, Jangala rule).
+Root package `com.slaythesector` (S1 state; later packages added as their milestones land).
 
-| Package | Responsibility |
+| Package / class | Responsibility |
 |---|---|
-| `hub/` | Hub station placement, Hub dialog, Restore |
-| `run/` | Run state, start/end, Home fleet stash, Payout |
-| `map/` | graph generation, node map model |
-| `world/` | Run system generation, Node entities, `fracture_jump` lock, transitions |
-| `combat/` | battle setups per Node type, combat plugins (objectives, placement), respawn intercept |
-| `nodes/` | per-type Node dialogs (Event, Shop, Rest, Treasure) |
-| `ui/` | card grid, node map canvas, Intel overview |
-| `meta/` | cross-save Meta progress, Ascension |
-| `util/` | constants, logging, scaling |
+| `SlayTheSectorModPlugin` | lifecycle, XStream aliases, registers transient hooks, places the Hub |
+| `RunCampaignPlugin` | routes Hub/Node interactions, fleet-wipe intercept (`pickRespawnPlugin`) |
+| `hub/HubDialog` | Begin a Run (Archetype → Starting pick → refit → jump), recover Home fleet, abandon |
+| `run/` | `RunState`/`RunNode`/`NodeType` (saved), `RunManager` (start/end/Payout), `HomeFleet` (swap), `RunFleet` (build, attrition, repair/sell), `Archetypes` (faction filter, ship pools), `SafetyNetScript` |
+| `map/NodeGraphBuilder` | pure-logic Act layout |
+| `world/` | `HubPlacer`, `RunSystem` (contained system, Node entities, transitions), `FtlLockScript` |
+| `combat/` | `EncounterFactory` (enemy fleets), `Rewards` (Reward pick), `RunRespawnDialog` |
+| `nodes/NodeDialog` | encounter → vanilla fleet encounter handoff → Reward pick → Fleet services → next course |
+| `ui/` | `CardGridDelegate` + `Card` (the shared picker) |
+| `hullmods/RunLogistics` | hidden built-in hullmod: no maintenance, no passive repair |
+| `util/` | `STSConstants`, `STSSettings` (`sts_*` keys in settings.json), `DepthScaling`, `STSLog` |
+
+**Implementation notes (S1)**
+- Fights hand the Node dialog to `FleetInteractionDialogPluginImpl` with `dismissOnLeave=false`;
+  `FIDDelegate.notifyLeave` hands it back (vanilla `SalvageDefenderInteraction` pattern). Boss:
+  no retreat, fight to the last, enemy deploys all (`battleContextCreated`).
+- Supplies only move by player choice: every Run ship carries the hidden `sts_run_logistics`
+  hullmod (supply use ×0, repair/CR recovery ×0). Free CR to ~70 % and crew/fuel refill after
+  each fight (`RunFleet.afterFight`).
+- Only the chosen next Node gets a world entity; a set course is final (Path lock). The Run
+  system is emptied (entities, wrecks, debris) between Runs.
+- **Zero campaign impact, enforced**: Run enemies fly under the mod faction `sts_descent` (hostile
+  to the player only) so commissions/bounties ignore Run kills; reputation impact is off; player
+  XP/level/skill points/story points and veteran marines are snapshotted at start and restored at
+  end; credits that land on the Run fleet (monthly income/payroll) are handed back to the Home
+  fleet; salvaged supplies are stripped (Supplies come only from designed rewards).
+- Payout scales on the **deepest Node won**, so retreating can't farm Depth.
+- Deferred from S1: free starting weapons from the Archetype's known weapons (refit uses what the
+  ships carry plus salvage), Fleet DP cap (S2), Meta progress (S4).
 
 ## History
 

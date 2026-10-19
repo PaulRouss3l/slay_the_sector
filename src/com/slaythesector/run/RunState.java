@@ -1,62 +1,113 @@
 package com.slaythesector.run;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Per-run state, stored in sector memory under {@link com.slaythesector.util.STSConstants#MEM_RUN_STATE}.
- * Lives only for the duration of a run; cleared on exit. Plain Serializable POJO
- * holding ids only (no SectorEntityToken references) to stay XStream-safe.
+ * The active Run, stored in sector memory under {@code $sts_run_state}. Plain Serializable POJO
+ * holding ids only. The detached Home fleet is kept separately (see {@link HomeFleet}).
  */
 public class RunState implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
-    /** Id of the generated run {@code StarSystemAPI}. */
-    private String runSystemId;
-
-    /** True while the player is inside an active run. */
-    private boolean active;
-
-    /** Node graph, keyed by node id, in generation order. */
+    private final String archetypeId;
     private final Map<String, RunNode> nodes = new LinkedHashMap<String, RunNode>();
-
-    private String startNodeId;
-
-    /** Node the player is currently at (set on arrival). */
+    private final List<String> enemyFactionIds = new ArrayList<String>();
+    /** Last Node the player resolved (or START). Its successors are the next choices. */
     private String currentNodeId;
+    /** Node the player has set course for but not resolved yet; null when choosing. */
+    private String targetNodeId;
+    private int maxDepthReached;
+    /** Deepest Node won; the Payout scales on this so withdrawing can't farm Depth. */
+    private int maxDepthWon;
+    /** Campaign values the Run must not change; restored at Run end (zero campaign impact). */
+    private long snapXp;
+    private long snapBonusXp;
+    private int snapLevel;
+    private int snapSkillPoints;
+    private int snapStoryPoints;
+    private float snapMarines;
+    private float snapMarineXp;
+    private long snapDeferredBonusXp;
+    /** Player skill id -> level at Run start; skills learned during the Run are removed at the end. */
+    private final HashMap<String, Float> snapSkills = new HashMap<String, Float>();
 
-    /** Nodes whose entities have been spawned (fog of war: only these are reachable). */
-    private final Set<String> revealedNodeIds = new HashSet<String>();
+    public RunState(String archetypeId) {
+        this.archetypeId = archetypeId;
+    }
 
-    /** Seed used to build the node graph (kept for potential regen). */
-    private long seed;
-
-    public RunState() {}
-
-    public String getRunSystemId() { return runSystemId; }
-    public void setRunSystemId(String runSystemId) { this.runSystemId = runSystemId; }
-
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
-
-    public Map<String, RunNode> getNodes() { return nodes; }
-    public RunNode getNode(String id) { return id == null ? null : nodes.get(id); }
-    public void addNode(RunNode node) { nodes.put(node.getId(), node); }
-
-    public String getStartNodeId() { return startNodeId; }
-    public void setStartNodeId(String startNodeId) { this.startNodeId = startNodeId; }
-
+    public String getArchetypeId() { return archetypeId; }
+    public List<String> getEnemyFactionIds() { return enemyFactionIds; }
     public String getCurrentNodeId() { return currentNodeId; }
-    public void setCurrentNodeId(String currentNodeId) { this.currentNodeId = currentNodeId; }
+    public void setCurrentNodeId(String id) { this.currentNodeId = id; }
+    public String getTargetNodeId() { return targetNodeId; }
+    public void setTargetNodeId(String id) { this.targetNodeId = id; }
+    public int getMaxDepthReached() { return maxDepthReached; }
+    public int getMaxDepthWon() { return maxDepthWon; }
 
-    public Set<String> getRevealedNodeIds() { return revealedNodeIds; }
-    public boolean isRevealed(String id) { return revealedNodeIds.contains(id); }
-    public void reveal(String id) { revealedNodeIds.add(id); }
+    public void snapshotCampaign(long xp, long bonusXp, int level, int skillPoints, int storyPoints,
+                                 float marines, float marineXp) {
+        snapXp = xp;
+        snapBonusXp = bonusXp;
+        snapLevel = level;
+        snapSkillPoints = skillPoints;
+        snapStoryPoints = storyPoints;
+        snapMarines = marines;
+        snapMarineXp = marineXp;
+    }
 
-    public long getSeed() { return seed; }
-    public void setSeed(long seed) { this.seed = seed; }
+    public long getSnapXp() { return snapXp; }
+    public long getSnapBonusXp() { return snapBonusXp; }
+    public int getSnapLevel() { return snapLevel; }
+    public int getSnapSkillPoints() { return snapSkillPoints; }
+    public int getSnapStoryPoints() { return snapStoryPoints; }
+    public float getSnapMarines() { return snapMarines; }
+    public float getSnapMarineXp() { return snapMarineXp; }
+    public long getSnapDeferredBonusXp() { return snapDeferredBonusXp; }
+    public void setSnapDeferredBonusXp(long xp) { snapDeferredBonusXp = xp; }
+    public Map<String, Float> getSnapSkills() { return snapSkills; }
+
+    public void addNode(RunNode node) {
+        nodes.put(node.getId(), node);
+    }
+
+    public RunNode getNode(String id) {
+        return id == null ? null : nodes.get(id);
+    }
+
+    public RunNode getCurrentNode() {
+        return getNode(currentNodeId);
+    }
+
+    public RunNode getTargetNode() {
+        return getNode(targetNodeId);
+    }
+
+    /** Successors of the current Node: the only Nodes the player may choose (Path lock). */
+    public List<RunNode> getChoices() {
+        List<RunNode> out = new ArrayList<RunNode>();
+        RunNode cur = getCurrentNode();
+        if (cur == null) return out;
+        for (String id : cur.getSuccessorIds()) {
+            RunNode n = nodes.get(id);
+            if (n != null) out.add(n);
+        }
+        return out;
+    }
+
+    /** Marks the target Node resolved and makes it the current Node. */
+    public void resolveTarget(boolean won) {
+        RunNode target = getTargetNode();
+        if (target == null) return;
+        target.resolve(won);
+        currentNodeId = target.getId();
+        targetNodeId = null;
+        maxDepthReached = Math.max(maxDepthReached, target.getDepth());
+        if (won) maxDepthWon = Math.max(maxDepthWon, target.getDepth());
+    }
 }

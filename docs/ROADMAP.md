@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S1.**
+**Current target: S1** — code-complete, awaiting the in-game smoke test.
 
 ## Done before the redesign
 
@@ -32,12 +32,22 @@ Carried into S1:
 - `getContainingLocation()` stays set after `removeEntity` — check `loc.getFleets().contains(fleet)`
   before re-adding a swapped fleet.
 
-## S1 — One Act, Combat + Boss ⬜
+## S1 — One Act, Combat + Boss 🟡
 
-Hub station (idempotent), Hub dialog, Archetype list, Starting pick (card grid, 30 DP), free refit,
-Run system with Node entities, text node choice (map canvas comes in S2), Combat and Boss Nodes
-via the vanilla fleet encounter, Reward pick (card grid), Supplies, attrition (CR regen ~70 %,
-crew refill), Fleet services (repair/sell), Run end + Payout, Restore safety net, XStream aliases.
+Code-complete on branch `s1/one-act`; in-game checklist: `S1_SMOKE_TEST.md`. Independent review
+done and its findings fixed (campaign leaks, Payout exploit).
+- 🟡 Hub station (idempotent placement, no market), Hub dialog, Archetype list (runtime faction filter).
+- 🟡 Starting pick (card grid, 30 DP), free refit (weapon stock deferred).
+- 🟡 Run system with Node entities, course choice as dialog options (map canvas in S2), Path lock.
+- 🟡 Combat and Boss Nodes via the vanilla fleet encounter flow.
+- 🟡 Reward pick (card grid), Supplies, attrition (CR to ~70 %, crew/fuel refill, logistics hullmod).
+- 🟡 Fleet services (repair/sell), Run end + Payout, fleet-wipe intercept, Restore safety net.
+- 🟡 Zero campaign impact enforced (Descent faction, stat snapshot, credits hand-back), XStream aliases.
+
+Known, not fixed (review, low impact): debris/wrecks inside a Run still yield supplies via
+scavenging; core's `xpAtLastStoryPointGain` has no API, so a max-level player who earns story
+points in a Run re-earns that XP afterwards; an AI fleet already pursuing the player at the Hub
+may target the parked Home fleet (untested); the Hub's fixed 2600-unit orbit may overlap a planet.
 
 ## S2 — Map and economy Nodes ⬜
 

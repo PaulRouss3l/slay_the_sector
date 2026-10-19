@@ -1,0 +1,21 @@
+{
+	"id":"sts_descent",
+	"color":[200,90,60,255],
+	"baseUIColor":[220,110,80,255],
+	"displayName":"The Descent",
+	"displayNameWithArticle":"the Descent",
+	"logo":"graphics/factions/neutral.png",
+	"crest":"graphics/factions/crest_neutral.png",
+	"showInIntelTab":false,
+	"names":{},
+	"portraits":{},
+	"music":{
+		"theme":"music_none",
+		"market_neutral":"music_none",
+		"market_hostile":"music_none",
+		"market_friendly":"music_none",
+		"encounter_neutral":"music_pirates_encounter_neutral",
+		"encounter_hostile":"music_pirates_encounter_hostile",
+		"encounter_friendly":"music_none"
+	}
+}
