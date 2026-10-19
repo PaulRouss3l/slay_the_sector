@@ -38,8 +38,8 @@
 			"START": "graphics/icons/intel/log_star.png",
 			"COMBAT": "graphics/icons/intel/log_crosshair.png",
 			"BOSS": "graphics/icons/intel/log_red_diamond.png",
-			"SHOP": "graphics/icons/intel/commodities.png",
-			"REST": "graphics/icons/intel/repairs_finished.png",
+			"SHOP": "graphics/icons/intel/gain_credits.png",
+			"REST": "graphics/icons/station_habitat.png",
 			"TREASURE": "graphics/icons/intel/log_treasure.png"
 		}
 	}

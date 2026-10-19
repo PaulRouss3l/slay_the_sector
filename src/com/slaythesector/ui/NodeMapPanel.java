@@ -51,6 +51,8 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
     private static final Color RING_CURRENT = new Color(255, 200, 80);
     private static final Color RING_CHOICE = new Color(120, 220, 255);
     private static final Color RING_SELECTED = new Color(255, 255, 255);
+    /** The Rest icon is a white station glyph; green keeps it apart from the white Combat crosshair. */
+    private static final Color REST_TINT = new Color(120, 230, 140);
 
     private final RunState state;
     private final Listener listener;
@@ -160,7 +162,8 @@ public class NodeMapPanel implements CustomUIPanelPlugin {
             SpriteAPI icon = Global.getSettings().getSprite("sts_map", n.getType().name());
             if (icon == null) continue;
             icon.setSize(size, size);
-            icon.setColor(new Color(bright, bright, bright));
+            Color tint = n.getType() == NodeType.REST ? REST_TINT : Color.WHITE;
+            icon.setColor(new Color(tint.getRed() / 255f * bright, tint.getGreen() / 255f * bright, tint.getBlue() / 255f * bright));
             icon.setAlphaMult(alphaMult);
             icon.renderAtCenter(p[0], p[1]);
         }
