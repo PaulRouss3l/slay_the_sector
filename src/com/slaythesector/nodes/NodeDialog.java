@@ -756,7 +756,7 @@ public class NodeDialog implements InteractionDialogPlugin {
                             int total = Shop.total(picked);
                             if (total <= pf.getCargo().getSupplies()) {
                                 pf.getCargo().removeSupplies(total);
-                                text.addPara("Bought for " + total + " supplies: " + Shop.apply(picked, pf) + ".");
+                                text.addPara("Bought for " + total + " supplies: " + Shop.apply(picked, pf, state) + ".");
                                 shopCards.removeAll(picked);
                             }
                         }
