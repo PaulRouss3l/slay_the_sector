@@ -16,6 +16,7 @@ import com.fs.starfarer.api.impl.PlayerFleetPersonnelTracker;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.economy.Upgrades;
+import com.slaythesector.intel.RunResultIntel;
 import com.slaythesector.map.NodeGraphBuilder;
 import com.slaythesector.meta.MetaProgress;
 import com.slaythesector.util.STSConstants;
@@ -79,6 +80,25 @@ public final class RunManager {
         STSLog.info("Act " + state.getAct() + " begins: enemies=" + state.getEnemyFactionIds());
     }
 
+    /**
+     * Debug (console {@code sts act}): skip straight to Act {@code act}'s Entry Beacon and move the
+     * player fleet onto it. Act 4 also sets Ascension Omega and marks Act 3 won. Call only from the
+     * campaign map with no dialog open (it relocates the player fleet).
+     */
+    public static void debugSkipToAct(RunState state, int act) {
+        if (act >= 4) {
+            state.setAscension(Ascension.OMEGA);
+            state.setAct3Won();
+        }
+        RunSystem.clearNodesAndFleets();
+        state.setDepthOffset((act - 1) * (STSSettings.actRows() + 1));
+        buildAct(state, act);
+        SectorEntityToken start = RunSystem.ensureNodeEntity(state.getCurrentNode());
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        pf.setLocation(start.getLocation().x, start.getLocation().y);
+        STSLog.info("debug: skipped to Act " + act);
+    }
+
     /** Fresh map and enemy factions for Act {@code act}. */
     private static void buildAct(RunState state, int act) {
         // Not security-sensitive: map/enemy randomness only.
@@ -111,11 +131,14 @@ public final class RunManager {
         CampaignFleetAPI home = HomeFleet.restore();
         if (state != null) restoreSnapshot(state);
         if (payout > 0) home.getCargo().getCredits().add(payout);
-        if (state != null) MetaProgress.load().recordRun(state, won);
         Global.getSector().getMemoryWithoutUpdate().unset(STSConstants.MEM_RUN_STATE);
         STSLog.info("Run ended: won=" + won + ", depth=" + depth + ", payout=" + payout);
-        Global.getSector().getCampaignUI().addMessage("Run " + (won ? "won" : "lost") + " at Depth " + depth
-                + ". Payout: " + Misc.getDGSCredits(payout), won ? Misc.getPositiveHighlightColor() : Misc.getHighlightColor());
+        if (state != null) {
+            List<String> unlocked = MetaProgress.load().recordRun(state, won);
+            // The Run-end report: intel with a notification (result, Payout, unlocks).
+            new RunResultIntel(state.getArchetypeId(), won, state.isTrueBossWon(), state.getAscension(),
+                    state.getAct(), depth, payout, unlocked).post();
+        }
         return payout;
     }
 

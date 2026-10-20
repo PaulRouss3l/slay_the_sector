@@ -27,26 +27,35 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 - [x] Then **Descend to Act 2**: dialog closes, a message, a new Entry Beacon right where you are;
       new map, new enemy factions, "The Descent: Act 2" on the map.
 - [x] Act 2 is harder (×1.6), its Boss is **Derelict** (~125); Act 3 ×2.2, Boss **Remnant** (~172).
-      (Log: Act 2 -> Act 3 transition seen; the Remnant Boss itself not yet.)
+      (Log: all three Bosses beaten in one Run.)
 - [x] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
-- [ ] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000.
+- [x] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000. (Log 2026-10-20: `won=true,
+      depth=33, payout=50000`; the Remnant Boss generated with no fallback warning.)
+- [ ] The Run's end posts an intel report with a notification: result, Payout, Act/Depth/Ascension
+      and what was unlocked (replaces the old one-line message).
 
 ## 3. Meta progress
-- [ ] After that win, Records shows the Run; the Archetype list says "(won at Gamma)".
-- [ ] Next Run with that faction: Ascension choice Gamma / Beta, each with its handicap text.
-- [ ] Starting bonuses screen: "+5 starting DP" unlocked by the first win ([x]/[ ] toggles);
+- [x] After that win, Records shows the Run; the Archetype list says "(won at Gamma)". (Meta file:
+      Tri-Tachyon 2 Runs, 1 win, best Depth 33, best Ascension won Gamma, Beta unlocked.)
+- [x] Next Run with that faction: Ascension choice Gamma / Beta, each with its handicap text.
+- [x] Starting bonuses screen: "+5 starting DP" unlocked by the first win ([x]/[ ] toggles);
       the Starting pick budget shows 35 DP when on.
-- [ ] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (level-up pending
-      in the Fleet screen at the start).
+- [x] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (log: `starting bonus
+      unlocked: officerLevel`; the pending level-up at the next start still to see).
 - [x] A Run's end is recorded in `saves/common/slay_the_sector_meta.json.data` (log: Depth 9 loss
       -> `runs 1`), and the loss Payout follows the 3-Act scale (Depth 9 -> 9,000).
 
 ## 4. Ascension effects (any order, as unlocked)
-- [ ] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.
-- [ ] Alpha: noticeably more Elites. Seraph: Rest repairs only **half** of the damage (check a
+- [x] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.
+- [x] Alpha: noticeably more Elites. Seraph: Rest repairs only **half** of the damage (check a
       lightly damaged ship isn't fully repaired). Primordial: Boss ships have pilots (Gamma cores on
       Derelict/Remnant, officers on the Act 1 Apex fleet).
-- [ ] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
+- [x] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
+
+## 4b. Ship fit tooltip
+- [x] On ship cards (Starting pick, Reward, Shop, Treasure), hovering the ship's **name** shows hull,
+      DP, system and OP; F1 expands to weapons, fighter wings and hullmods. The icon keeps vanilla's
+      tooltip. A grey header line tells the player to hover the name.
 
 ## 4b. Ship fit tooltip
 - [x] On ship cards (Starting pick, Reward, Shop, Treasure), hovering the ship's **name** shows hull,
@@ -57,7 +66,10 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 - [x] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
       repair and D-mod removal); the stock closes when you leave the beacon. Assault still works.
 
-## 6. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
+## 6. Act 4 (Ascension Omega)
+
+Shortcut with the Console Commands mod: start any Run, jump into the Descent, then `sts act 4` (or
+`sts unlock` then start an Omega Run). `sts supplies 500` helps survive the Ziggurat test.
 - [ ] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
 - [ ] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
 - [ ] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
