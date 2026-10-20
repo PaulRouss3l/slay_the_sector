@@ -21,8 +21,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSConstants;
 
 /**
- * Hover tooltip of a ship card: hull, DP, system and ordnance points; F1 expands it to the full
- * fit (weapons, fighter wings, hullmods), like the vanilla ship tooltips.
+ * Hover tooltip on a ship card's name: hull, DP, system and ordnance points; F1 expands it to the
+ * full fit (weapons, fighter wings, hullmods), like the vanilla ship tooltips. The ship icon keeps
+ * vanilla's own tooltip.
  */
 public class ShipFitTooltip implements TooltipCreator {
 
