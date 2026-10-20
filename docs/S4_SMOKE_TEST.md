@@ -20,7 +20,7 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 ## 2. Acts and Bosses
 - [x] Act 1 Boss: "The Act 1 Boss: a <enemy faction> fleet", strength ~78.
 - [x] Win it: Boss supplies, then the **Boss reward** choice (no Reward pick):
-  - [ ] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
+  - [x] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
         ship. Press Back instead: "Choose your free S-mod (Boss reward)" stays on the beacon menu until used.
   - [x] Bigger fleet: beacon text shows the cap 20 higher (`Fleet DP x / 100`).
   - [x] Remnant warship: Brilliant with a Gamma core captain, **CR normal** (not 0).
@@ -28,7 +28,7 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
       new map, new enemy factions, "The Descent: Act 2" on the map.
 - [x] Act 2 is harder (×1.6), its Boss is **Derelict** (~125); Act 3 ×2.2, Boss **Remnant** (~172).
       (Log: Act 2 -> Act 3 transition seen; the Remnant Boss itself not yet.)
-- [ ] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
+- [x] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
 - [ ] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000.
 
 ## 3. Meta progress
