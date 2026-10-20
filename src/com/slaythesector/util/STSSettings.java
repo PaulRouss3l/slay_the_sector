@@ -124,6 +124,9 @@ public final class STSSettings {
     public static float shopWeaponPerOP() { return f("sts_shopWeaponPerOP", 1.5f); }
     public static int shopOfficerBase() { return i("sts_shopOfficerBase", 30); }
     public static int shopOfficerPerLevel() { return i("sts_shopOfficerPerLevel", 10); }
+    /** Shop card: + this many Fleet DP cap for the rest of the Run, at this price. */
+    public static int shopDPCapAmount() { return i("sts_shopDPCapAmount", 10); }
+    public static int shopDPCapPrice() { return i("sts_shopDPCapPrice", 100); }
     public static float shopRepairMult() { return f("sts_shopRepairMult", 0.5f); }
     /** Shop price to remove one D-mod: base + per DP of the ship. */
     public static float shopDModBase() { return f("sts_shopDModBase", 15f); }
