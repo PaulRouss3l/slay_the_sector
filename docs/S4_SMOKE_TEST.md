@@ -7,21 +7,28 @@ one-Act Run. Afterwards I run `log_scan` myself (mod lines: `Run started ... asc
 `sts_bonusStart*`). Meta progress lives in `saves/common/slay_the_sector_meta.json`: delete it to
 start fresh. Tip: save before each Boss.
 
+**Log evidence (2026-10-20, no mod errors):** a Gamma Run went Act 1 -> Act 2 -> Act 3 (`Act 2
+begins`, `Act 3 begins`, new enemy factions each time; the Derelict Act 2 Boss generated with no
+fallback warning); escape and pursuit setups still apply; an earlier S4 loss at Depth 9 paid 9,000
+(new 3-Act Payout scale); Meta progress was written (`tritachyon: 1 Run, best Depth 10`). Not seen
+yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension above Gamma, Act 4.
+
 ## 1. Hub
 - [x] Main menu: **Records** page (empty at first; shows the starting bonuses as locked).
 - [x] First Run: no Ascension or bonus screen (only Gamma, nothing unlocked); straight to the pick.
 
 ## 2. Acts and Bosses
 - [x] Act 1 Boss: "The Act 1 Boss: a <enemy faction> fleet", strength ~78.
-- [ ] Win it: Boss supplies, then the **Boss reward** choice (no Reward pick):
-  - [ ] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
+- [x] Win it: Boss supplies, then the **Boss reward** choice (no Reward pick):
+  - [x] Refit: pick a ship -> it can take one more S-mod (check in Refit), then the S-mod picker for any
         ship. Press Back instead: "Choose your free S-mod (Boss reward)" stays on the beacon menu until used.
-  - [ ] Bigger fleet: beacon text shows the cap 20 higher (`Fleet DP x / 100`).
-  - [ ] Remnant warship: Brilliant with a Gamma core captain, **CR normal** (not 0).
-- [ ] Then **Descend to Act 2**: dialog closes, a message, a new Entry Beacon right where you are;
+  - [x] Bigger fleet: beacon text shows the cap 20 higher (`Fleet DP x / 100`).
+  - [x] Remnant warship: Brilliant with a Gamma core captain, **CR normal** (not 0).
+- [x] Then **Descend to Act 2**: dialog closes, a message, a new Entry Beacon right where you are;
       new map, new enemy factions, "The Descent: Act 2" on the map.
-- [ ] Act 2 is harder (×1.6), its Boss is **Derelict** (~125); Act 3 ×2.2, Boss **Remnant** (~172).
-- [ ] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
+- [x] Act 2 is harder (×1.6), its Boss is **Derelict** (~125); Act 3 ×2.2, Boss **Remnant** (~172).
+      (Log: Act 2 -> Act 3 transition seen; the Remnant Boss itself not yet.)
+- [x] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
 - [ ] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000.
 
 ## 3. Meta progress
@@ -31,6 +38,8 @@ start fresh. Tip: save before each Boss.
       the Starting pick budget shows 35 DP when on.
 - [ ] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (level-up pending
       in the Fleet screen at the start).
+- [x] A Run's end is recorded in `saves/common/slay_the_sector_meta.json.data` (log: Depth 9 loss
+      -> `runs 1`), and the loss Payout follows the 3-Act scale (Depth 9 -> 9,000).
 
 ## 4. Ascension effects (any order, as unlocked)
 - [ ] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.

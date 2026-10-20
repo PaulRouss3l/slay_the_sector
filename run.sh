@@ -4,6 +4,10 @@
 # VM flags are copied from the game's own starsector.sh (Linux), plus the debug agent.
 cd "${STARSECTOR_DIR:-/home/ubik/Downloads/starsector}" || exit 1
 
+# set layout to english for 12345 key
+setxkbmap -device $(xinput list --id-only "keyboard:Naga V2 HS Keyboard") -layout us
+
+
 ./jre_linux/bin/java \
     -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:5005 \
     -Dfile.encoding=UTF-8 \
