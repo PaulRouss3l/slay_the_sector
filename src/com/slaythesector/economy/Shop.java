@@ -33,7 +33,7 @@ public final class Shop {
 
     private Shop() {}
 
-    public enum Kind { SHIP, WEAPON, OFFICER }
+    public enum Kind { SHIP, WEAPON, OFFICER, DP_CAP }
 
     public static class Item {
         public final Kind kind;
@@ -83,7 +83,14 @@ public final class Shop {
                 }
             }
             for (FleetMemberAPI m : ships) cards.add(shipCard(m));
-            for (int w = page * 4; w < Math.min(weaponIds.size(), page * 4 + 4); w++) cards.add(weaponCard(weaponIds.get(w)));
+            // Page 1 opens with the Fleet DP cap upgrade and carries one weapon less, so it stays 8 cards.
+            int firstWeapon = page * 4;
+            int lastWeapon = page * 4 + 4;
+            if (page == 0) {
+                cards.add(0, dpCapCard());
+                lastWeapon--;
+            }
+            for (int w = firstWeapon; w < Math.min(weaponIds.size(), lastWeapon); w++) cards.add(weaponCard(weaponIds.get(w)));
             cards.add(officerCard(level));
         }
         return cards;
@@ -110,8 +117,15 @@ public final class Shop {
                 "Joins the Run fleet - " + price + " supplies", null, price, 1);
     }
 
+    private static Card dpCapCard() {
+        int dp = STSSettings.shopDPCapAmount();
+        int price = STSSettings.shopDPCapPrice();
+        return new Card(new Item(Kind.DP_CAP, null, null, 0), "+" + dp + " Fleet DP cap",
+                "For the rest of the Run (the hard cap rises too) - " + price + " supplies", null, price, 1);
+    }
+
     /** Applies a confirmed purchase; Supplies are taken by the caller. */
-    public static String apply(List<Card> bought, CampaignFleetAPI fleet) {
+    public static String apply(List<Card> bought, CampaignFleetAPI fleet, RunState state) {
         Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         for (Card c : bought) {
             Item it = (Item) c.data;
@@ -125,6 +139,9 @@ public final class Shop {
                 case OFFICER:
                     PersonAPI officer = OfficerManagerEvent.createOfficer(Global.getSector().getPlayerFaction(), it.officerLevel);
                     fleet.getFleetData().addOfficer(officer);
+                    break;
+                case DP_CAP:
+                    state.addSoftCapBonus(STSSettings.shopDPCapAmount());
                     break;
             }
             Integer n = counts.get(c.title);

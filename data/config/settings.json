@@ -60,6 +60,8 @@
 	"sts_shopOfficerBase": 30,
 	"sts_shopOfficerPerLevel": 10,
 	"sts_shopRepairMult": 0.5,
+	"sts_shopDPCapAmount": 10,
+	"sts_shopDPCapPrice": 100,
 	"sts_shopDModBase": 15,
 	"sts_shopDModPerDP": 1,
 	"graphics": {
