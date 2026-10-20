@@ -48,6 +48,11 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
       Derelict/Remnant, officers on the Act 1 Apex fleet).
 - [ ] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
 
+## 4b. Ship fit tooltip
+- [x] On ship cards (Starting pick, Reward, Shop, Treasure), hovering the ship's **name** shows hull,
+      DP, system and OP; F1 expands to weapons, fighter wings and hullmods. The icon keeps vanilla's
+      tooltip. A grey header line tells the player to hover the name.
+
 ## 5. Battle station Event
 - [ ] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
       repair and D-mod removal); the stock closes when you leave the beacon. Assault still works.
