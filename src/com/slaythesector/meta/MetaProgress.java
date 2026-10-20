@@ -1,6 +1,8 @@
 package com.slaythesector.meta;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,6 +12,7 @@ import com.fs.starfarer.api.Global;
 import com.slaythesector.run.Ascension;
 import com.slaythesector.run.RunState;
 import com.slaythesector.util.STSLog;
+import com.slaythesector.util.STSSettings;
 
 /**
  * Cross-save Meta progress, in {@code saves/common/} (never in a save): Records and Ascension per
@@ -98,36 +101,51 @@ public final class MetaProgress {
         return b != null && b.optBoolean(bonus, false);
     }
 
-    private void unlock(String bonus) throws JSONException {
+    /** Unlocks a starting bonus; adds a line to {@code unlocked} the first time. */
+    private void unlock(String bonus, List<String> unlocked) throws JSONException {
         JSONObject b = root.optJSONObject("bonuses");
         if (b == null) {
             b = new JSONObject();
             root.put("bonuses", b);
         }
-        if (!b.optBoolean(bonus, false)) STSLog.info("Meta progress: starting bonus unlocked: " + bonus);
+        if (!b.optBoolean(bonus, false)) {
+            STSLog.info("Meta progress: starting bonus unlocked: " + bonus);
+            unlocked.add("Starting bonus: " + bonusName(bonus));
+        }
         b.put(bonus, true);
+    }
+
+    public static String bonusName(String bonus) {
+        if (BONUS_DP.equals(bonus)) return "+" + STSSettings.bonusStartDP() + " starting DP";
+        if (BONUS_OFFICER.equals(bonus)) return "+1 level for the starting officer";
+        if (BONUS_SUPPLIES.equals(bonus)) return "+" + STSSettings.bonusStartSupplies() + " starting supplies";
+        return bonus;
     }
 
     // ---- Run end -------------------------------------------------------------------------------
 
     /**
      * Records a finished Run: counts, deepest Depth, Ascension unlock (winning at the highest level
-     * reached opens the next), Omega cleared, and the starting-bonus milestones.
+     * reached opens the next), Omega cleared, and the starting-bonus milestones. Returns what this
+     * Run unlocked, for the Run-end report.
      */
-    public void recordRun(RunState state, boolean won) {
+    public List<String> recordRun(RunState state, boolean won) {
+        List<String> unlocked = new ArrayList<String>();
         try {
             String id = state.getArchetypeId();
             JSONObject a = archetype(id);
             a.put("runs", a.optInt("runs", 0) + 1);
             a.put("bestDepth", Math.max(a.optInt("bestDepth", 0), state.getMaxDepthReached()));
-            if (state.getAct() >= 3) unlock(BONUS_OFFICER);
+            if (state.getAct() >= 3) unlock(BONUS_OFFICER, unlocked);
             if (won) {
                 a.put("wins", a.optInt("wins", 0) + 1);
                 a.put("bestAscensionWon", Math.max(a.optInt("bestAscensionWon", -1), state.getAscension()));
-                if (state.getAscension() >= a.optInt("ascensionUnlocked", 0)) {
-                    a.put("ascensionUnlocked", Math.min(Ascension.MAX, state.getAscension() + 1));
+                int before = a.optInt("ascensionUnlocked", 0);
+                if (state.getAscension() >= before && before < Ascension.MAX) {
+                    a.put("ascensionUnlocked", state.getAscension() + 1);
+                    unlocked.add("Ascension " + Ascension.name(state.getAscension() + 1) + " for this faction");
                 }
-                unlock(BONUS_DP);
+                unlock(BONUS_DP, unlocked);
                 JSONArray winners = root.optJSONArray("winArchetypes");
                 if (winners == null) {
                     winners = new JSONArray();
@@ -138,13 +156,14 @@ public final class MetaProgress {
                     if (id.equals(winners.optString(i))) seen = true;
                 }
                 if (!seen) winners.put(id);
-                if (winners.length() >= 3) unlock(BONUS_SUPPLIES);
+                if (winners.length() >= 3) unlock(BONUS_SUPPLIES, unlocked);
             }
             if (state.isTrueBossWon()) a.put("omegaCleared", true);
         } catch (JSONException e) {
             STSLog.warn("Meta progress not recorded: " + e);
-            return;
+            return unlocked;
         }
         save();
+        return unlocked;
     }
 }

@@ -16,6 +16,7 @@ import com.fs.starfarer.api.impl.PlayerFleetPersonnelTracker;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.economy.Upgrades;
+import com.slaythesector.intel.RunResultIntel;
 import com.slaythesector.map.NodeGraphBuilder;
 import com.slaythesector.meta.MetaProgress;
 import com.slaythesector.util.STSConstants;
@@ -111,11 +112,14 @@ public final class RunManager {
         CampaignFleetAPI home = HomeFleet.restore();
         if (state != null) restoreSnapshot(state);
         if (payout > 0) home.getCargo().getCredits().add(payout);
-        if (state != null) MetaProgress.load().recordRun(state, won);
         Global.getSector().getMemoryWithoutUpdate().unset(STSConstants.MEM_RUN_STATE);
         STSLog.info("Run ended: won=" + won + ", depth=" + depth + ", payout=" + payout);
-        Global.getSector().getCampaignUI().addMessage("Run " + (won ? "won" : "lost") + " at Depth " + depth
-                + ". Payout: " + Misc.getDGSCredits(payout), won ? Misc.getPositiveHighlightColor() : Misc.getHighlightColor());
+        if (state != null) {
+            List<String> unlocked = MetaProgress.load().recordRun(state, won);
+            // The Run-end report: intel with a notification (result, Payout, unlocks).
+            new RunResultIntel(state.getArchetypeId(), won, state.isTrueBossWon(), state.getAscension(),
+                    state.getAct(), depth, payout, unlocked).post();
+        }
         return payout;
     }
 
