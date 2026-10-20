@@ -73,6 +73,16 @@ public final class STSSettings {
             return 1f;
         }
     }
+    /** Supply-reward multiplier of Act {@code act} (all fights); the last value covers later Acts. */
+    public static float actRewardMult(int act) {
+        List<String> f = list("sts_actRewardMult");
+        if (f.isEmpty()) return 1f + 0.5f * (act - 1);
+        try {
+            return Float.parseFloat(f.get(Math.min(act, f.size()) - 1));
+        } catch (NumberFormatException e) {
+            return 1f;
+        }
+    }
     /** Boss faction of Act {@code act}; empty = one of the Act's own enemy factions. */
     public static String actBossFaction(int act) {
         List<String> f = list("sts_actBossFactions");
