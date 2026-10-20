@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -24,8 +26,8 @@ import com.slaythesector.util.DepthScaling;
 import com.slaythesector.util.STSSettings;
 
 /**
- * A Shop Node's stock, priced in Supplies: ships (mostly the Archetype's, one size above the
- * usual Reward), single weapons and one officer. Shown in the card grid in budget mode.
+ * A Shop Node's stock, priced in Supplies: one page per Act of ships (mostly the Archetype's, one
+ * size above the usual Reward), single weapons and an officer. Shown in the card grid in budget mode.
  */
 public final class Shop {
 
@@ -47,40 +49,65 @@ public final class Shop {
         }
     }
 
+    /**
+     * One page of stock per Act (Act 2 = 2 pages...): each page holds 3 ships (2 of the Archetype,
+     * 1 of an enemy faction, taking turns), 4 weapons and 1 officer. No hull or weapon repeats.
+     */
     public static List<Card> stock(RunState state, RunNode node) {
         // Not security-sensitive: stock variety only.
         Random rng = new Random(); // nosemgrep: java-lang-security-audit-crypto-weak-random
-        List<Card> cards = new ArrayList<Card>();
+        int pages = Math.max(1, Math.min(3, state.getAct()));
         HullSize maxSize = bigger(DepthScaling.rewardSize(state, node.getDepth()));
 
-        List<FleetMemberAPI> ships = new ArrayList<FleetMemberAPI>();
         List<FleetMemberAPI> own = Archetypes.shipsUpTo(state.getArchetypeId(), maxSize, rng);
-        ships.addAll(own.subList(0, Math.min(2, own.size())));
-        if (!state.getEnemyFactionIds().isEmpty()) {
-            String enemy = state.getEnemyFactionIds().get(rng.nextInt(state.getEnemyFactionIds().size()));
-            List<FleetMemberAPI> theirs = Archetypes.shipsUpTo(enemy, maxSize, rng);
-            if (!theirs.isEmpty()) ships.add(theirs.get(0));
-        }
-        for (FleetMemberAPI m : ships) {
-            int price = Math.round(m.getDeploymentPointsCost() * STSSettings.shopSuppliesPerDP());
-            cards.add(new Card(new Item(Kind.SHIP, m, null, 0), m.getHullSpec().getHullName(),
-                    m.getHullSpec().getManufacturer() + " - " + (int) m.getDeploymentPointsCost() + " DP - "
-                            + price + " supplies", m, price, 1));
-        }
-
-        for (String id : weapons(state, rng, 4)) {
-            WeaponSpecAPI spec = Global.getSettings().getWeaponSpec(id);
-            int price = weaponPrice(spec);
-            cards.add(new Card(new Item(Kind.WEAPON, null, id, 0), spec.getWeaponName(),
-                    spec.getSize().getDisplayName() + " " + spec.getMountType().getDisplayName() + " - "
-                            + price + " supplies", null, price, 1));
-        }
-
+        List<String> enemies = new ArrayList<String>(state.getEnemyFactionIds());
+        Collections.shuffle(enemies, rng);
+        Set<String> hulls = new HashSet<String>();
+        List<String> weaponIds = weapons(state, rng, 4 * pages);
         int level = DepthScaling.officerLevel(state, node.getDepth());
-        int price = STSSettings.shopOfficerBase() + level * STSSettings.shopOfficerPerLevel();
-        cards.add(new Card(new Item(Kind.OFFICER, null, null, level), "Officer (level " + level + ")",
-                "Joins the Run fleet - " + price + " supplies", null, price, 1));
+
+        List<Card> cards = new ArrayList<Card>();
+        for (int page = 0; page < pages; page++) {
+            List<FleetMemberAPI> ships = new ArrayList<FleetMemberAPI>();
+            for (FleetMemberAPI m : own) {
+                if (ships.size() >= 2) break;
+                if (hulls.add(m.getHullId())) ships.add(m);
+            }
+            if (!enemies.isEmpty()) {
+                String enemy = enemies.get(page % enemies.size());
+                for (FleetMemberAPI m : Archetypes.shipsUpTo(enemy, maxSize, rng)) {
+                    if (hulls.add(m.getHullId())) {
+                        ships.add(m);
+                        break;
+                    }
+                }
+            }
+            for (FleetMemberAPI m : ships) cards.add(shipCard(m));
+            for (int w = page * 4; w < Math.min(weaponIds.size(), page * 4 + 4); w++) cards.add(weaponCard(weaponIds.get(w)));
+            cards.add(officerCard(level));
+        }
         return cards;
+    }
+
+    private static Card shipCard(FleetMemberAPI m) {
+        int price = Math.round(m.getDeploymentPointsCost() * STSSettings.shopSuppliesPerDP());
+        return new Card(new Item(Kind.SHIP, m, null, 0), m.getHullSpec().getHullName(),
+                m.getHullSpec().getManufacturer() + " - " + (int) m.getDeploymentPointsCost() + " DP - "
+                        + price + " supplies", m, price, 1);
+    }
+
+    private static Card weaponCard(String id) {
+        WeaponSpecAPI spec = Global.getSettings().getWeaponSpec(id);
+        int price = weaponPrice(spec);
+        return new Card(new Item(Kind.WEAPON, null, id, 0), spec.getWeaponName(),
+                spec.getSize().getDisplayName() + " " + spec.getMountType().getDisplayName() + " - "
+                        + price + " supplies", null, price, 1);
+    }
+
+    private static Card officerCard(int level) {
+        int price = STSSettings.shopOfficerBase() + level * STSSettings.shopOfficerPerLevel();
+        return new Card(new Item(Kind.OFFICER, null, null, level), "Officer (level " + level + ")",
+                "Joins the Run fleet - " + price + " supplies", null, price, 1);
     }
 
     /** Applies a confirmed purchase; Supplies are taken by the caller. */

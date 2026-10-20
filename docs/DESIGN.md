@@ -117,7 +117,7 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 | Ambush | enemy `FleetGoal.ESCAPE`, player spawns around it, one marked target 🧪; target destroyed = Reward pick, escaped = Supplies only |
 | Boss | no retreat, fight to the last, enemy deploys all; pilots per `sts_bossOfficers` (default none: no officers or AI cores); strength ×`sts_bossFPMult` (1.3); Reward pick + bonus S-mod; retreat = Run lost |
 | Event | text choice: battle station (fight it, win = 3 Reward picks; or trade with it: the Node becomes a Shop), sabotage (choice to inspect or risk −20 % Supplies), side battle (fight with allies, reward from the helped faction, no reputation change), convoy raid (convoy flees, reward by DP destroyed) |
-| Shop | buy ships, weapons, officers, repairs and D-mod removal (one per job, 15 + 1/DP supplies) with Supplies |
+| Shop | buy ships, weapons, officers, repairs and D-mod removal (one per job, 15 + 1/DP supplies) with Supplies; one page of stock per Act (each page: 3 ships, 4 weapons, 1 officer) |
 | Rest | choose one: full repair of the fleet / S-mod on one ship / +1 officer level / remove all D-mods from one ship |
 | Treasure | choose 1 rare prize: bigger ship, top-tier weapons, S-mod, or full restoration (all D-mods off one ship), scaled by Depth |
 
