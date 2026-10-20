@@ -51,6 +51,22 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
 `gameVersion` in `mod_info.json` is `0.98a-RC8` (the installed version). If the launcher shows a
 "version mismatch" warning, set it to the exact version printed on the launcher screen.
 
+## Debug commands (Console Commands mod)
+
+With the Console Commands mod enabled, open the console (Ctrl+Backspace by default) on the campaign
+map:
+
+| Command | Does |
+|---|---|
+| `sts status` | Run state: Act, Ascension, deepest Node won, supplies, DP cap |
+| `sts unlock [0-6]` | Ascension up to that level (default 6 = Omega) for every faction, plus every starting bonus |
+| `sts act <2-4>` | during a Run, skip to that Act's Entry Beacon; `4` sets Omega and counts Act 3 as won |
+| `sts supplies <n>` | give the Run fleet n supplies |
+
+The class (`com.slaythesector.debug.StsCommand`) is registered in `data/console/commands.csv`;
+Console loads it only when Console is enabled, so it adds no dependency. The build compiles
+against Console's jar through `optional_mods` in `tools/validate_config.json`.
+
 ## Release
 
 Built locally on purpose: compiling needs the game's own jars, which can't go to a public CI.

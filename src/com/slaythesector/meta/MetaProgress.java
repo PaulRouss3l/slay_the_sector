@@ -122,6 +122,31 @@ public final class MetaProgress {
         return bonus;
     }
 
+    /**
+     * Debug (console {@code sts unlock}): Ascension up to {@code level} for these Archetypes, and
+     * every starting bonus.
+     */
+    public void debugUnlock(List<String> archetypeIds, int level) {
+        try {
+            for (String id : archetypeIds) {
+                JSONObject a = archetype(id);
+                a.put("ascensionUnlocked", Math.max(a.optInt("ascensionUnlocked", 0), Math.min(Ascension.MAX, level)));
+            }
+            JSONObject b = root.optJSONObject("bonuses");
+            if (b == null) {
+                b = new JSONObject();
+                root.put("bonuses", b);
+            }
+            b.put(BONUS_DP, true);
+            b.put(BONUS_OFFICER, true);
+            b.put(BONUS_SUPPLIES, true);
+        } catch (JSONException e) {
+            STSLog.warn("debug unlock failed: " + e);
+            return;
+        }
+        save();
+    }
+
     // ---- Run end -------------------------------------------------------------------------------
 
     /**
