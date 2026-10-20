@@ -90,8 +90,8 @@ was beaten (Payout 50,000); log shows both `battle setup: escape` and `pursuit`,
 - ✅ Elite (break out with ≥ 60 % DP), Ambush (marked flagship, ring + status in combat).
 - ✅ Events: battle station, sabotage, side battle with an allied fleet, convoy raid.
 - ✅ Beacon menu "Repair the fleet" + "Refit" label; D-mod removal (Rest, Treasure, Shop dockyard).
-- 🟡 Not yet tested: a won straight battle as a total victory (`RunEncounterDialog`, no re-engaging
-  survivors / after "Claim victory"); reputation unchanged after a side battle.
+- ✅ A won straight battle as a total victory (`RunEncounterDialog`: survivors let go, no
+  re-engagement); reputation unchanged after a side battle.
 
 Independent review done and its findings fixed (pursuit "win" counted the mark/convoy as taken,
 Elite scored on undeployed ships, a non-station hull at low Depth, layout written to a copy of the
