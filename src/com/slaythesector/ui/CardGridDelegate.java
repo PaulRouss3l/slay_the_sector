@@ -257,6 +257,8 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
             List<FleetMemberAPI> one = new ArrayList<FleetMemberAPI>();
             one.add(c.preview);
             ui.addShipList(1, 1, 96f, base, one, 0f);
+            // Hover for hull, DP, system and OP; F1 expands to the full fit (weapons, wings, hullmods).
+            ui.addTooltipToPrevious(new ShipFitTooltip(c.preview), TooltipMakerAPI.TooltipLocation.RIGHT);
         }
         ui.addPara(c.title, Misc.getHighlightColor(), 6f);
         ui.addPara(c.subtitle, 3f);
