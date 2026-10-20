@@ -35,12 +35,12 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
     }
 
     public static final float WIDTH = 1000f;
-    public static final float HEIGHT = 640f;
+    public static final float HEIGHT = 660f;
     private static final int COLS = 4;
     private static final int ROWS = 2;
     private static final float CARD_W = 236f;
     private static final float CARD_H = 250f;
-    private static final float HEADER_H = 110f;
+    private static final float HEADER_H = 126f;
 
     private final String title;
     private final List<Card> cards;
@@ -139,6 +139,9 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
         TooltipMakerAPI header = panel.createUIElement(WIDTH - 20f, HEADER_H, false);
         header.addTitle(title);
         if (headerNote != null) header.addPara(headerNote, headerNoteColor, 4f);
+        if (hasShips()) {
+            header.addPara("Hover a ship's name to see its fit (F1 for weapons and hullmods).", Misc.getGrayColor(), 4f);
+        }
         status = header.addPara("", 4f);
         ButtonAPI prev = header.addButton("< Prev", "prev", 90f, 24f, 8f);
         ButtonAPI next = header.addButton("Next >", "next", 90f, 24f, 0f);
@@ -211,6 +214,13 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
             }
             if (!fits.isEmpty()) counts[fits.get(rng.nextInt(fits.size()))]++;
         } while (!fits.isEmpty());
+    }
+
+    private boolean hasShips() {
+        for (Card c : cards) {
+            if (c.preview != null) return true;
+        }
+        return false;
     }
 
     private boolean canAdd(int i) {
