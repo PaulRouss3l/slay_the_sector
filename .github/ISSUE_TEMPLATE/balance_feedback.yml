@@ -1,0 +1,22 @@
+name: Balance feedback
+description: Something felt too hard, too easy, too cheap or too expensive.
+labels: ["balance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The beta's numbers are still being tuned, so every opinion helps.
+  - type: textarea
+    id: what
+    attributes:
+      label: What felt off?
+      placeholder: "The Act 2 Boss was much harder than anything before it."
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Your Run
+      description: Faction played, Ascension level, how far you got, roughly how big your fleet was.
+    validations:
+      required: false

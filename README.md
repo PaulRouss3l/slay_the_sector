@@ -94,6 +94,12 @@ directed every change. Each milestone was then played and tested in game by me, 
 checklist, before it was merged. The full source and the design notes are public in this
 repository.
 
+## License
+
+[MIT](LICENSE): use, change, fork or redistribute the mod freely, as long as the copyright notice and
+the license text stay with it. No warranty. The scripts in `tools/` are third-party (see
+`tools/UPSTREAM.md`) and are not covered by this license.
+
 ## For developers
 
 Building from source, project layout and release steps: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
