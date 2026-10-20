@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.5.1 (beta)
+
+**Balance**
+- Act 2 and Act 3 no longer start easier than the end of the previous Act: fights climb from the
+  previous Act's last fight (Act 1 15 -> 56, Act 2 56 -> 89, Act 3 89 -> 122).
+- Supply rewards grow with the Act (x1.0 / x1.5 / x2.0), since the fleet gets bigger and costs more
+  to repair.
+- The true Boss and the battle station now start at full combat readiness.
+
+**Shops**
+- One page of stock per Act (Act 2 = 2 pages, Act 3 = 3 pages).
+- Buy +10 Fleet DP cap for 100 supplies (first card of every Shop).
+
+**Interface**
+- Ship cards: hover a ship's name to see its fit, press F1 for its weapons, fighters and hullmods.
+- The end of a Run posts an intel report with a notification: result, Payout, how deep you went,
+  and what you unlocked.
+
+**Other**
+- Debug commands for the Console Commands mod: `sts status`, `sts unlock`, `sts act <2-4>`,
+  `sts supplies <n>` (handy to test Act 4).
+- The mod is now under the MIT license (LICENSE file included).
+- Bug reports and balance feedback: friendly forms on the GitHub Issues page.
+
 ## 0.5.0 (beta)
 
 First public beta. A full rewrite of the earlier prototype: the Run now lives in its own star
