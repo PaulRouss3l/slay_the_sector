@@ -37,8 +37,8 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 ## 3. Meta progress
 - [x] After that win, Records shows the Run; the Archetype list says "(won at Gamma)". (Meta file:
       Tri-Tachyon 2 Runs, 1 win, best Depth 33, best Ascension won Gamma, Beta unlocked.)
-- [ ] Next Run with that faction: Ascension choice Gamma / Beta, each with its handicap text.
-- [ ] Starting bonuses screen: "+5 starting DP" unlocked by the first win ([x]/[ ] toggles);
+- [x] Next Run with that faction: Ascension choice Gamma / Beta, each with its handicap text.
+- [x] Starting bonuses screen: "+5 starting DP" unlocked by the first win ([x]/[ ] toggles);
       the Starting pick budget shows 35 DP when on.
 - [x] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (log: `starting bonus
       unlocked: officerLevel`; the pending level-up at the next start still to see).
@@ -46,11 +46,11 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
       -> `runs 1`), and the loss Payout follows the 3-Act scale (Depth 9 -> 9,000).
 
 ## 4. Ascension effects (any order, as unlocked)
-- [ ] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.
-- [ ] Alpha: noticeably more Elites. Seraph: Rest repairs only **half** of the damage (check a
+- [x] Beta: enemy strength +15 % (encounter numbers). Chronos: "N supplies withheld" after fights.
+- [x] Alpha: noticeably more Elites. Seraph: Rest repairs only **half** of the damage (check a
       lightly damaged ship isn't fully repaired). Primordial: Boss ships have pilots (Gamma cores on
       Derelict/Remnant, officers on the Act 1 Apex fleet).
-- [ ] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
+- [x] Payout: +50,000 per level on a win (e.g. Beta win = 100,000).
 
 ## 5. Battle station Event
 - [ ] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
