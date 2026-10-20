@@ -74,8 +74,10 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
 - **Act 4 (Ascension Omega only)**: Start → one Rest Node → the **true Boss**: a lone **Ziggurat**
   (`sts_trueBossHull`), no escort, no core, no retreat. Winning it is the true victory (+100,000
   Payout, "Omega cleared" in the Records); losing it still pays like an Act 3 win.
-- **Difficulty**: enemy strength = (15 + 4.5 × row within the Act) × Act factor (1.0 / 1.6 / 2.2),
-  Bosses ×1.3 (~78 / 125 / 172), never the player's fleet strength. Reward ship sizes and officer
+- **Difficulty**: never the player's fleet strength, and never easier after an Act transition.
+  Fights climb from the previous Act's last fight to (15 + 4.5 × 9) × Act factor (1.0 / 1.6 / 2.2):
+  Act 1 15 → 56, Act 2 56 → 89, Act 3 89 → 122. Bosses (15 + 4.5 × 10) × Act factor × 1.3
+  (~78 / 125 / 172). Reward ship sizes and officer
   levels step up per Act. Ascension adds on top.
 - **Boss reward** (choose one, plus the Boss supplies; replaces the Reward pick):
   - *Refit*: +1 S-mod slot on one ship of the player's choice, and a free S-mod on any ship.
