@@ -27,17 +27,21 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 - [x] Then **Descend to Act 2**: dialog closes, a message, a new Entry Beacon right where you are;
       new map, new enemy factions, "The Descent: Act 2" on the map.
 - [x] Act 2 is harder (×1.6), its Boss is **Derelict** (~125); Act 3 ×2.2, Boss **Remnant** (~172).
-      (Log: Act 2 -> Act 3 transition seen; the Remnant Boss itself not yet.)
+      (Log: all three Bosses beaten in one Run.)
 - [x] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
-- [ ] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000.
+- [x] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000. (Log 2026-10-20: `won=true,
+      depth=33, payout=50000`; the Remnant Boss generated with no fallback warning.)
+- [ ] The Run's end posts an intel report with a notification: result, Payout, Act/Depth/Ascension
+      and what was unlocked (replaces the old one-line message).
 
 ## 3. Meta progress
-- [ ] After that win, Records shows the Run; the Archetype list says "(won at Gamma)".
+- [x] After that win, Records shows the Run; the Archetype list says "(won at Gamma)". (Meta file:
+      Tri-Tachyon 2 Runs, 1 win, best Depth 33, best Ascension won Gamma, Beta unlocked.)
 - [ ] Next Run with that faction: Ascension choice Gamma / Beta, each with its handicap text.
 - [ ] Starting bonuses screen: "+5 starting DP" unlocked by the first win ([x]/[ ] toggles);
       the Starting pick budget shows 35 DP when on.
-- [ ] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (level-up pending
-      in the Fleet screen at the start).
+- [x] Reaching Act 3 (win or lose) unlocks "+1 level for the starting officer" (log: `starting bonus
+      unlocked: officerLevel`; the pending level-up at the next start still to see).
 - [x] A Run's end is recorded in `saves/common/slay_the_sector_meta.json.data` (log: Depth 9 loss
       -> `runs 1`), and the loss Payout follows the 3-Act scale (Depth 9 -> 9,000).
 

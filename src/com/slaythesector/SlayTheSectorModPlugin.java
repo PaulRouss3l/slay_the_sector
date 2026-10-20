@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.slaythesector.intel.HubIntel;
 import com.slaythesector.intel.RunIntel;
+import com.slaythesector.intel.RunResultIntel;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunPayrollListener;
@@ -38,6 +39,7 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         x.alias("STS_NodeType", NodeType.class);
         x.alias("STS_HubIntel", HubIntel.class);
         x.alias("STS_RunIntel", RunIntel.class);
+        x.alias("STS_RunResultIntel", RunResultIntel.class);
     }
 
     @Override
