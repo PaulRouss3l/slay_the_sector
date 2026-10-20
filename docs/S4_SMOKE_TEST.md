@@ -31,7 +31,7 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 - [x] Leaving the Boss beacon before choosing the reward, then coming back: the choice is still there.
 - [x] Beat Act 3's Boss at Gamma: "The Run is won", Payout 50,000. (Log 2026-10-20: `won=true,
       depth=33, payout=50000`; the Remnant Boss generated with no fallback warning.)
-- [ ] The Run's end posts an intel report with a notification: result, Payout, Act/Depth/Ascension
+- [x] The Run's end posts an intel report with a notification: result, Payout, Act/Depth/Ascension
       and what was unlocked (replaces the old one-line message).
 
 ## 3. Meta progress
@@ -68,10 +68,13 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 
 ## 6. Act 4 (Ascension Omega)
 
+Log 2026-10-20: an Omega Run, `sts act 4`, true Boss beaten: `won=true, depth=35, payout=450000`
+(50,000 + 6 x 50,000 for Omega + 100,000 true Boss).
+
 Shortcut with the Console Commands mod: start any Run, jump into the Descent, then `sts act 4` (or
 `sts unlock` then start an Omega Run). `sts supplies 500` helps survive the Ziggurat test.
-- [ ] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
-- [ ] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
-- [ ] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
-- [ ] After any Run with a station or the Ziggurat, a Ziggurat/station met elsewhere in the campaign
+- [x] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
+- [x] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
+- [x] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
+- [x] After any Run with a station or the Ziggurat, a Ziggurat/station met elsewhere in the campaign
       is still recoverable as normal (no tag leaked onto the stock variant).

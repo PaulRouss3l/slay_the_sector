@@ -7,7 +7,7 @@ smoke-test list for the human tester. Design: `DESIGN.md`. Terms: `GLOSSARY.md`.
 
 Status legend: ⬜ planned · 🟡 code-complete, needs in-game test · ✅ verified in game.
 
-**Current target: S4** — code-complete, awaiting the in-game smoke test (`S4_SMOKE_TEST.md`).
+**Current target: S5** — polish and release.
 
 ## Done before the redesign
 
@@ -98,15 +98,17 @@ Elite scored on undeployed ships, a non-station hull at low Depth, layout writte
 battle context). Known: the Event and the sabotage roll can be re-rolled by reloading a save made
 before arriving (save-scumming is accepted).
 
-## S4 — Full Run and Meta progress 🟡
+## S4 — Full Run and Meta progress ✅
 
-Design settled 2026-10-19 (DESIGN "Acts and Bosses", "Ascension and Meta progress"). Branch `s4/full-run`.
-- 🟡 3 Acts: Act transition after the Boss, fresh map, enemy factions per Act, Act difficulty factor.
-- 🟡 Bosses per Act (Apex / Derelict / Remnant) and the Boss reward choice (S-mod slot + S-mod,
+Design settled 2026-10-19 (DESIGN "Acts and Bosses", "Ascension and Meta progress"). Smoke-tested in
+game 2026-10-20 (`S4_SMOKE_TEST.md`, all checks): full 3-Act win, Ascension up to Omega, Act 4 true
+Boss beaten (Payout 450,000), Meta progress and Run-end report; no mod errors in the log.
+- ✅ 3 Acts: Act transition after the Boss, fresh map, enemy factions per Act, Act difficulty factor.
+- ✅ Bosses per Act (Apex / Derelict / Remnant) and the Boss reward choice (S-mod slot + S-mod,
   +20 DP cap, Remnant warship with an AI core).
-- 🟡 Ascension Gamma → Omega per Archetype, its handicaps and Payout scaling.
-- 🟡 Act 4 at Omega: Rest + true Boss (lone Ziggurat, `sts_trueBossHull`).
-- 🟡 Cross-save Meta progress: Records, Ascension reached, starting bonuses; Hub Records page.
+- ✅ Ascension Gamma → Omega per Archetype, its handicaps and Payout scaling.
+- ✅ Act 4 at Omega: Rest + true Boss (lone Ziggurat, `sts_trueBossHull`).
+- ✅ Cross-save Meta progress: Records, Ascension reached, starting bonuses; Hub Records page.
 
 Independent review done and its findings fixed: spawned stations and the true Boss tagged the
 shared stock variant (now a copy, also fixing an S3 leak), Primordial now gives every Boss pilots
