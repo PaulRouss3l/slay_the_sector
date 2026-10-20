@@ -389,6 +389,8 @@ public class NodeDialog implements InteractionDialogPlugin {
         state.resolveTarget(success);
         RunFleet.afterFight(pf);
 
+        // Later Acts pay more: the fleet is bigger and costs more to repair.
+        supplies = Math.round(supplies * STSSettings.actRewardMult(state.getAct()));
         int cut = Math.min(supplies, FleetCap.penalty(pf, state));
         supplies -= cut;
         if (state.getAscension() >= Ascension.CHRONOS && supplies > 0) {
