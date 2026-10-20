@@ -54,7 +54,7 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
       tooltip. A grey header line tells the player to hover the name.
 
 ## 5. Battle station Event
-- [ ] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
+- [x] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
       repair and D-mod removal); the stock closes when you leave the beacon. Assault still works.
 
 ## 6. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
