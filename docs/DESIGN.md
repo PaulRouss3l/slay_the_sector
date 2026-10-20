@@ -130,7 +130,9 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   officer or weapon bundle. Never an
   S-mod; S-mods come only from Rest, Treasure and as a Boss bonus.
 - **Supplies**: the only currency. Earned from fights (Combat < Elite < Boss), Events, selling
-  ships. Spent on repairs and Shops.
+  ships. Spent on repairs and Shops. Every fight's supply reward is multiplied by the Act
+  (`sts_actRewardMult` ×1.0 / 1.5 / 2.0): the fleet grows and costs more to repair. The DP-cap and
+  Ascension cuts are applied after, unscaled.
 - **Attrition**: hull/armor damage carries over; CR regenerates for free up to ~70 % after each
   fight, Supplies top it up; crew refilled free after each fight; fuel unlimited. Ships destroyed
   in a fight are lost unless recovered right after (vanilla recovery flow).
