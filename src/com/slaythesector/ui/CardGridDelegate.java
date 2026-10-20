@@ -259,6 +259,11 @@ public class CardGridDelegate implements CustomVisualDialogDelegate {
             ui.addShipList(1, 1, 96f, base, one, 0f);
         }
         ui.addPara(c.title, Misc.getHighlightColor(), 6f);
+        if (c.preview != null) {
+            // The icon keeps vanilla's own ship tooltip; the name line carries ours: hull, DP, system
+            // and OP, F1 expands to the full fit (weapons, wings, hullmods).
+            ui.addTooltipToPrevious(new ShipFitTooltip(c.preview), TooltipMakerAPI.TooltipLocation.RIGHT);
+        }
         ui.addPara(c.subtitle, 3f);
         if (c.note != null) ui.addPara(c.note, c.noteColor, 3f);
         if (mode == Mode.SINGLE) {
