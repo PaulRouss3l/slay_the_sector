@@ -52,7 +52,10 @@ yet: the Act 3 Remnant Boss, a won Run's Records and unlocks, any Ascension abov
 - [ ] "Trade with the station" replaces "Slip past": the Node turns into a Shop (Browse, dockyard
       repair and D-mod removal); the stock closes when you leave the beacon. Assault still works.
 
-## 6. Act 4 (Ascension Omega; or set a test: temporarily give yourself the level by editing the meta file)
+## 6. Act 4 (Ascension Omega)
+
+Shortcut with the Console Commands mod: start any Run, jump into the Descent, then `sts act 4` (or
+`sts unlock` then start an Omega Run). `sts supplies 500` helps survive the Ziggurat test.
 - [ ] After Act 3's Boss, "Descend to Act 4: the true Boss": Start -> Rest -> Boss.
 - [ ] The Boss is a lone **Ziggurat**, no escort; win = "True victory", Payout + 100,000, Records "Omega cleared".
 - [ ] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.

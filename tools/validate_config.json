@@ -1,9 +1,12 @@
 {
     "prefix": "sts_",
-    "optional_mods": [],
+    "optional_mods": [
+        "lw_console"
+    ],
     "literal_whitelist": [],
     "allow_overrides": [],
     "ignore": [
-        "mod id 'slay_the_sector' is also used by .*/mods/slay-the-sector \\(the launcher"
+        "mod id 'slay_the_sector' is also used by .*/mods/slay-the-sector \\(the launcher",
+        "imports org\\.lazywizard classes but lw_lazylib is not a dependency"
     ]
 }

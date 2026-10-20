@@ -1,0 +1,2 @@
+command,class,tags,syntax,help
+sts,com.slaythesector.debug.StsCommand,"slay_the_sector,cheat",sts status|unlock [level]|act <2-4>|supplies <amount>,"Slay the Sector debug. status: Run state. unlock [0-6]: Ascension up to that level (default 6 = Omega) for every faction, plus every starting bonus. act <2-4>: during a Run, skip to that Act's Entry Beacon (4 = Act 4, sets Omega and counts Act 3 as won). supplies <n>: give the Run fleet n supplies."

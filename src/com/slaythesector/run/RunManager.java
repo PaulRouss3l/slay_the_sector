@@ -79,6 +79,25 @@ public final class RunManager {
         STSLog.info("Act " + state.getAct() + " begins: enemies=" + state.getEnemyFactionIds());
     }
 
+    /**
+     * Debug (console {@code sts act}): skip straight to Act {@code act}'s Entry Beacon and move the
+     * player fleet onto it. Act 4 also sets Ascension Omega and marks Act 3 won. Call only from the
+     * campaign map with no dialog open (it relocates the player fleet).
+     */
+    public static void debugSkipToAct(RunState state, int act) {
+        if (act >= 4) {
+            state.setAscension(Ascension.OMEGA);
+            state.setAct3Won();
+        }
+        RunSystem.clearNodesAndFleets();
+        state.setDepthOffset((act - 1) * (STSSettings.actRows() + 1));
+        buildAct(state, act);
+        SectorEntityToken start = RunSystem.ensureNodeEntity(state.getCurrentNode());
+        CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
+        pf.setLocation(start.getLocation().x, start.getLocation().y);
+        STSLog.info("debug: skipped to Act " + act);
+    }
+
     /** Fresh map and enemy factions for Act {@code act}. */
     private static void buildAct(RunState state, int act) {
         // Not security-sensitive: map/enemy randomness only.
