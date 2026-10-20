@@ -97,7 +97,6 @@ public final class EncounterFactory {
         // Never recoverable into the Run fleet. Tag a copy: the stock variant is shared game-wide.
         unboardable(station);
         fleet.getFleetData().addFleetMember(station);
-        station.getRepairTracker().setCR(station.getRepairTracker().getMaxCR());
         fleet.setName("Battle Station");
         fleet.setStationMode(true);
         prepare(fleet, at);
@@ -126,7 +125,6 @@ public final class EncounterFactory {
         FleetMemberAPI ship = Global.getFactory().createFleetMember(FleetMemberType.SHIP, variant);
         unboardable(ship);
         fleet.getFleetData().addFleetMember(ship);
-        ship.getRepairTracker().setCR(ship.getRepairTracker().getMaxCR());
         fleet.setName("The " + ship.getHullSpec().getHullName());
         fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
         prepare(fleet, at);
@@ -142,6 +140,7 @@ public final class EncounterFactory {
         copy.setSource(VariantSource.REFIT);
         copy.addTag(Tags.VARIANT_UNBOARDABLE);
         m.setVariant(copy, false, false);
+        m.updateStats();
     }
 
     private static FleetParamsV3 params(String factionId, float quality, float combatFP, float freighterFP, String type) {
@@ -170,6 +169,13 @@ public final class EncounterFactory {
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, true);
         fleet.inflateIfNeeded();
+        // As vanilla FleetFactoryV3 does: sync stats first, then every ship at its maximum CR (a CR
+        // set before the sync uses stale stats, e.g. right after a variant swap).
+        fleet.forceSync();
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            m.updateStats();
+            m.getRepairTracker().setCR(m.getRepairTracker().getMaxCR());
+        }
         at.getContainingLocation().addEntity(fleet);
         fleet.setLocation(at.getLocation().x, at.getLocation().y);
         fleet.setDoNotAdvanceAI(true);
