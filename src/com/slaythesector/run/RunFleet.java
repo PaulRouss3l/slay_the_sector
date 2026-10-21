@@ -15,6 +15,7 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.ids.Abilities;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.VariantSource;
 import com.fs.starfarer.api.util.Misc;
@@ -30,6 +31,10 @@ public final class RunFleet {
     public static CampaignFleetAPI create(List<FleetMemberAPI> picks) {
         PersonAPI player = Global.getSector().getPlayerPerson();
         CampaignFleetAPI fleet = FleetFactoryV3.createEmptyFleet(Factions.PLAYER, null, null);
+        // createEmptyFleet stores the (null) fleet type in memory; Memory.getString then throws on that
+        // key, and other mods read it when the fleet spawns (Chatter crashed on it). A player fleet
+        // has no fleet type: remove the key.
+        fleet.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_FLEET_TYPE);
         fleet.setName("Run Fleet");
         fleet.setCommander(player);
 
