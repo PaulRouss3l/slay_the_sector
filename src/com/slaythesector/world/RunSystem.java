@@ -5,6 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.lwjgl.util.vector.Vector2f;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -44,7 +46,7 @@ public final class RunSystem {
         if (sys != null) return sys;
         sys = Global.getSector().createStarSystem(STSConstants.RUN_SYSTEM_NAME);
         sys.setBackgroundTextureFilename("graphics/backgrounds/background4.jpg");
-        sys.getLocation().set(-85000f, -85000f);
+        placeInBounds(sys);
         SectorEntityToken center = sys.initNonStarCenter();
         center.addTag(Tags.THEME_HIDDEN);
         center.addTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER);
@@ -54,6 +56,49 @@ public final class RunSystem {
         // No autogenerateHyperspaceJumpPoints(): the only way out is our transition.
         STSLog.info("Run system created");
         return sys;
+    }
+
+    /**
+     * Keeps the Descent inside the Sector's bounds, at the point farthest from every other system.
+     * A system far outside them skews mods that size the Sector from its systems (MagicLib's
+     * bounty distance bands). It has no jump points or star, so it stays unreachable and unseen
+     * wherever it sits. Also moves the system of older saves (created at -85000, -85000).
+     */
+    public static void placeInBounds(StarSystemAPI sys) {
+        float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+        List<Vector2f> others = new ArrayList<Vector2f>();
+        for (StarSystemAPI s : Global.getSector().getStarSystems()) {
+            if (s == sys) continue;
+            Vector2f p = s.getLocation();
+            others.add(p);
+            minX = Math.min(minX, p.x);
+            maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y);
+            maxY = Math.max(maxY, p.y);
+        }
+        if (others.isEmpty()) return;
+        Vector2f at = sys.getLocation();
+        if (at.x >= minX && at.x <= maxX && at.y >= minY && at.y <= maxY && !(at.x == 0f && at.y == 0f)) return;
+        float bestX = 0f, bestY = 0f, bestDist = -1f;
+        int steps = 30;
+        for (int i = 1; i < steps; i++) {
+            for (int j = 1; j < steps; j++) {
+                float x = minX + (maxX - minX) * i / steps;
+                float y = minY + (maxY - minY) * j / steps;
+                float nearest = Float.MAX_VALUE;
+                for (Vector2f p : others) {
+                    float dx = p.x - x, dy = p.y - y;
+                    nearest = Math.min(nearest, dx * dx + dy * dy);
+                }
+                if (nearest > bestDist) {
+                    bestDist = nearest;
+                    bestX = x;
+                    bestY = y;
+                }
+            }
+        }
+        at.set(bestX, bestY);
+        STSLog.info("Run system placed at " + Math.round(bestX) + ", " + Math.round(bestY));
     }
 
     /**

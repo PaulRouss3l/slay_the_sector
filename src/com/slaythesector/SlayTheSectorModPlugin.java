@@ -16,6 +16,7 @@ import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
 import com.slaythesector.world.RunWatchScript;
 import com.slaythesector.world.HubPlacer;
+import com.slaythesector.world.RunSystem;
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -58,6 +59,8 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         RunFactions.apply();
 
         HubPlacer.ensureHub();
+        // Older saves created the Descent far outside the Sector: move it in (see placeInBounds).
+        if (RunSystem.get() != null) RunSystem.placeInBounds(RunSystem.get());
         RunIntel.ensure();
     }
 }
