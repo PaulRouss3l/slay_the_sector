@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2 (beta)
+
+**Fixes**
+- Fixed a crash when confirming the Starting pick with Combat Chatter installed.
+- Fixed a related error with Nexerelin's salvage scavenger dialog near the Run fleet.
+
 ## 0.5.1 (beta)
 
 **Balance**

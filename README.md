@@ -2,7 +2,7 @@
 
 **A Slay the Spire style roguelite, played inside your Starsector campaign.**
 
-*Beta 0.5.0, for Starsector 0.98a.*
+*Beta 0.5.2, for Starsector 0.98a.*
 
 [![Install with TriOS](https://trilink.wispborne.com/badges/install-badge-forthebadge.svg)](https://trilink.wispborne.com/open.html?mod=%7B%22url%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2FPaulRouss3l%2Fslay_the_sector%2Fmain%2Fslay_the_sector.version%22%2C%22id%22%3A%22slay_the_sector%22%7D)
 
@@ -36,7 +36,7 @@ Every number (difficulty, rewards, caps, prices, map shape) can be tuned in
 
 - **Other mods:** works with them. Factions and ships are read from the game at runtime, so modded
   factions show up as playable factions and as enemies. Tested alongside Nexerelin, Random
-  Assortment of Things, MagicLib, LazyLib, LunaLib and GraphicsLib.
+  Assortment of Things, Combat Chatter, MagicLib, LazyLib, LunaLib and GraphicsLib.
 - **No dependencies.**
 - **Existing saves:** safe to add to a game in progress. The Relay appears the next time you load.
 - **Your campaign:** a Run changes nothing in it except the Payout. XP, skills, story points,
