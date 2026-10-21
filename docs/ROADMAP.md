@@ -117,6 +117,15 @@ claimable from the beacon menu until used, Act 4 texts. Known, low impact: a one
 on an S1-era map continues into Act 2 with its Start beside the player rather than under it;
 `repairFraction` (Seraph Rest) semantics to confirm in game.
 
+## Compatibility (0.5.3)
+
+Audit of the installed mods' sources (Nexerelin, RAT, MagicLib, HMI, Mayasuran, GraphicsLib, LunaLib,
+Combat Chatter): no other crash of the Chatter kind. Fixed: Nexerelin relation sync / warmonger
+reputation loss (faction configs, `NO_REP_IMPACT`, relations re-applied), foreign credits leaking
+home through the Run fleet, the Descent's out-of-bounds position skewing MagicLib. Accepted:
+Nexerelin milestones in Run fights; known issue: Nexerelin Special Forces can be ordered to the
+Descent.
+
 ## S5 — Polish and release ⬜
 
 Balance pass, descriptions/flavor, settings exposure, `package_mod.py --strict`, release.

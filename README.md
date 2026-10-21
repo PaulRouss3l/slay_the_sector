@@ -61,6 +61,12 @@ Version Checker (bundled with Nexerelin and LunaLib) will tell you when an updat
 This is a beta: balance is rough and bugs are expected. Reports are welcome on the forum thread or as
 GitHub issues. Please attach your `starsector.log`; the mod's lines start with `[SlayTheSector]`.
 
+Known issues:
+- With Nexerelin, a Special Forces fleet ordered to patrol "The Descent" may show up inside a Run.
+  Don't send Special Forces there.
+- Nexerelin milestones (first battle, first station, beating a Ziggurat...) can be earned in Run
+  fights.
+
 ## Credits
 
 Thanks to the people whose work and open source code taught me how Starsector mods are made, and
