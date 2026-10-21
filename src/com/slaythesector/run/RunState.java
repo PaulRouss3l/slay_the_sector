@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fs.starfarer.api.Global;
+
 /**
  * The active Run, stored in sector memory under {@code $sts_run_state}. Plain Serializable POJO
  * holding ids only. The detached Home fleet is kept separately (see {@link HomeFleet}).
@@ -54,6 +56,13 @@ public class RunState implements Serializable {
     private long snapDeferredBonusXp;
     /** Run-fleet pay minus the Home fleet's pay since the Run started; refunded at the end (RunPayrollListener). */
     private float payrollRefund;
+    /**
+     * Credits paid to (or taken from) the Run fleet outside the monthly report, e.g. another mod's
+     * insurance for lost Run ships. Not carried home at Run end.
+     */
+    private float foreignCredits;
+    /** Game timestamp of the last month end; credit changes right after it are the monthly report. */
+    private transient long monthEndAt = Long.MIN_VALUE;
     /** Player skill id -> level at Run start; skills learned during the Run are removed at the end. */
     private final HashMap<String, Float> snapSkills = new HashMap<String, Float>();
 
@@ -131,6 +140,17 @@ public class RunState implements Serializable {
     public void setSnapDeferredBonusXp(long xp) { snapDeferredBonusXp = xp; }
     public Map<String, Float> getSnapSkills() { return snapSkills; }
     public float getPayrollRefund() { return payrollRefund; }
+    public float getForeignCredits() { return foreignCredits; }
+    public void addForeignCredits(float credits) { foreignCredits += credits; }
+    public void markMonthEnd() { monthEndAt = Global.getSector().getClock().getTimestamp(); }
+
+    /** Whether a month just ended (within a day) and its report has not been matched to a credit change yet. */
+    public boolean consumeMonthEnd() {
+        if (monthEndAt == Long.MIN_VALUE) return false;
+        boolean recent = Global.getSector().getClock().getElapsedDaysSince(monthEndAt) <= 1f;
+        monthEndAt = Long.MIN_VALUE;
+        return recent;
+    }
     public void addPayrollRefund(float credits) { payrollRefund += credits; }
 
     public void addNode(RunNode node) {
