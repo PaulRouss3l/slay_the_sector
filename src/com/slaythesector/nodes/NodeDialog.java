@@ -38,6 +38,7 @@ import com.slaythesector.economy.Upgrades;
 import com.slaythesector.map.NodeText;
 import com.slaythesector.run.Ascension;
 import com.slaythesector.run.FleetCap;
+import com.slaythesector.run.RunFactions;
 import com.slaythesector.run.NodeType;
 import com.slaythesector.run.RunFleet;
 import com.slaythesector.run.RunManager;
@@ -223,6 +224,7 @@ public class NodeDialog implements InteractionDialogPlugin {
     private void engage(final CampaignFleetAPI enemy, final CampaignFleetAPI ally, Fight kind) {
         CampaignFleetAPI pf = Global.getSector().getPlayerFleet();
         RunFleet.restoreCR(pf);
+        RunFactions.apply();
         fight = kind;
         playerDPBefore = EncounterFactory.dp(pf);
         enemyDPBefore = EncounterFactory.dp(enemy);

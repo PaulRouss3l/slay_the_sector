@@ -166,6 +166,8 @@ public final class EncounterFactory {
 
     private static void prepare(CampaignFleetAPI fleet, SectorEntityToken at) {
         fleet.setNoAutoDespawn(true);
+        // Run fights never touch reputation (Nexerelin's warmonger event checks this flag).
+        fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, true);
         fleet.inflateIfNeeded();

@@ -57,6 +57,7 @@ public final class RunManager {
         }
         if (!HomeFleet.stash(runFleet)) return null;
         Global.getSector().getMemoryWithoutUpdate().set(STSConstants.MEM_RUN_STATE, state);
+        RunFactions.apply();
         RunSystem.ensure();
         RunSystem.clear();
         buildAct(state, 1);

@@ -78,3 +78,12 @@ Shortcut with the Console Commands mod: start any Run, jump into the Descent, th
 - [x] Losing to it (or abandoning: "The Run stays won") still ends a **won** Run.
 - [x] After any Run with a station or the Ziggurat, a Ziggurat/station met elsewhere in the campaign
       is still recoverable as normal (no tag leaked onto the stock variant).
+
+## 7. Compatibility fixes (0.5.3)
+- [ ] With Nexerelin and a commission: run a fight, then check the Intel faction relations: no
+      reputation change, no "warmonger" event; Run enemies still hostile, side-battle allies still help.
+- [ ] Hyperspace map: nothing new shows for "The Descent" (it now sits inside the Sector's bounds);
+      jumping into a Run still works. Log on load of an older save: `Run system placed at x, y`.
+- [ ] A Run that crosses a month end: the Run end hands back colony income as before, and no
+      `credits paid to the Run fleet outside the monthly report` warning appears in a plain game.
+

@@ -50,8 +50,9 @@ public final class HomeFleet {
 
         // Monthly income and pay settle on the player fleet's credits: hand them back, refunding the
         // Run fleet's pay and charging the Home fleet's (RunPayrollListener), as if no Run happened.
+        // Credits other mods paid into the Run fleet (RunWatchScript) stay behind.
         RunState state = RunManager.get();
-        float refund = state == null ? 0f : state.getPayrollRefund();
+        float refund = state == null ? 0f : state.getPayrollRefund() - state.getForeignCredits();
         home.getCargo().getCredits().add(run.getCargo().getCredits().get() + refund);
         becomePlayerFleet(home, loc, pos);
         if (loc != null && loc.getFleets().contains(run)) loc.removeEntity(run);

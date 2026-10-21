@@ -37,6 +37,10 @@ public class RunPayrollListener implements EconomyTickListener {
         return pay;
     }
 
+    /** Lets RunWatchScript tell the monthly report's credit change from other payments. */
     @Override
-    public void reportEconomyMonthEnd() {}
+    public void reportEconomyMonthEnd() {
+        RunState state = RunManager.get();
+        if (state != null && HomeFleet.isStashed()) state.markMonthEnd();
+    }
 }
