@@ -93,7 +93,10 @@ Some or all assets and code in this mod were created using AI tools:
   build and test tooling configuration, and the design and API documentation.
 - **Code review:** Claude was also used to review each milestone for bugs before release. No line of
   code reaches a release without a human review.
-- **Art:** no AI image model. Map and node icons are vanilla Starsector sprites.
+- **Art:** the banner in the forum post (`docs/assets/banner.png`) was made with Z-Image Turbo
+  (Alibaba's Tongyi Lab), an open image model run locally in ComfyUI, starting from vanilla
+  Starsector portraits; its three captains are a nod to Slay the Spire's Ironclad, Silent and
+  Defect. Nothing in the mod itself uses AI art: map and node icons are vanilla Starsector sprites.
 
 How it was made: I designed the mod (the Run, the Node types, the rules and the balance) and
 directed every change. Each milestone was then played and tested in game by me, against a
