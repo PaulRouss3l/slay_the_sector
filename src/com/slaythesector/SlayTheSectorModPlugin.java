@@ -2,14 +2,12 @@ package com.slaythesector;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.slaythesector.intel.HubIntel;
 import com.slaythesector.intel.RunIntel;
 import com.slaythesector.intel.RunResultIntel;
 import com.slaythesector.run.NodeType;
+import com.slaythesector.run.RunFactions;
 import com.slaythesector.run.RunNode;
 import com.slaythesector.run.RunPayrollListener;
 import com.slaythesector.run.RunState;
@@ -57,13 +55,7 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
         }
 
         // Run enemies fly under the Descent so commissions and bounties ignore their kills.
-        FactionAPI descent = sector.getFaction(STSConstants.FACTION_DESCENT);
-        if (descent != null) descent.setRelationship(Factions.PLAYER, RepLevel.VENGEFUL);
-        FactionAPI ally = sector.getFaction(STSConstants.FACTION_ALLY);
-        if (ally != null) {
-            ally.setRelationship(Factions.PLAYER, RepLevel.COOPERATIVE);
-            ally.setRelationship(STSConstants.FACTION_DESCENT, RepLevel.VENGEFUL);
-        }
+        RunFactions.apply();
 
         HubPlacer.ensureHub();
         RunIntel.ensure();
