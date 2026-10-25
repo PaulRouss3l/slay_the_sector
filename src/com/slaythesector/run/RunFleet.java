@@ -1,5 +1,6 @@
 package com.slaythesector.run;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -15,11 +16,13 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.ids.Abilities;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.HullMods;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.VariantSource;
 import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSConstants;
+import com.slaythesector.util.STSLog;
 import com.slaythesector.util.STSSettings;
 
 /** Builds the Run fleet and applies the Run's attrition rules to it. */
@@ -38,10 +41,12 @@ public final class RunFleet {
         fleet.setName("Run Fleet");
         fleet.setCommander(player);
 
-        FleetMemberAPI flagship = null;
-        for (FleetMemberAPI pick : picks) {
-            FleetMemberAPI m = addShip(fleet, pick.getVariant());
-            if (flagship == null || m.getDeploymentPointsCost() > flagship.getDeploymentPointsCost()) flagship = m;
+        for (FleetMemberAPI pick : picks) addShip(fleet, pick.getVariant());
+        // The biggest crewed pick; with only drones (an automated Archetype), the biggest drone, uplinked.
+        FleetMemberAPI flagship = biggest(fleet, null, false);
+        if (flagship == null) {
+            flagship = biggest(fleet, null, true);
+            if (flagship != null) uplink(flagship);
         }
         if (flagship != null) {
             flagship.setCaptain(player);
@@ -122,17 +127,73 @@ public final class RunFleet {
         if (extraCrew > 0) cargo.removeCrew(extraCrew);
     }
 
-    /** Built-in hidden hullmod: no monthly supply use and no passive repair/CR recovery. */
+    /**
+     * Built-in hidden hullmod: no monthly supply use and no passive repair/CR recovery. Automated
+     * ships are also tagged to need no Automated Ships skill (vanilla would set their CR to 0).
+     */
     public static void ensureLogistics(FleetMemberAPI m) {
         ShipVariantAPI v = m.getVariant();
-        if (v.hasHullMod(STSConstants.HULLMOD_RUN_LOGISTICS)) return;
-        if (v.getSource() != VariantSource.REFIT) {
-            v = v.clone();
-            v.setSource(VariantSource.REFIT);
-            m.setVariant(v, false, true);
-        }
+        boolean penalty = Misc.isAutomated(v) && !v.hasTag(Tags.TAG_AUTOMATED_NO_PENALTY);
+        if (v.hasHullMod(STSConstants.HULLMOD_RUN_LOGISTICS) && !penalty) return;
+        v = ownVariant(m);
         v.addPermaMod(STSConstants.HULLMOD_RUN_LOGISTICS);
+        if (penalty) v.addTag(Tags.TAG_AUTOMATED_NO_PENALTY);
         m.updateStats();
+    }
+
+    /** The member's variant, first replaced by a copy unless it is already the member's own. */
+    private static ShipVariantAPI ownVariant(FleetMemberAPI m) {
+        ShipVariantAPI v = m.getVariant();
+        if (v.getSource() == VariantSource.REFIT) return v;
+        v = v.clone();
+        v.setSource(VariantSource.REFIT);
+        m.setVariant(v, false, true);
+        return v;
+    }
+
+    /**
+     * Fits the Command Uplink to a drone: its "automated" built-in is suppressed, so vanilla lets
+     * the player command it. Vanilla ends the game's fleet (and so the Run) when no ship is left
+     * that isn't automated. An AI-core captain is removed, the seat is the player's.
+     */
+    public static void uplink(FleetMemberAPI m) {
+        ShipVariantAPI v = ownVariant(m);
+        v.addSuppressedMod(HullMods.AUTOMATED);
+        v.addPermaMod(STSConstants.HULLMOD_COMMAND_UPLINK);
+        if (m.getCaptain() != null && m.getCaptain().isAICore()) m.setCaptain(null);
+        m.updateStats();
+    }
+
+    /**
+     * Before a Run battle is scored: if every ship that isn't automated was lost ({@code lost}),
+     * uplinks the biggest surviving drone, so the Run fleet keeps a ship the player can command.
+     */
+    public static void ensureCommandShip(CampaignFleetAPI fleet, Collection<FleetMemberAPI> lost) {
+        if (biggest(fleet, lost, false) != null) return;
+        FleetMemberAPI drone = null;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            if (m.isFighterWing() || lost.contains(m) || !Misc.isAutomated(m)) continue;
+            if (drone == null || uplinkRank(m) > uplinkRank(drone)) drone = m;
+        }
+        if (drone == null) return;
+        uplink(drone);
+        STSLog.info("Command Uplink moved to " + drone.getHullId() + " (no crewed ship left)");
+    }
+
+    /** Drones without an AI core first (uplinking takes the captain's seat), then the biggest. */
+    private static float uplinkRank(FleetMemberAPI m) {
+        boolean cored = m.getCaptain() != null && m.getCaptain().isAICore();
+        return (cored ? 0f : 10000f) + m.getDeploymentPointsCost();
+    }
+
+    /** Biggest ship (by DP) not in {@code skip}, automated or not as {@code automated} says. */
+    private static FleetMemberAPI biggest(CampaignFleetAPI fleet, Collection<FleetMemberAPI> skip, boolean automated) {
+        FleetMemberAPI best = null;
+        for (FleetMemberAPI m : fleet.getFleetData().getMembersListCopy()) {
+            if (m.isFighterWing() || (skip != null && skip.contains(m)) || Misc.isAutomated(m) != automated) continue;
+            if (best == null || m.getDeploymentPointsCost() > best.getDeploymentPointsCost()) best = m;
+        }
+        return best;
     }
 
     /** Hull + CR repair cost in Supplies for one ship (0 if nothing to repair). */
@@ -169,13 +230,12 @@ public final class RunFleet {
 
     /**
      * Boss reward "Remnant warship": Brilliant / Apex / Nova by Act, with a Gamma / Beta / Alpha
-     * core captain. Tagged so it needs no Automated Ships skill (vanilla would set its CR to 0).
+     * core captain. Needs no Automated Ships skill, like every automated Run ship (ensureLogistics).
      */
     public static FleetMemberAPI addRemnantShip(CampaignFleetAPI fleet, int act) {
         String variant = act >= 3 ? "nova_Standard" : act == 2 ? "apex_Standard" : "brilliant_Standard";
         String core = act >= 3 ? Commodities.ALPHA_CORE : act == 2 ? Commodities.BETA_CORE : Commodities.GAMMA_CORE;
         FleetMemberAPI m = addShip(fleet, Global.getSettings().getVariant(variant));
-        m.getVariant().addTag(Tags.TAG_AUTOMATED_NO_PENALTY);
         // Not security-sensitive: officer generation only.
         PersonAPI captain = Misc.getAICoreOfficerPlugin(core).createPerson(core, Factions.PLAYER, new Random()); // nosemgrep: java-lang-security-audit-crypto-weak-random
         m.setCaptain(captain);

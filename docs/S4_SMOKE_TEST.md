@@ -86,4 +86,9 @@ Shortcut with the Console Commands mod: start any Run, jump into the Descent, th
       jumping into a Run still works. Log on load of an older save: `Run system placed at x, y`.
 - [ ] A Run that crosses a month end: the Run end hands back colony income as before, and no
       `credits paid to the Run fleet outside the monthly report` warning appears in a plain game.
-
+- [ ] Dustkeepers (SotF; reveal with `runcode Global.getSector().getFaction("sotf_dustkeepers").setShowInIntelTab(true)`):
+      pick only drones. The Run starts (no "fleet destroyed"); the biggest drone is the flagship with
+      **Command Uplink** and you command it; every drone has normal CR without the Automated Ships skill.
+- [ ] Same Run: lose the flagship in a fight while other drones survive. The Run goes on; log
+      `Command Uplink moved to <hull>`; the biggest surviving drone is the new flagship.
+- [ ] Shop / Rewards of a Dustkeeper Run offer Dustkeeper drones; bought ones have normal CR.

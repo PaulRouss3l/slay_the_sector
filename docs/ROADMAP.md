@@ -126,6 +126,11 @@ home through the Run fleet, the Descent's out-of-bounds position skewing MagicLi
 Nexerelin milestones in Run fights; known issue: Nexerelin Special Forces can be ordered to the
 Descent.
 
+- 🟡 Automated Archetypes (SotF Dustkeepers, once met in the campaign): automated Run ships need
+  no Automated Ships skill and appear in ship pools; an all-drone Run fleet flies a drone fitted
+  with the Command Uplink, which moves to another drone if the flagship is lost. Before, the Run
+  ended at once ("fleet destroyed").
+
 ## S5 — Polish and release ⬜
 
 Balance pass, descriptions/flavor, settings exposure, `package_mod.py --strict`, release.

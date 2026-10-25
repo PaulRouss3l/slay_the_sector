@@ -89,6 +89,10 @@ _Avoid_: Character, class, start
 The player's choice of a 30 DP opening Run fleet from the Archetype's ships.
 _Avoid_: Starting fleet, loadout
 
+**Command Uplink**:
+The hullmod that lets the player command a drone: fitted to the flagship of an all-drone Run fleet, and moved to the biggest surviving drone if that flagship is lost.
+_Avoid_: Neural link, AI flagship
+
 **Reward pick**:
 The choice of one item out of three (ship, officer or weapon bundle) offered after a won fight; never an S-mod.
 _Avoid_: Loot, recruit, card reward
