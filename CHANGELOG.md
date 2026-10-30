@@ -12,6 +12,11 @@
 - The Descent's star system now sits inside the Sector's bounds, so mods that size the Sector from
   its systems (MagicLib bounties) are no longer skewed. Older saves are moved on load.
 
+**Factions**
+- Automated factions (e.g. Secrets of the Frontier's Dustkeepers, once met) are playable: drones
+  need no Automated Ships skill, and an all-drone fleet gets a Command Uplink on its biggest drone,
+  which becomes your flagship.
+
 ## 0.5.2 (beta)
 
 **Fixes**
