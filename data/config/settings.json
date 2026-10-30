@@ -1,4 +1,5 @@
 {
+	"sts_prepareRemoval": false,
 	"sts_actRows": 10,
 	"sts_mapColumns": 5,
 	"sts_mapPaths": 4,

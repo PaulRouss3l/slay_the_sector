@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.4 (beta)
+
+- The mod can be removed from a save: finish your Run, set `"sts_prepareRemoval": true` in
+  `data/config/settings.json` (or run `sts remove` with Console Commands), load, save, then disable
+  the mod. Steps in the README.
+- Version Checker links to the forum thread.
+
 ## 0.5.3 (beta)
 
 **Compatibility**
@@ -11,6 +18,11 @@
   ships) no longer leak into your campaign. Only the Payout comes home.
 - The Descent's star system now sits inside the Sector's bounds, so mods that size the Sector from
   its systems (MagicLib bounties) are no longer skewed. Older saves are moved on load.
+
+**Factions**
+- Automated factions (e.g. Secrets of the Frontier's Dustkeepers, once met) are playable: drones
+  need no Automated Ships skill, and an all-drone fleet gets a Command Uplink on its biggest drone,
+  which becomes your flagship.
 
 ## 0.5.2 (beta)
 

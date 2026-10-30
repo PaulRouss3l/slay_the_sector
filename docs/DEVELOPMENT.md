@@ -20,7 +20,7 @@ adapted for **Linux** and Starsector **0.98a** (bundled Zulu JDK 17).
    (VSCode prompts to install them from `.vscode/extensions.json`).
 3. **Symlink the project into the game's `mods/`** so the launcher loads it:
    ```sh
-   ln -s /home/ubik/localhost/perso/slay-the-sector \
+   ln -s /home/ubik/localhost/perso/starsector/slay-the-sector \
          /home/ubik/Downloads/starsector/mods/slay-the-sector
    ```
 
@@ -62,6 +62,7 @@ map:
 | `sts unlock [0-6]` | Ascension up to that level (default 6 = Omega) for every faction, plus every starting bonus |
 | `sts act <2-4>` | during a Run, skip to that Act's Entry Beacon; `4` sets Omega and counts Act 3 as won |
 | `sts supplies <n>` | give the Run fleet n supplies |
+| `sts remove` | no Run going: strip the mod from this save so it can be removed (ADR 0002) |
 
 The class (`com.slaythesector.debug.StsCommand`) is registered in `data/console/commands.csv`;
 Console loads it only when Console is enabled, so it adds no dependency. The build compiles

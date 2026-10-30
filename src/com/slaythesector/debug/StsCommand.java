@@ -9,6 +9,7 @@ import org.lazywizard.console.Console;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.slaythesector.ModRemoval;
 import com.slaythesector.meta.MetaProgress;
 import com.slaythesector.run.Archetypes;
 import com.slaythesector.run.Ascension;
@@ -25,6 +26,7 @@ import com.slaythesector.world.RunSystem;
  *   sts unlock [level]    Ascension up to level (0-6, default 6 = Omega) for every faction, all bonuses
  *   sts act <2-4>         during a Run, skip to that Act's Entry Beacon (4 = Omega Act 4)
  *   sts supplies <n>      give the Run fleet n supplies
+ *   sts remove            strip the mod from this save so it can be removed (ModRemoval)
  */
 public class StsCommand implements BaseCommand {
 
@@ -48,6 +50,8 @@ public class StsCommand implements BaseCommand {
                 case "supplies":
                     if (a.length < 2) return CommandResult.BAD_SYNTAX;
                     return supplies(Integer.parseInt(a[1]));
+                case "remove":
+                    return remove();
                 default:
                     return CommandResult.BAD_SYNTAX;
             }
@@ -90,6 +94,17 @@ public class StsCommand implements BaseCommand {
         RunManager.debugSkipToAct(state, act);
         Console.showMessage("Now at Act " + act + "'s Entry Beacon" + (act == 4 ? " (Ascension Omega, Act 3 counted as won)" : "")
                 + ". Interact with the beacon to continue.");
+        return CommandResult.SUCCESS;
+    }
+
+    private CommandResult remove() {
+        String blocker = ModRemoval.blocker();
+        if (blocker != null) {
+            Console.showMessage("Can't remove Slay the Sector yet: " + blocker + ".");
+            return CommandResult.ERROR;
+        }
+        Console.showMessage("Removed " + String.join(", ", ModRemoval.run()) + ".\nSave now, quit, then disable"
+                + " the mod in the launcher. Loading this save with the mod still enabled puts the Relay back.");
         return CommandResult.SUCCESS;
     }
 

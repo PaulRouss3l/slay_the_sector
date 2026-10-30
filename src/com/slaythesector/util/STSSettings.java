@@ -132,6 +132,15 @@ public final class STSSettings {
     public static float shopDModBase() { return f("sts_shopDModBase", 15f); }
     public static float shopDModPerDP() { return f("sts_shopDModPerDP", 1f); }
 
+    /** On load, strip the mod from the save so it can be removed (ModRemoval). */
+    public static boolean prepareRemoval() {
+        try {
+            return Global.getSettings().getBoolean("sts_prepareRemoval");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private static int i(String key, int def) {
         try {
             return Global.getSettings().getInt(key);

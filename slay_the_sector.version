@@ -1,11 +1,11 @@
 {
     "masterVersionFile": "https://raw.githubusercontent.com/PaulRouss3l/slay_the_sector/main/slay_the_sector.version",
     "modName": "Slay the Sector",
-    "modThreadId": "",
-    "directDownloadURL": "https://github.com/PaulRouss3l/slay_the_sector/releases/download/v0.5.3/slay-the-sector-0.5.3.zip",
+    "modThreadId": "36176",
+    "directDownloadURL": "https://github.com/PaulRouss3l/slay_the_sector/releases/download/v0.5.4/slay-the-sector-0.5.4.zip",
     "modVersion": {
         "major": 0,
         "minor": 5,
-        "patch": 3
+        "patch": 4
     }
 }

@@ -1,4 +1,4 @@
-Thread title: [0.98a] Slay the Sector v0.5.3 (beta)
+Thread title: [0.98a] Slay the Sector v0.5.4 (beta)
 
 [center][img width=800]https://raw.githubusercontent.com/PaulRouss3l/slay_the_sector/main/docs/assets/banner.png[/img]
 [i]A Slay the Spire style roguelite, played inside your Starsector campaign.[/i]
@@ -8,7 +8,7 @@ Thread title: [0.98a] Slay the Sector v0.5.3 (beta)
 
 [url=https://trilink.wispborne.com/open.html?mod=%7B%22url%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2FPaulRouss3l%2Fslay_the_sector%2Fmain%2Fslay_the_sector.version%22%2C%22id%22%3A%22slay_the_sector%22%7D][img]https://trilink.wispborne.com/badges/install-badge-forthebadge.svg[/img][/url]
 
-[size=12pt][b][url=https://github.com/PaulRouss3l/slay_the_sector/releases/download/v0.5.3/slay-the-sector-0.5.3.zip]Download v0.5.3 (beta)[/url][/b][/size]
+[size=12pt][b][url=https://github.com/PaulRouss3l/slay_the_sector/releases/download/v0.5.4/slay-the-sector-0.5.4.zip]Download v0.5.4 (beta)[/url][/b][/size]
 [url=https://github.com/PaulRouss3l/slay_the_sector]Source code on GitHub[/url] | [url=https://github.com/PaulRouss3l/slay_the_sector/releases]All releases[/url]
 
 [b]Requires:[/b] Starsector 0.98a. [b]No other mods needed.[/b][/center]
@@ -19,7 +19,7 @@ Thread title: [0.98a] Slay the Sector v0.5.3 (beta)
 [list]
 [li][b]Can be added to an ongoing game:[/b] yes. The Descent Relay appears the next time you load.[/li]
 [li][b]Your campaign is safe:[/b] a Run changes nothing except a credit Payout at the end. XP, skills, story points, marines, reputation, bounties, cargo and salaries are all restored.[/li]
-[li][b]Can be removed:[/b] [color=orange]not yet.[/color] A save that has used the mod needs it to load. Finish your Run and keep a backup before uninstalling.[/li]
+[li][b]Can be removed:[/b] yes, after a cleanup. Finish your Run, keep a backup, set "sts_prepareRemoval": true in data/config/settings.json, load, save, then disable the mod. Details in the [url=https://github.com/PaulRouss3l/slay_the_sector#removing-the-mod]README[/url].[/li]
 [li][b]Other mods:[/b] compatible. Modded factions and ships show up as playable factions and as enemies. Tested with Nexerelin, Random Assortment of Things, Combat Chatter, MagicLib, LazyLib, LunaLib and GraphicsLib.[/li]
 [/list]
 
@@ -80,12 +80,18 @@ Most numbers (difficulty, rewards, prices, map shape) can also be changed in [b]
 [hr]
 
 [spoiler=Changelog]
+[b]0.5.4 (beta)[/b]
+[list]
+[li]The mod can be removed from a save: finish your Run, set "sts_prepareRemoval": true in data/config/settings.json (or run "sts remove" with Console Commands), load, save, then disable the mod. Steps in the README.[/li]
+[/list]
+
 [b]0.5.3 (beta)[/b]
 [list]
 [li]With Crew Stations installed, your first won Run also unlocks its Simulator Bay; the Run-end report says so.[/li]
 [li]Nexerelin: Run fights no longer touch your real reputation, and the Descent's factions keep their relations.[/li]
 [li]Credits other mods pay into the Run fleet during a Run (e.g. Nexerelin insurance) no longer leak into your campaign.[/li]
 [li]The Descent's star system now sits inside the Sector's bounds (fixes skewed MagicLib bounty distances). Older saves are moved on load.[/li]
+[li]Automated factions (e.g. Dustkeepers, once met) are playable: drones need no skill, an all-drone fleet gets a Command Uplink on its flagship.[/li]
 [/list]
 
 [b]0.5.2 (beta)[/b]
