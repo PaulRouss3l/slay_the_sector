@@ -127,7 +127,9 @@ pick) and the **node map** (canvas and Intel). Everything else is vanilla dialog
   player/neutral/independent; blacklist/whitelist `sts_factionBlacklist` in `settings.json`.
   Boss-pool factions are never Archetypes.
 - **Starting pick**: Archetype's known ships (stock variants), hard 30 DP cap, then free refit
-  with the Archetype's known weapons; 1 starting officer.
+  with the Archetype's known weapons; 1 starting officer. The flagship is the biggest crewed
+  pick; an all-drone pick (e.g. SotF's Dustkeepers) gets the **Command Uplink** on its biggest
+  drone (see implementation notes).
 - **Reward pick**: 1 of 3 among two ships (one of the faction just fought, one of the Archetype) /
   officer or weapon bundle. Never an
   S-mod; S-mods come only from Rest, Treasure and as a Boss bonus.
@@ -199,7 +201,7 @@ Root package `com.slaythesector` (S4 state).
   map (no jump, no relocation).
 - Boss reward "Refit" adds a variant tag `sts_smod_slot_N`; the hidden `sts_run_logistics` hullmod
   turns each into +1 `Stats.MAX_PERMANENT_HULLMODS_MOD`. The Remnant warship carries
-  `Tags.TAG_AUTOMATED_NO_PENALTY` and an AI-core captain.
+  `Tags.TAG_AUTOMATED_NO_PENALTY` (like every automated Run ship) and an AI-core captain.
 - The Run counts as won once Act 3's Boss falls (`act3Won`): losing, abandoning or being wiped in
   Act 4 still ends a won Run.
 
@@ -243,7 +245,14 @@ Root package `com.slaythesector` (S4 state).
 - Officer training gives the officer exactly the XP for its next level; the player picks the
   skill in the vanilla Fleet screen. S-mods use `addPermaMod(id, true)` within
   `Misc.getMaxPermanentMods`.
-- Ship pools skip automated hulls (they need a skill to crew).
+- Automated Run ships carry `Tags.TAG_AUTOMATED_NO_PENALTY` (set with the logistics hullmod), so
+  they need no Automated Ships skill and ship pools include them.
+- Vanilla treats the player fleet as destroyed when no ship is left that isn't `Misc.isAutomated`
+  (`CampaignFleet.isValidPlayerFleet`, checked every frame and when a battle is scored), and never
+  lets the player captain an automated ship. The **Command Uplink** (`sts_command_uplink`)
+  suppresses a drone's `automated` built-in (`addSuppressedMod`) and adds 1 crew, so it counts as
+  crewed. `RunEncounterDialog` moves it to the biggest surviving drone before vanilla scores a
+  Run battle in which every crewed ship was lost.
 - Deferred from S1: free starting weapons from the Archetype's known weapons (refit uses what the
   ships carry plus salvage), Fleet DP cap (S2), Meta progress (S4).
 

@@ -39,6 +39,8 @@ public final class STSConstants {
     // --- Hullmods ---
     /** Hidden built-in hullmod on every Run fleet ship: no maintenance, no passive repair. */
     public static final String HULLMOD_RUN_LOGISTICS = "sts_run_logistics";
+    /** Built into the flagship of an all-automated Run fleet so the player can command it. */
+    public static final String HULLMOD_COMMAND_UPLINK = "sts_command_uplink";
 
     // --- Factions ---
     /** Mod faction Run enemies fly under, so campaign systems ignore Run kills. */

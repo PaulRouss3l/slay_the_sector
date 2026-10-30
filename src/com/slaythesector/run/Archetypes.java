@@ -19,7 +19,6 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
-import com.fs.starfarer.api.util.Misc;
 import com.slaythesector.util.STSSettings;
 
 /**
@@ -82,15 +81,14 @@ public final class Archetypes {
     }
 
     /**
-     * Shuffled {@link #shipPool} of a faction (no automated hulls, which need a skill to crew),
-     * no larger than {@code maxSize}. Empty for an unknown faction.
+     * Shuffled {@link #shipPool} of a faction, no larger than {@code maxSize}. Empty for an unknown
+     * faction. Automated hulls included: Run ships need no Automated Ships skill (RunFleet).
      */
     public static List<FleetMemberAPI> shipsUpTo(String factionId, HullSize maxSize, Random rng) {
         List<FleetMemberAPI> pool = new ArrayList<FleetMemberAPI>();
         if (factionId == null || Global.getSector().getFaction(factionId) == null) return pool;
         for (FleetMemberAPI m : shipPool(factionId, 999f, 40)) {
             if (m.getHullSpec().getHullSize().ordinal() > maxSize.ordinal()) continue;
-            if (Misc.isAutomated(m)) continue;
             pool.add(m);
         }
         Collections.shuffle(pool, rng);

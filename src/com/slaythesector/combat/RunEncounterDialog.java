@@ -3,11 +3,13 @@ package com.slaythesector.combat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.fleet.FleetGoal;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.campaign.EngagementResultForFleetAPI;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
+import com.slaythesector.run.RunFleet;
 import com.slaythesector.util.STSLog;
 
 /**
@@ -49,6 +51,14 @@ public class RunEncounterDialog extends FleetInteractionDialogPluginImpl {
                     STSLog.warn("could not finish off survivors: " + e);
                 }
             }
+        }
+        // Vanilla scores the battle a total defeat when no ship that isn't automated survives:
+        // an all-drone Run fleet that lost its uplinked flagship moves the uplink first.
+        EngagementResultForFleetAPI own = result == null ? null : result.didPlayerWin() ? result.getWinnerResult() : result.getLoserResult();
+        if (own != null) {
+            List<FleetMemberAPI> lost = new ArrayList<FleetMemberAPI>(own.getDestroyed());
+            lost.addAll(own.getDisabled());
+            RunFleet.ensureCommandShip(Global.getSector().getPlayerFleet(), lost);
         }
         super.backFromEngagement(result);
     }
