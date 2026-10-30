@@ -2,7 +2,7 @@
 
 **A Slay the Spire style roguelite, played inside your Starsector campaign.**
 
-*Beta 0.5.3, for Starsector 0.98a.*
+*Beta 0.5.4, for Starsector 0.98a.*
 
 [![Install with TriOS](https://trilink.wispborne.com/badges/install-badge-forthebadge.svg)](https://trilink.wispborne.com/open.html?mod=%7B%22url%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2FPaulRouss3l%2Fslay_the_sector%2Fmain%2Fslay_the_sector.version%22%2C%22id%22%3A%22slay_the_sector%22%7D)
 
@@ -71,7 +71,7 @@ Your Meta progress (unlocked Ascensions) is kept in `saves/common/` and comes ba
 
 ## Beta notes
 
-This is a beta: balance is rough and bugs are expected. Reports are welcome on the forum thread or as
+This is a beta: balance is rough and bugs are expected. Reports are welcome on the [forum thread](https://fractalsoftworks.com/forum/index.php?topic=36176) or as
 GitHub issues. Please attach your `starsector.log`; the mod's lines start with `[SlayTheSector]`.
 
 Known issues:

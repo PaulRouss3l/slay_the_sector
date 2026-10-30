@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.4 (beta)
+
+- The mod can be removed from a save: finish your Run, set `"sts_prepareRemoval": true` in
+  `data/config/settings.json` (or run `sts remove` with Console Commands), load, save, then disable
+  the mod. Steps in the README.
+- Version Checker links to the forum thread.
+
 ## 0.5.3 (beta)
 
 **Compatibility**
