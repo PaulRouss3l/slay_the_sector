@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- With [Crew Stations](https://github.com/PaulRouss3l/crew_stations) installed, your first won Run also
+  unlocks its Simulator Bay; the Run-end report says so.
+
 ## 0.5.2 (beta)
 
 **Fixes**
