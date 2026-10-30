@@ -94,12 +94,12 @@ Shortcut with the Console Commands mod: start any Run, jump into the Descent, th
 - [ ] Shop / Rewards of a Dustkeeper Run offer Dustkeeper drones; bought ones have normal CR.
 
 ## 8. Removing the mod (ADR 0002)
-- [ ] During a Run, `sts remove`: refused ("a Run is in progress"), nothing changes.
-- [ ] No Run, `"sts_prepareRemoval": true`, load: message "Slay the Sector removed from this save";
+- [x] During a Run, `sts remove`: refused ("a Run is in progress"), nothing changes.
+- [x] No Run, `"sts_prepareRemoval": true`, load: message "Slay the Sector removed from this save";
       no Relay, no Slay the Sector intel; log `prepared for removal: [...]`. Save.
-- [ ] `python3 scripts/save_residue.py`: "OK: nothing known to break loading without the mod"
+- [x] `python3 scripts/save_residue.py`: "OK: nothing known to break loading without the mod"
       (only `sts_descent` / `sts_ally` listed under other residue).
-- [ ] Disable the mod (keep Nexerelin etc. as they were), load that save: it loads and plays.
+- [x] Disable the mod (keep Nexerelin etc. as they were), load that save: it loads and plays.
       **This answers the faction question in ADR 0002**; note the result in ROADMAP.
-- [ ] Re-enable the mod with the setting back to false, load: the Relay and its intel come back.
+- [x] Re-enable the mod with the setting back to false, load: the Relay and its intel come back.
 

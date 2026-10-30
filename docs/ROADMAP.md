@@ -135,6 +135,7 @@ Descent.
 
 Balance pass, descriptions/flavor, settings exposure, `package_mod.py --strict`, release.
 
-- 🟡 **Removable from a save** (ADR 0002): `sts_prepareRemoval` setting / `sts remove` console
-  command strip intel, Relay, Descent, memory keys; `scripts/save_residue.py` checks a save. Open:
-  does a save load with the leftover `sts_descent` / `sts_ally` factions (S4 smoke test §8)?
+- ✅ **Removable from a save** (ADR 0002, released in 0.5.4): `sts_prepareRemoval` setting /
+  `sts remove` console command strip intel, Relay, Descent, memory keys; `scripts/save_residue.py`
+  checks a save. Verified in game 2026-10-30: the cleaned save loads with the mod disabled,
+  leftover `sts_descent` / `sts_ally` factions included.

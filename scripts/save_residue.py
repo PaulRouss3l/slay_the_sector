@@ -18,10 +18,10 @@ BLOCKERS = {
     "custom entity type": r"\bsts_(?:hub_station|node_marker|spike_station)\b",
     "hullmod": r"\bsts_(?:run_logistics|command_uplink)\b",
 }
-# Harmless or not known yet: memory keys and the two factions (no API to remove a faction).
+# Harmless: memory keys, and the two factions (no API to remove one; a save loads with them).
 OTHERS = {
     "memory key": r"\$sts_\w+",
-    "faction (needs the load test)": r"\bsts_(?:descent|ally)\b",
+    "faction (harmless, ADR 0002)": r"\bsts_(?:descent|ally)\b",
 }
 MOD_LIST_ENTRY = re.compile(r"<modPluginClassName>com\.slaythesector\.[\w.]+</modPluginClassName>")
 

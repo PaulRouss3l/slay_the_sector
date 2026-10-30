@@ -1,6 +1,6 @@
 # 0002 — The mod can be removed from a save, after a cleanup step
 
-Date: 2026-10-30. Status: accepted (faction question open, see Consequences).
+Date: 2026-10-30. Status: accepted.
 
 ## Context
 
@@ -35,8 +35,7 @@ plugin. On a removal load nothing of ours is re-added. `scripts/save_residue.py`
 - **New rule:** anything new the mod puts in a save (class, entity type, hullmod on a ship that
   can come home, memory key) must be covered by `ModRemoval` and by the scanner's patterns.
 - **Factions stay**: the API has no way to remove a faction, so `sts_descent` and `sts_ally` remain
-  in the sector's faction map. Whether a save loads with them but without their `.faction` files is
-  checked by the in-game load test (S4 smoke test §8). If it fails, Run fleets must fly under a
-  vanilla faction instead, which reopens the Nexerelin reputation fix of 0.5.3.
+  in the sector's faction map. Verified in game (2026-10-30): a cleaned save loads with the mod
+  disabled despite them, so the scanner lists them as harmless residue.
 - Removal is one-way for that save until the next load with the setting off: the Relay and its
   intel come back then, but Meta progress lives in `saves/common/` and is not touched.
