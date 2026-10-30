@@ -134,3 +134,7 @@ Descent.
 ## S5 — Polish and release ⬜
 
 Balance pass, descriptions/flavor, settings exposure, `package_mod.py --strict`, release.
+
+- 🟡 **Removable from a save** (ADR 0002): `sts_prepareRemoval` setting / `sts remove` console
+  command strip intel, Relay, Descent, memory keys; `scripts/save_residue.py` checks a save. Open:
+  does a save load with the leftover `sts_descent` / `sts_ally` factions (S4 smoke test §8)?

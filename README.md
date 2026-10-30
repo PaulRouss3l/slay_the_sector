@@ -43,8 +43,7 @@ Every number (difficulty, rewards, caps, prices, map shape) can be tuned in
 - **Existing saves:** safe to add to a game in progress. The Relay appears the next time you load.
 - **Your campaign:** a Run changes nothing in it except the Payout. XP, skills, story points,
   marines, reputation, bounties, cargo and salaries are all restored when the Run ends.
-- **Removing the mod:** not supported yet. A save that has used the mod needs it to load. Finish
-  your Run first and keep a backup if you plan to remove it.
+- **Removing the mod:** see [Removing the mod](#removing-the-mod) below.
 
 ## Install
 
@@ -57,6 +56,18 @@ Manually:
 3. Enable **Slay the Sector** in the launcher.
 
 Version Checker (bundled with Nexerelin and LunaLib) will tell you when an update is out.
+
+## Removing the mod
+
+A save that has used the mod needs a cleanup before it loads without it:
+
+1. Finish or abandon your Run, and keep a backup of the save.
+2. In `mods/slay-the-sector/data/config/settings.json`, set `"sts_prepareRemoval": true`.
+   (With Console Commands, you can run `sts remove` on the campaign map instead.)
+3. Load the save. A message confirms the Relay, the Descent and their intel were removed.
+4. Save, quit, and disable Slay the Sector in the launcher.
+
+Your Meta progress (unlocked Ascensions) is kept in `saves/common/` and comes back if you reinstall.
 
 ## Beta notes
 

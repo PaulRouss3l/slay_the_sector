@@ -14,6 +14,7 @@ import com.slaythesector.run.RunState;
 import com.slaythesector.run.SafetyNetScript;
 import com.slaythesector.util.STSConstants;
 import com.slaythesector.util.STSLog;
+import com.slaythesector.util.STSSettings;
 import com.slaythesector.world.RunWatchScript;
 import com.slaythesector.world.HubPlacer;
 import com.slaythesector.world.RunSystem;
@@ -45,6 +46,18 @@ public class SlayTheSectorModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         STSLog.info("game loaded (newGame=" + newGame + ")");
         SectorAPI sector = Global.getSector();
+
+        if (STSSettings.prepareRemoval()) {
+            String blocker = ModRemoval.blocker();
+            if (blocker == null) {
+                ModRemoval.run();
+                sector.addTransientScript(new ModRemoval.Notice("Slay the Sector removed from this save. "
+                        + "Save, quit, then disable the mod in the launcher.", true));
+                return;
+            }
+            STSLog.warn("sts_prepareRemoval set but " + blocker);
+            sector.addTransientScript(new ModRemoval.Notice("Slay the Sector can't be removed yet: " + blocker + ".", false));
+        }
 
         // Transient hooks, re-added every load.
         sector.unregisterPlugin(STSConstants.CAMPAIGN_PLUGIN_ID);

@@ -53,6 +53,9 @@ S1 (one Act, Combat + Boss, text course choice); later milestones add to it.
   references to live world objects (`SectorEntityToken`s, fleets in a location). The one deliberate
   exception is the detached Home fleet + cargo held during a Run (see ADR 0001). No static fields
   holding game objects. Alias saved classes in `configureXStream`; never rename them after release.
+- **Removable from a save** (ADR 0002): anything new stored in a save (class, entity type, hullmod
+  that can reach the Home fleet, memory key) must be stripped by `ModRemoval` and matched by
+  `scripts/save_residue.py`.
 
 ## Workflow
 
