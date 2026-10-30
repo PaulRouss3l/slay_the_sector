@@ -1,9 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.5.3 (beta)
 
+**Compatibility**
 - With [Crew Stations](https://github.com/PaulRouss3l/crew_stations) installed, your first won Run also
   unlocks its Simulator Bay; the Run-end report says so.
+- Nexerelin: Run fights no longer touch your real reputation, and the Descent's factions keep their
+  relations (no warmonger event, no neutral Descent after a commission).
+- Credits other mods pay into the Run fleet during a Run (e.g. Nexerelin insurance for lost Run
+  ships) no longer leak into your campaign. Only the Payout comes home.
+- The Descent's star system now sits inside the Sector's bounds, so mods that size the Sector from
+  its systems (MagicLib bounties) are no longer skewed. Older saves are moved on load.
 
 ## 0.5.2 (beta)
 
