@@ -27,6 +27,9 @@ public final class MetaProgress {
     public static final String BONUS_OFFICER = "officerLevel";
     public static final String BONUS_SUPPLIES = "supplies";
 
+    /** Mod id of Crew Stations, whose Simulator Bay a first won Run unlocks. */
+    private static final String CREW_STATIONS = "crew_stations";
+
     private final JSONObject root;
 
     private MetaProgress(JSONObject root) {
@@ -176,11 +179,17 @@ public final class MetaProgress {
                     winners = new JSONArray();
                     root.put("winArchetypes", winners);
                 }
+                boolean firstWin = winners.length() == 0;
                 boolean seen = false;
                 for (int i = 0; i < winners.length(); i++) {
                     if (id.equals(winners.optString(i))) seen = true;
                 }
                 if (!seen) winners.put(id);
+                // Crew Stations reads "winArchetypes" / "wins" from this file to offer its Simulator Bay
+                // (its docs/adr/0002): keep those keys. Only named here when that mod is enabled.
+                if (firstWin && Global.getSettings().getModManager().isModEnabled(CREW_STATIONS)) {
+                    unlocked.add("Crew Stations: the Simulator Bay, at any Station Yard Inc. showroom");
+                }
                 if (winners.length() >= 3) unlock(BONUS_SUPPLIES, unlocked);
             }
             if (state.isTrueBossWon()) a.put("omegaCleared", true);
